@@ -1,0 +1,56 @@
+import { describe, expect, it } from "vitest";
+import type { OrderEmailData } from "./orderConfirmation";
+import {
+  buildCustomerConfirmation,
+  buildStoreNotification,
+} from "./orderConfirmation";
+
+const data: OrderEmailData = {
+  orderId: "EPH-TEST-1",
+  items: [
+    { sku: "BP-3R-20MG", name: "BP-3R", size: "20mg", qty: 2, unitPrice: 69.99 },
+  ],
+  subtotal: 139.98,
+  shipping: 12,
+  total: 151.98,
+  customer: {
+    firstName: "Ada",
+    lastName: "Lovelace",
+    email: "[email protected]",
+    address1: "1 Lab St",
+    city: "Denver",
+    state: "CO",
+    zip: "80014",
+    country: "US",
+  },
+  siteName: "Elevate Precision Health",
+};
+
+describe("buildCustomerConfirmation", () => {
+  it("addresses the customer and includes the order reference and total", () => {
+    const message = buildCustomerConfirmation(data);
+    expect(message.to).toBe("[email protected]");
+    expect(message.subject).toContain("EPH-TEST-1");
+    expect(message.text).toContain("EPH-TEST-1");
+    expect(message.text).toContain("$151.98");
+    expect(message.html).toContain("BP-3R");
+  });
+
+  it("escapes HTML in customer-provided fields", () => {
+    const message = buildCustomerConfirmation({
+      ...data,
+      customer: { ...data.customer, firstName: "<script>", lastName: "x" },
+    });
+    expect(message.html).not.toContain("<script>");
+    expect(message.html).toContain("&lt;script&gt;");
+  });
+});
+
+describe("buildStoreNotification", () => {
+  it("targets the store address and identifies the buyer", () => {
+    const message = buildStoreNotification(data, "[email protected]");
+    expect(message.to).toBe("[email protected]");
+    expect(message.subject).toContain("EPH-TEST-1");
+    expect(message.text).toContain("[email protected]");
+  });
+});

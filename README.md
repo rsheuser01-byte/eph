@@ -1,36 +1,69 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Elevate Precision Health
 
-## Getting Started
+Next.js marketing + research catalog site rebuilt from the incomplete HTTrack mirror of the prior WordPress storefront.
 
-First, run the development server:
+## Develop
 
 ```bash
+cd web
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
 
-## Learn More
+## Notes
 
-To learn more about Next.js, take a look at the following resources:
+- Catalog data lives in `src/data/products.ts` (per-size variants with prices)
+- Brand copy and FAQ live in `src/data/site.ts`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Checkout
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Cart-based checkout with a swappable payment provider (`src/lib/payments`).
 
-## Deploy on Vercel
+Create `web/.env.local` with:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+# "mock" (default, no credentials) or "bankful"
+PAYMENT_PROVIDER=mock
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Bankful gateway (only when PAYMENT_PROVIDER=bankful)
+# Sandbox: https://api-dev1.bankfulportal.com | Live: https://api.paybybankful.com
+BANKFUL_API_BASE_URL=https://api-dev1.bankfulportal.com
+BANKFUL_USERNAME=
+BANKFUL_PASSWORD=
+
+# Order confirmation emails: "console" (default, logs to server) or "resend"
+EMAIL_PROVIDER=console
+# Required when EMAIL_PROVIDER=resend
+RESEND_API_KEY=
+EMAIL_FROM="Elevate Precision Health <[email protected]>"
+
+# Order store: "file" (default, writes web/.data/orders.json)
+ORDER_STORE=file
+# Token to view /admin/orders?key=... (leave unset to disable the admin view)
+ADMIN_TOKEN=
+
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+- With `PAYMENT_PROVIDER=mock`, test card `4111 1111 1111 1111` is approved and
+  `4111 1111 1111 1112` is declined, so the full flow works without credentials.
+- The interim on-site card form puts the app in PCI SAQ D scope. For production,
+  add a Bankful Hosted Payment Page provider (returns a redirect URL) so card
+  entry stays on Bankful's PCI-compliant page.
+- On a successful order, a confirmation email goes to the customer and a
+  notification to `site.email`. With `EMAIL_PROVIDER=console` these are logged
+  to the server console; set `EMAIL_PROVIDER=resend` + `RESEND_API_KEY` +
+  `EMAIL_FROM` (verified domain) to actually send.
+- Every approved order is saved via the order store (no card data). The `file`
+  store writes `web/.data/orders.json` (gitignored). Set `ADMIN_TOKEN` and visit
+  `/admin/orders?key=YOUR_ADMIN_TOKEN` to review orders. The file store is not
+  durable on serverless hosts — see TODO for the production database task.
+
+See [TODO.md](./TODO.md) for the remaining production tasks.
