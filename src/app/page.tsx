@@ -1,8 +1,17 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
 import { products } from "@/data/products";
 import { operatingNotes, site } from "@/data/site";
+import { pageMetadata } from "@/lib/seo/pageMetadata";
+
+export const metadata: Metadata = pageMetadata({
+  absoluteTitle: "Elevate Precision Health — Research Peptides & Lab Supplies",
+  description:
+    "Elevate Precision Health offers a focused catalog of research-only peptides, blends, and laboratory supplies, with lot documentation available on request. Research use only.",
+  path: "/",
+});
 
 export default function HomePage() {
   const spotlight = products.filter((product) => product.featured);
@@ -119,7 +128,10 @@ export default function HomePage() {
             </Link>
           </Reveal>
 
-          <Reveal delayMs={100} className="mt-14 border-t border-ink/20">
+          <Reveal
+            delayMs={100}
+            className="mt-14 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3"
+          >
             {spotlight.map((product) => (
               <ProductCard key={product.slug} product={product} />
             ))}

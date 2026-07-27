@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { AddToCart } from "@/components/AddToCart";
+import { JsonLd } from "@/components/JsonLd";
+import { ProductPurchase } from "@/components/ProductPurchase";
+import { ProductSpecs } from "@/components/ProductSpecs";
 import { getProductBySlug, products } from "@/data/products";
 import { researchDisclaimer } from "@/data/site";
+import { pageMetadata } from "@/lib/seo/pageMetadata";
+import { getSiteUrl } from "@/lib/seo/siteUrl";
+import { breadcrumbSchema } from "@/lib/seo/structuredData";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -19,12 +24,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const product = getProductBySlug(slug);
   if (!product) {
-    return { title: "Product not found" };
+    return { title: "Product not found", robots: { index: false } };
   }
-  return {
-    title: product.name,
-    description: product.shortDescription,
-  };
+  return pageMetadata({
+    title: `${product.name} — Research ${product.category}`,
+    description: `${product.name} (${product.sku}), a research-use-only ${product.category.toLowerCase()} from Elevate Precision Health. Not for human or veterinary use.`,
+    path: `/products/${product.slug}`,
+  });
 }
 
 export default async function ProductDetailPage({ params }: ProductPageProps) {
@@ -37,6 +43,13 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
 
   return (
     <div className="site-shell py-20">
+      <JsonLd
+        data={breadcrumbSchema(getSiteUrl(), [
+          { name: "Home", path: "/" },
+          { name: "Products", path: "/products" },
+          { name: product.name, path: `/products/${product.slug}` },
+        ])}
+      />
       <Link
         href="/products"
         className="text-[0.7rem] font-medium uppercase tracking-[0.18em] text-ink-soft transition hover:text-ink"
@@ -44,37 +57,8 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         ← Products
       </Link>
 
-      <div className="mt-14 grid gap-14 lg:grid-cols-[1fr_1fr]">
-        <div>
-          <p className="label">{product.category}</p>
-          <h1 className="font-display mt-4 text-5xl font-semibold tracking-tight text-ink sm:text-7xl">
-            {product.name}
-          </h1>
-          <p className="mt-5 text-xs uppercase tracking-[0.18em] text-ink-soft">
-            SKU {product.sku}
-          </p>
-          <p className="mt-8 text-base leading-relaxed text-ink-soft">
-            {product.shortDescription}
-          </p>
-        </div>
-
-        <div className="border-t border-line pt-10 lg:border-t-0 lg:border-l lg:pl-14 lg:pt-0">
-          <AddToCart product={product} />
-
-          <div className="mt-8">
-            <Link
-              href="/coa"
-              className="link-underline text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft"
-            >
-              Assay policy →
-            </Link>
-          </div>
-
-          <p className="mt-12 text-[0.7rem] leading-relaxed text-ink-soft/80">
-            {researchDisclaimer}
-          </p>
-        </div>
-      </div>
+      <ProductPurchase product={product} disclaimer={researchDisclaimer} />
+      <ProductSpecs product={product} />
     </div>
   );
 }

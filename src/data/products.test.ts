@@ -4,6 +4,7 @@ import {
   getProductBySlug,
   getVariant,
   productPriceRange,
+  productSpecRows,
   products,
 } from "./products";
 
@@ -21,11 +22,36 @@ describe("catalog integrity", () => {
       }
     }
   });
+
+  it("gives every product the required research specs", () => {
+    for (const product of products) {
+      expect(product.specs.form.length).toBeGreaterThan(0);
+      expect(product.specs.researchApplication.length).toBeGreaterThan(0);
+      expect(product.specs.appearance.length).toBeGreaterThan(0);
+      expect(product.specs.storage.length).toBeGreaterThan(0);
+    }
+  });
+
+  it("gives every variant a packshot under /products/", () => {
+    for (const product of products) {
+      for (const variant of product.variants) {
+        expect(variant.image).toMatch(/^\/products\/.+\.png$/);
+      }
+    }
+  });
+
+  it("features six products including NAD+ and GLOW Blend", () => {
+    const featured = products.filter((product) => product.featured);
+    expect(featured.map((product) => product.slug)).toEqual(
+      expect.arrayContaining(["nad", "glow-blend"]),
+    );
+    expect(featured).toHaveLength(6);
+  });
 });
 
 describe("productPriceRange", () => {
   it("returns min and max across variants", () => {
-    const product = getProductBySlug("bp-3r");
+    const product = getProductBySlug("glp-3");
     expect(product).toBeDefined();
     const range = productPriceRange(product!);
     expect(range.min).toBe(69.99);
@@ -40,19 +66,95 @@ describe("formatPrice", () => {
   });
 
   it("shows a range when variants differ", () => {
-    const product = getProductBySlug("bp-3r");
+    const product = getProductBySlug("glp-3");
     expect(formatPrice(product!)).toBe("$69.99 – $189.99");
   });
 });
 
 describe("getVariant", () => {
   it("finds a variant by size", () => {
-    const product = getProductBySlug("bp-3r");
-    expect(getVariant(product!, "50mg")?.price).toBe(189.99);
+    const product = getProductBySlug("glp-3");
+    expect(getVariant(product!, "60mg")?.price).toBe(189.99);
   });
 
   it("returns undefined for an unknown size", () => {
-    const product = getProductBySlug("bp-3r");
+    const product = getProductBySlug("glp-3");
     expect(getVariant(product!, "999mg")).toBeUndefined();
+  });
+});
+
+describe("NAD+", () => {
+  it("is listed with 100mg and 500mg variants", () => {
+    const product = getProductBySlug("nad");
+    expect(product).toBeDefined();
+    expect(product!.name).toBe("NAD+");
+    expect(product!.variants.map((variant) => variant.size)).toEqual([
+      "100mg",
+      "500mg",
+    ]);
+    expect(getVariant(product!, "100mg")?.sku).toBe("NAD-100MG");
+    expect(getVariant(product!, "500mg")?.sku).toBe("NAD-500MG");
+  });
+
+  it("includes verified molecular identity fields", () => {
+    const product = getProductBySlug("nad");
+    expect(product!.specs.molecularFormula).toBe("C21H26N7O14P2");
+    expect(product!.specs.molecularWeight).toBe("663.43 g/mol");
+    expect(product!.specs.form).toBe("Lyophilized powder");
+  });
+});
+
+describe("productSpecRows", () => {
+  it("omits optional fields that are not set", () => {
+    const product = getProductBySlug("wolverine-blend");
+    const labels = productSpecRows(product!).map((row) => row.label);
+    expect(labels).toContain("Form");
+    expect(labels).toContain("Composition");
+    expect(labels).not.toContain("Molecular formula");
+    expect(labels).not.toContain("Molecular weight");
+  });
+
+  it("includes composition for blends", () => {
+    const product = getProductBySlug("wolverine-blend");
+    const composition = productSpecRows(product!).find(
+      (row) => row.label === "Composition",
+    );
+    expect(composition?.value).toMatch(/BPC-157/);
+    expect(composition?.value).toMatch(/TB-500/);
+  });
+});
+
+describe("KLOW Blend", () => {
+  it("is listed as an 80mg four-peptide blend with KPV", () => {
+    const product = getProductBySlug("klow-blend");
+    expect(product).toBeDefined();
+    expect(product!.name).toBe("KLOW Blend");
+    expect(product!.category).toBe("Blend");
+    expect(product!.featured).toBe(false);
+    expect(product!.variants.map((variant) => variant.size)).toEqual(["80mg"]);
+    expect(getVariant(product!, "80mg")?.sku).toBe("KLOW-80MG");
+    expect(getVariant(product!, "80mg")?.image).toBe(
+      "/products/klow-blend-80mg.png",
+    );
+    expect(product!.specs.composition).toMatch(/BPC-157/);
+    expect(product!.specs.composition).toMatch(/GHK-Cu/);
+    expect(product!.specs.composition).toMatch(/TB-500/);
+    expect(product!.specs.composition).toMatch(/KPV/);
+  });
+});
+
+describe("GLP catalog identities", () => {
+  it("maps GLP-3 to retatrutide chemistry", () => {
+    const product = getProductBySlug("glp-3");
+    expect(product!.specs.molecularFormula).toBe("C221H342N46O68");
+    expect(product!.specs.molecularWeight).toBe("4731.33 g/mol");
+    expect(product!.specs.synonyms).toMatch(/Retatrutide/);
+  });
+
+  it("maps GLP-2 to tirzepatide chemistry", () => {
+    const product = getProductBySlug("glp-2");
+    expect(product!.specs.molecularFormula).toBe("C225H348N48O68");
+    expect(product!.specs.molecularWeight).toBe("4813.45 g/mol");
+    expect(product!.specs.synonyms).toMatch(/Tirzepatide/);
   });
 });

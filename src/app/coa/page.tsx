@@ -1,16 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "@/components/JsonLd";
 import { site } from "@/data/site";
+import { pageMetadata } from "@/lib/seo/pageMetadata";
+import { getSiteUrl } from "@/lib/seo/siteUrl";
+import { breadcrumbSchema } from "@/lib/seo/structuredData";
 
-export const metadata: Metadata = {
-  title: "Assays",
+export const metadata: Metadata = pageMetadata({
+  title: "Certificates of Analysis",
   description:
-    "How Elevate Precision Health handles certificates of analysis and lot documentation.",
-};
+    "How Elevate Precision Health handles certificates of analysis and lot documentation for its research-only catalog.",
+  path: "/coa",
+});
 
 export default function CoaPage() {
   return (
     <div>
+      <JsonLd
+        data={breadcrumbSchema(getSiteUrl(), [
+          { name: "Home", path: "/" },
+          { name: "Certificates of Analysis", path: "/coa" },
+        ])}
+      />
       <section className="hero-ascetic surface-grain">
         <div className="site-shell relative z-[2] py-20 sm:py-24">
           <p className="label label-on-dark">Assays</p>

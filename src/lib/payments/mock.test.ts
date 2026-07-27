@@ -19,7 +19,7 @@ function chargeWith(number: string): ChargeInput {
     },
     card: { number, expiryMonth: "12", expiryYear: "2030", cvv: "123" },
     items: [
-      { sku: "BP-3R-20MG", name: "BP-3R", size: "20mg", qty: 1, unitPrice: 69.99 },
+      { sku: "GLP-3-15MG", name: "GLP-3", size: "15mg", qty: 1, unitPrice: 69.99 },
     ],
   };
 }

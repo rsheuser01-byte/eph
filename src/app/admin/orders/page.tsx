@@ -1,8 +1,15 @@
+import type { Metadata } from "next";
 import { formatUSD } from "@/lib/checkout/pricing";
 import { getOrderStore } from "@/lib/orders";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+// Private route: never index. Note this is not a substitute for real
+// authentication — the route currently relies on a query-string token only.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
 
 type AdminOrdersPageProps = {
   searchParams: Promise<{ key?: string }>;

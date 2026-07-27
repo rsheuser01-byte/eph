@@ -1,14 +1,27 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { JsonLd } from "@/components/JsonLd";
 import { site } from "@/data/site";
+import { pageMetadata } from "@/lib/seo/pageMetadata";
+import { getSiteUrl } from "@/lib/seo/siteUrl";
+import { breadcrumbSchema } from "@/lib/seo/structuredData";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Privacy policy",
-};
+  description:
+    "Privacy policy for Elevate Precision Health, covering the information collected when you browse or contact the site and how it is used.",
+  path: "/privacy",
+});
 
 export default function PrivacyPage() {
   return (
     <LegalLayout title="Privacy policy">
+      <JsonLd
+        data={breadcrumbSchema(getSiteUrl(), [
+          { name: "Home", path: "/" },
+          { name: "Privacy policy", path: "/privacy" },
+        ])}
+      />
       <p>
         {site.name} respects your privacy. This policy describes how we collect
         and use information when you browse our site or contact us.

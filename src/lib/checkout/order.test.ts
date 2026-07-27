@@ -8,28 +8,28 @@ describe("buildOrder", () => {
   });
 
   it("rejects malformed items", () => {
-    expect(buildOrder([{ slug: "bp-3r" }]).ok).toBe(false);
+    expect(buildOrder([{ slug: "glp-3" }]).ok).toBe(false);
   });
 
   it("rejects unknown products", () => {
-    const result = buildOrder([{ slug: "nope", size: "20mg", qty: 1 }]);
+    const result = buildOrder([{ slug: "nope", size: "15mg", qty: 1 }]);
     expect(result.ok).toBe(false);
   });
 
   it("rejects unknown sizes", () => {
-    const result = buildOrder([{ slug: "bp-3r", size: "999mg", qty: 1 }]);
+    const result = buildOrder([{ slug: "glp-3", size: "999mg", qty: 1 }]);
     expect(result.ok).toBe(false);
   });
 
   it("rejects invalid quantities", () => {
-    expect(buildOrder([{ slug: "bp-3r", size: "20mg", qty: 0 }]).ok).toBe(false);
-    expect(buildOrder([{ slug: "bp-3r", size: "20mg", qty: 100 }]).ok).toBe(
+    expect(buildOrder([{ slug: "glp-3", size: "15mg", qty: 0 }]).ok).toBe(false);
+    expect(buildOrder([{ slug: "glp-3", size: "15mg", qty: 100 }]).ok).toBe(
       false,
     );
   });
 
   it("recomputes prices from the catalog and adds flat shipping", () => {
-    const result = buildOrder([{ slug: "bp-3r", size: "20mg", qty: 1 }]);
+    const result = buildOrder([{ slug: "glp-3", size: "15mg", qty: 1 }]);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.subtotal).toBe(69.99);
@@ -40,7 +40,7 @@ describe("buildOrder", () => {
   });
 
   it("gives free shipping at or above the threshold", () => {
-    const result = buildOrder([{ slug: "bp-3r", size: "50mg", qty: 1 }]);
+    const result = buildOrder([{ slug: "glp-3", size: "60mg", qty: 1 }]);
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.subtotal).toBe(189.99);

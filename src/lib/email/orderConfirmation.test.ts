@@ -8,7 +8,7 @@ import {
 const data: OrderEmailData = {
   orderId: "EPH-TEST-1",
   items: [
-    { sku: "BP-3R-20MG", name: "BP-3R", size: "20mg", qty: 2, unitPrice: 69.99 },
+    { sku: "GLP-3-15MG", name: "GLP-3", size: "15mg", qty: 2, unitPrice: 69.99 },
   ],
   subtotal: 139.98,
   shipping: 12,
@@ -33,7 +33,7 @@ describe("buildCustomerConfirmation", () => {
     expect(message.subject).toContain("EPH-TEST-1");
     expect(message.text).toContain("EPH-TEST-1");
     expect(message.text).toContain("$151.98");
-    expect(message.html).toContain("BP-3R");
+    expect(message.html).toContain("GLP-3");
   });
 
   it("escapes HTML in customer-provided fields", () => {

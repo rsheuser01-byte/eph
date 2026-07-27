@@ -20,8 +20,8 @@ Ordered roughly by priority.
 
 ## Catalog / pricing
 - [ ] Replace PLACEHOLDER variant prices/sizes in `src/data/products.ts`:
-      BP-3R 30mg, BP-2T 20mg, MOTS-c (sizes + prices), Tesamorelin 5mg,
-      BAC (sizes + prices). (Search the file for `PLACEHOLDER`.)
+      GLP-3 15/30/60mg prices, GLP-2 20mg, MOTS-c (sizes + prices), Tesamorelin 5mg,
+      BAC (sizes + prices), NAD+ 100mg and 500mg. (Search the file for `PLACEHOLDER`.)
 - [ ] Confirm real shipping rates (currently flat $12, free at $150) and whether
       international shipping is offered.
 - [ ] Sales tax handling (none today).

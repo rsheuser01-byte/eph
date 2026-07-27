@@ -13,7 +13,7 @@ function makeOrder(orderId: string, createdAt: string): OrderRecord {
     transactionId: "tx_1",
     status: "approved",
     items: [
-      { sku: "BP-3R-20MG", name: "BP-3R", size: "20mg", qty: 1, unitPrice: 69.99 },
+      { sku: "GLP-3-15MG", name: "GLP-3", size: "15mg", qty: 1, unitPrice: 69.99 },
     ],
     subtotal: 69.99,
     shipping: 12,

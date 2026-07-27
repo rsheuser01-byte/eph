@@ -1,15 +1,27 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { JsonLd } from "@/components/JsonLd";
 import { site } from "@/data/site";
+import { pageMetadata } from "@/lib/seo/pageMetadata";
+import { getSiteUrl } from "@/lib/seo/siteUrl";
+import { breadcrumbSchema } from "@/lib/seo/structuredData";
 
-export const metadata: Metadata = {
-  title: "Approach",
-  description: `How ${site.name} sources and supports research products.`,
-};
+export const metadata: Metadata = pageMetadata({
+  title: "About",
+  description:
+    "About Elevate Precision Health — a focused supplier of research-only peptides, blends, and laboratory supplies for qualified researchers and institutions.",
+  path: "/about",
+});
 
 export default function AboutPage() {
   return (
     <div>
+      <JsonLd
+        data={breadcrumbSchema(getSiteUrl(), [
+          { name: "Home", path: "/" },
+          { name: "About", path: "/about" },
+        ])}
+      />
       <section className="border-b border-line bg-bg-elevated">
         <div className="site-shell py-20 sm:py-24">
           <p className="label">Approach</p>

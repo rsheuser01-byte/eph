@@ -327,49 +327,27 @@ a {
   transition: transform 0.7s var(--ease-out);
 }
 
-.product-row {
-  position: relative;
-  transition:
-    background 0.3s ease,
-    padding-left 0.35s var(--ease-out);
+.product-card {
+  transition: opacity 0.3s ease;
 }
 
-.product-row::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--accent);
-  transform: scaleY(0);
-  transform-origin: center;
-  transition: transform 0.35s var(--ease-out);
+.product-card:hover .product-card-media,
+.product-card:focus-visible .product-card-media {
+  border-color: color-mix(in srgb, var(--ink) 55%, var(--line));
 }
 
-.product-row:hover,
-.product-row:focus-visible {
-  background: color-mix(in srgb, var(--bg-elevated) 90%, var(--accent) 10%);
-}
-
-.product-row:hover::before,
-.product-row:focus-visible::before {
-  transform: scaleY(1);
-}
-
-.product-row:hover .product-name,
-.product-row:focus-visible .product-name {
-  transform: translateX(6px);
-}
-
-.product-row:hover .product-open,
-.product-row:focus-visible .product-open {
+.product-card:hover .product-open,
+.product-card:focus-visible .product-open {
   opacity: 1;
   transform: translateX(0);
 }
 
+.product-card-media {
+  transition: border-color 0.35s var(--ease-out);
+}
+
 .product-name {
-  transition: transform 0.35s var(--ease-out);
+  transition: color 0.3s ease;
 }
 
 .product-open {
@@ -494,6 +472,13 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .product-card img {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
@@ -516,7 +501,8 @@ a {
   .btn-arrow::after,
   .nav-link::after,
   .link-underline::after,
-  .product-row,
+  .product-card,
+  .product-card-media,
   .product-name,
   .product-open,
   .spotlight-card,

@@ -28,12 +28,7 @@ export function AddToCart({ product }: AddToCartProps) {
     <div className="flex flex-col gap-6">
       {product.variants.length > 1 ? (
         <div>
-          <label
-            htmlFor="variant-size"
-            className="label mb-3 block !text-ink-soft"
-          >
-            Vial size
-          </label>
+          <p className="label mb-3 !text-ink-soft">Vial size</p>
           <div className="flex flex-wrap gap-2">
             {product.variants.map((item) => {
               const active = item.size === size;
