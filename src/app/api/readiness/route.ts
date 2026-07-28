@@ -103,6 +103,13 @@ async function runChecks(): Promise<{ ready: boolean; checks: CheckResult[] }> {
         ok: !reservations.error,
         detail: reservations.error?.message ?? "ok",
       });
+
+      const outbox = await client.from("outbox_events").select("id").limit(1);
+      checks.push({
+        name: "outbox_events_table",
+        ok: !outbox.error,
+        detail: outbox.error?.message ?? "ok",
+      });
     } catch (error) {
       checks.push({
         name: "supabase",

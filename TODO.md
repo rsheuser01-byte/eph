@@ -33,6 +33,7 @@ Ordered roughly by priority.
 - [x] Supabase `OrderStore` (`ORDER_STORE=supabase`) + migrations under
       `supabase/migrations/`. Keep `file` for optional local fallback.
 - [x] Admin login with httpOnly signed session cookie (`/admin/login`).
+- [x] Durable `order.paid` outbox + `/api/cron/process-outbox` email retries.
 - [ ] Shipping/tracking notification email once a label is created.
 - [ ] Set `SUPABASE_SERVICE_ROLE_KEY` in Vercel from the Supabase dashboard
       (service role is not exposed via MCP). Project: `elevate-precision-health`.

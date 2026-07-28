@@ -1,9 +1,3 @@
-import type { EmailMessage } from "@/lib/email/types";
-import { site } from "@/data/site";
-import {
-  buildCustomerConfirmation,
-  buildStoreNotification,
-} from "@/lib/email/orderConfirmation";
 import type { OrderStore } from "@/lib/orders/types";
 import { verifyBankfulTransaction } from "@/lib/payments/bankful";
 import {
@@ -26,7 +20,7 @@ export type IpnDependencies = {
   getPassword: () => string;
   orderStore: OrderStore;
   paymentEvents: PaymentEventStore;
-  sendEmails: (orderId: string) => Promise<void>;
+  enqueuePaid: (orderId: string) => Promise<void>;
   logSecurityEvent: (event: string, detail: Record<string, unknown>) => void;
   verifyTransaction?: typeof verifyBankfulTransaction;
   commitStock?: (orderId: string) => Promise<void>;
@@ -261,9 +255,9 @@ export async function processBankfulIpn(
       });
     }
     try {
-      await deps.sendEmails(callback.orderId);
+      await deps.enqueuePaid(callback.orderId);
     } catch (error) {
-      deps.logSecurityEvent("bankful_ipn_email_failed", {
+      deps.logSecurityEvent("bankful_ipn_outbox_enqueue_failed", {
         orderId: callback.orderId,
         message: error instanceof Error ? error.message : "unknown",
       });
@@ -306,26 +300,6 @@ export async function processBankfulIpn(
     status: 200,
     body: { ok: true, approved: false, pending: reconciledStatus === "pending" },
   };
-}
-
-export async function defaultSendIpnEmails(
-  orderId: string,
-  orderStore: OrderStore,
-  send: (message: EmailMessage) => Promise<void>,
-): Promise<void> {
-  const existing = await orderStore.get(orderId);
-  if (!existing) return;
-  const emailData = {
-    orderId,
-    items: existing.items,
-    subtotal: existing.subtotal,
-    shipping: existing.shipping,
-    total: existing.total,
-    customer: existing.customer,
-    siteName: site.name,
-  };
-  await send(buildCustomerConfirmation(emailData));
-  await send(buildStoreNotification(emailData, site.email));
 }
 
 /** Safe security logger — never include secrets or raw card data. */

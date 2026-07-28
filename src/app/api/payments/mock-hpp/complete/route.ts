@@ -1,11 +1,6 @@
 import { NextResponse } from "next/server";
-import { site } from "@/data/site";
-import { getEmailProvider } from "@/lib/email";
-import {
-  buildCustomerConfirmation,
-  buildStoreNotification,
-} from "@/lib/email/orderConfirmation";
 import { commitReservations } from "@/lib/inventory/reservations";
+import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
 import { getOrderStore } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -45,20 +40,9 @@ export async function GET(request: Request) {
     });
 
     try {
-      const email = getEmailProvider();
-      const emailData = {
-        orderId,
-        items: existing.items,
-        subtotal: existing.subtotal,
-        shipping: existing.shipping,
-        total: existing.total,
-        customer: existing.customer,
-        siteName: site.name,
-      };
-      await email.send(buildCustomerConfirmation(emailData));
-      await email.send(buildStoreNotification(emailData, site.email));
+      await enqueueOrderPaid(orderId);
     } catch (error) {
-      console.error(`Mock HPP email failed for ${orderId}:`, error);
+      console.error(`Mock HPP outbox enqueue failed for ${orderId}:`, error);
     }
   }
 

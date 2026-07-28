@@ -1,12 +1,8 @@
 import { NextResponse } from "next/server";
-import { getEmailProvider } from "@/lib/email";
 import { getOrderStore } from "@/lib/orders";
 import { getPaymentEventStore } from "@/lib/payments/paymentEvents";
-import {
-  defaultSendIpnEmails,
-  logIpnSecurityEvent,
-  processBankfulIpn,
-} from "./processIpn";
+import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
+import { logIpnSecurityEvent, processBankfulIpn } from "./processIpn";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,7 +11,8 @@ export const dynamic = "force-dynamic";
  * Bankful HPP asynchronous callback (IPN).
  *
  * Requires a valid HMAC-SHA256 signature (gateway password), reconciles
- * amount/currency in integer cents, and is idempotent via payment_events.
+ * amount/currency in integer cents against the stored order, and is idempotent
+ * via payment_events. Paid-order emails are enqueued on the durable outbox.
  */
 export async function POST(request: Request) {
   const contentType = request.headers.get("content-type") ?? "";
@@ -37,17 +34,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
   }
 
-  const orderStore = getOrderStore();
-  const email = getEmailProvider();
-
   const result = await processBankfulIpn(fields, {
     getPassword: () => process.env.BANKFUL_PASSWORD?.trim() ?? "",
-    orderStore,
+    orderStore: getOrderStore(),
     paymentEvents: getPaymentEventStore(),
-    sendEmails: (orderId) =>
-      defaultSendIpnEmails(orderId, orderStore, (message) =>
-        email.send(message),
-      ),
+    enqueuePaid: enqueueOrderPaid,
     logSecurityEvent: logIpnSecurityEvent,
   });
 

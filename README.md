@@ -104,6 +104,12 @@ Probes:
 - `GET /api/health` — liveness
 - `GET /api/readiness` — `{ ready }` public; detailed `checks` with `Authorization: Bearer READINESS_SECRET` (or `CRON_SECRET`)
 
+### Durable paid-order side effects
+
+- Approving payment enqueues an `order.paid` outbox event (does not send email inline).
+- `GET/POST /api/cron/process-outbox` (Bearer `CRON_SECRET`) sends customer + store emails with idempotent `email_deliveries` keys and retries with backoff.
+- After max attempts, the event is marked `failed` and the store receives an alert email.
+
 ### Payments
 
 - `mock` / `bankful`: on-site card capture (PCI SAQ D for live Bankful direct).

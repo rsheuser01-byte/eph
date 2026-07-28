@@ -117,12 +117,12 @@ function createMemoryEventStore(): PaymentEventStore {
 
 describe("processBankfulIpn", () => {
   const orders = new Map<string, OrderRecord>();
-  const emailSend = vi.fn().mockResolvedValue(undefined);
+  const enqueuePaid = vi.fn().mockResolvedValue(undefined);
   let events: PaymentEventStore;
 
   beforeEach(() => {
     orders.clear();
-    emailSend.mockClear();
+    enqueuePaid.mockClear();
     events = createMemoryEventStore();
     orders.set("ord_test_1", makeOrder());
     vi.stubEnv("BANKFUL_PASSWORD", PASSWORD);
@@ -165,7 +165,7 @@ describe("processBankfulIpn", () => {
         },
       },
       paymentEvents: events,
-      sendEmails: emailSend,
+      enqueuePaid,
       logSecurityEvent: vi.fn(),
       commitStock: vi.fn().mockResolvedValue(undefined),
       releaseStock: vi.fn().mockResolvedValue(undefined),
@@ -192,18 +192,19 @@ describe("processBankfulIpn", () => {
     expect(result.status).toBe(200);
     expect(result.body).toMatchObject({ ok: true, approved: true });
     expect(orders.get("ord_test_1")?.paymentStatus).toBe("approved");
-    expect(emailSend).toHaveBeenCalledTimes(1);
+    expect(enqueuePaid).toHaveBeenCalledTimes(1);
+    expect(enqueuePaid).toHaveBeenCalledWith("ord_test_1");
     expect(d.commitStock).toHaveBeenCalledWith("ord_test_1");
   });
 
   it("is idempotent on replay of the same approved callback", async () => {
     const fields = signedFields();
     expect((await processBankfulIpn(fields, deps())).status).toBe(200);
-    emailSend.mockClear();
+    enqueuePaid.mockClear();
     const replay = await processBankfulIpn(fields, deps());
     expect(replay.status).toBe(200);
     expect(replay.body).toMatchObject({ ok: true, duplicate: true });
-    expect(emailSend).not.toHaveBeenCalled();
+    expect(enqueuePaid).not.toHaveBeenCalled();
   });
 
   it("rejects amount mismatch without approving", async () => {
@@ -213,7 +214,7 @@ describe("processBankfulIpn", () => {
     );
     expect(result.status).toBe(422);
     expect(orders.get("ord_test_1")?.paymentStatus).toBe("review_required");
-    expect(emailSend).not.toHaveBeenCalled();
+    expect(enqueuePaid).not.toHaveBeenCalled();
   });
 
   it("rejects currency mismatch without approving", async () => {
@@ -255,7 +256,7 @@ describe("processBankfulIpn", () => {
     expect(result.status).toBe(200);
     expect(result.body).toMatchObject({ ok: true, approved: false });
     expect(orders.get("ord_test_1")?.paymentStatus).toBe("declined");
-    expect(emailSend).not.toHaveBeenCalled();
+    expect(enqueuePaid).not.toHaveBeenCalled();
     expect(d.releaseStock).toHaveBeenCalledWith("ord_test_1");
   });
 
@@ -271,10 +272,10 @@ describe("processBankfulIpn", () => {
     };
     const first = await processBankfulIpn(resigned, deps());
     expect(first.status).toBe(200);
-    emailSend.mockClear();
+    enqueuePaid.mockClear();
     const second = await processBankfulIpn(resigned, deps());
     expect(second.body).toMatchObject({ duplicate: true });
-    expect(emailSend).not.toHaveBeenCalled();
+    expect(enqueuePaid).not.toHaveBeenCalled();
     // Sanity: hash is stable
     const hash = createHash("sha256")
       .update(

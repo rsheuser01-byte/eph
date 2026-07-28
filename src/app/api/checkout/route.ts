@@ -1,12 +1,5 @@
 import { NextResponse } from "next/server";
-import { site } from "@/data/site";
 import { buildOrder } from "@/lib/checkout/order";
-import { getEmailProvider } from "@/lib/email";
-import {
-  buildCustomerConfirmation,
-  buildStoreNotification,
-  type OrderEmailData,
-} from "@/lib/email/orderConfirmation";
 import {
   approvedOrderDefaults,
   getOrderStore,
@@ -29,6 +22,7 @@ import {
   assertProductionCheckoutReady,
   publicCheckoutUnavailableMessage,
 } from "@/lib/config/productionReadiness";
+import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,16 +93,6 @@ function parseCard(input: unknown): CardInput | null {
 function generateOrderId(): string {
   const random = Math.random().toString(36).slice(2, 8).toUpperCase();
   return `EPH-${Date.now().toString(36).toUpperCase()}-${random}`;
-}
-
-async function sendOrderEmails(data: OrderEmailData): Promise<void> {
-  try {
-    const email = getEmailProvider();
-    await email.send(buildCustomerConfirmation(data));
-    await email.send(buildStoreNotification(data, site.email));
-  } catch (error) {
-    console.error(`Order ${data.orderId} confirmation email failed:`, error);
-  }
 }
 
 async function persistOrder(record: OrderRecord): Promise<void> {
@@ -246,15 +230,11 @@ export async function POST(request: Request) {
       });
     }
 
-    await sendOrderEmails({
-      orderId: outcome.orderId,
-      items: order.items,
-      subtotal: order.subtotal,
-      shipping: order.shipping,
-      total: order.total,
-      customer: billing,
-      siteName: site.name,
-    });
+    try {
+      await enqueueOrderPaid(outcome.orderId);
+    } catch (error) {
+      console.error(`Failed to enqueue order.paid for ${orderId}:`, error);
+    }
 
     return NextResponse.json({
       status: "approved",

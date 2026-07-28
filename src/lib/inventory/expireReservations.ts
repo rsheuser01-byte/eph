@@ -1,5 +1,6 @@
 import { verifyBankfulTransaction } from "@/lib/payments/bankful";
 import type { OrderStore } from "@/lib/orders/types";
+import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
 import {
   commitReservations,
   expireReservations,
@@ -20,6 +21,7 @@ export type ExpireReservationsDeps = {
   commit?: (orderId: string) => Promise<void>;
   expire?: (orderId: string) => Promise<void>;
   release?: (orderId: string) => Promise<void>;
+  enqueuePaid?: (orderId: string) => Promise<void>;
   verifyPayment?: typeof verifyBankfulTransaction;
   log?: (message: string, detail?: Record<string, unknown>) => void;
   batchSize?: number;
@@ -36,6 +38,7 @@ export async function processExpiredReservations(
   const list = deps.listExpiredOrderIds ?? listExpiredReservationOrderIds;
   const commit = deps.commit ?? commitReservations;
   const expire = deps.expire ?? expireReservations;
+  const enqueuePaid = deps.enqueuePaid ?? enqueueOrderPaid;
   const verify = deps.verifyPayment ?? verifyBankfulTransaction;
   const log = deps.log ?? ((message, detail) => console.error(message, detail));
   const batchSize = deps.batchSize ?? 50;
@@ -72,6 +75,12 @@ export async function processExpiredReservations(
 
       if (order.paymentStatus === "approved") {
         await commit(orderId);
+        await enqueuePaid(orderId).catch((error) => {
+          log("expire_reservations_outbox_failed", {
+            orderId,
+            message: error instanceof Error ? error.message : "unknown",
+          });
+        });
         result.committed += 1;
         continue;
       }
@@ -110,6 +119,12 @@ export async function processExpiredReservations(
               });
             }
             await commit(orderId);
+            await enqueuePaid(orderId).catch((error) => {
+              log("expire_reservations_outbox_failed", {
+                orderId,
+                message: error instanceof Error ? error.message : "unknown",
+              });
+            });
             result.committed += 1;
             continue;
           }
