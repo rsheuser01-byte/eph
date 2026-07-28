@@ -216,6 +216,14 @@ async function alertFailedOutbox(
   } catch (error) {
     console.error("Failed to send outbox failure alert", error);
   }
+  void import("@/lib/security/alerts").then(({ alertCritical }) =>
+    alertCritical("outbox.retry_exhausted", {
+      orderId,
+      eventType: event.eventType,
+      attempts: event.attempts,
+      errorMessage,
+    }),
+  );
 }
 
 export async function processOutbox(

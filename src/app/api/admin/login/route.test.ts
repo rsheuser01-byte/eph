@@ -1,13 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { resetRateLimits } from "@/lib/admin/rateLimit";
 import { ADMIN_SESSION_COOKIE } from "@/lib/admin/session";
+import { resetMemoryRateLimits } from "@/lib/security/rateLimit";
 import { POST as login } from "./route";
 
 describe("POST /api/admin/login", () => {
   beforeEach(() => {
     vi.stubEnv("ADMIN_TOKEN", "correct-password");
     vi.stubEnv("ADMIN_SESSION_SECRET", "signing-secret");
-    resetRateLimits();
+    resetMemoryRateLimits();
   });
 
   afterEach(() => {

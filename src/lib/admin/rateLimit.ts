@@ -7,7 +7,7 @@ const buckets = new Map<string, Bucket>();
 
 /**
  * Simple in-memory sliding window limiter. Returns true when the request is
- * allowed. Per-instance only (fine for single-node / low-traffic admin login).
+ * allowed. Prefer `@/lib/security/rateLimit` for durable (Upstash) limits.
  */
 export function allowAttempt(
   key: string,

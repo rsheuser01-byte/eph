@@ -4,6 +4,13 @@ import { adjustStock, stockItemsFromOrder } from "@/lib/inventory";
 import { enqueueOrderRefunded } from "@/lib/outbox/enqueue";
 import { getOrderStore } from "@/lib/orders";
 import { getPaymentProvider } from "@/lib/payments";
+import { writeAuditLog } from "@/lib/security/audit";
+import {
+  RATE_LIMITS,
+  checkRateLimit,
+  clientIpFromRequest,
+  tooManyRequestsResponse,
+} from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -15,6 +22,16 @@ export async function POST(
   if (!(await assertAdminApiSession())) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
+
+  const limited = await checkRateLimit(
+    "adminRefund",
+    `ip:${clientIpFromRequest(request)}`,
+    RATE_LIMITS.adminRefund,
+  );
+  if (!limited.allowed) {
+    return tooManyRequestsResponse();
+  }
+
   const { orderId } = await context.params;
 
   let body: { amount?: number; restock?: boolean } = {};
@@ -110,6 +127,22 @@ export async function POST(
   ).catch((error) => {
     console.error("Failed to enqueue order.refunded", error);
   });
+
+  await writeAuditLog(
+    {
+      actor: "admin",
+      action: "order.refund",
+      entityType: "order",
+      entityId: orderId,
+      metadata: {
+        amount,
+        refundedAmount,
+        paymentStatus,
+        restocked: shouldRestock,
+      },
+    },
+    request,
+  );
 
   return NextResponse.json({
     ok: true,

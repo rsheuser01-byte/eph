@@ -28,6 +28,8 @@ function stubProductionEnv(overrides: Record<string, string> = {}) {
   vi.stubEnv("TAXJAR_API_TOKEN", "tj_test");
   vi.stubEnv("TAX_FROM_STATE", "KY");
   vi.stubEnv("TAX_FROM_ZIP", "40202");
+  vi.stubEnv("UPSTASH_REDIS_REST_URL", "https://example.upstash.io");
+  vi.stubEnv("UPSTASH_REDIS_REST_TOKEN", "upstash-token");
   for (const [key, value] of Object.entries(overrides)) {
     vi.stubEnv(key, value);
   }
@@ -121,6 +123,15 @@ describe("productionReadiness", () => {
     const result = assessProductionConfig();
     expect(result.ok).toBe(false);
     expect(result.issues.some((i) => i.key === "TAX_PROVIDER")).toBe(true);
+  });
+
+  it("fails closed when Upstash is missing in production", () => {
+    stubProductionEnv({ UPSTASH_REDIS_REST_URL: "" });
+    const result = assessProductionConfig();
+    expect(result.ok).toBe(false);
+    expect(
+      result.issues.some((i) => i.key === "UPSTASH_REDIS_REST_URL"),
+    ).toBe(true);
   });
 
   it("warns when STATUS lookup is unset but does not block checkout", () => {

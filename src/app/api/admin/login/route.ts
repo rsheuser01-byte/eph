@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { allowAttempt } from "@/lib/admin/rateLimit";
 import {
   ADMIN_SESSION_COOKIE,
   ADMIN_SESSION_TTL_MS,
@@ -7,19 +6,15 @@ import {
   getAdminSessionCookieOptions,
   passwordsMatch,
 } from "@/lib/admin/session";
+import { writeAuditLog } from "@/lib/security/audit";
+import {
+  RATE_LIMITS,
+  checkRateLimit,
+  clientIpFromRequest,
+  tooManyRequestsResponse,
+} from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
-
-const LOGIN_LIMIT = 10;
-const LOGIN_WINDOW_MS = 15 * 60 * 1000;
-
-function clientKey(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    return `ip:${forwarded.split(",")[0]?.trim() || "unknown"}`;
-  }
-  return "ip:unknown";
-}
 
 export async function POST(request: Request) {
   const expected = process.env.ADMIN_TOKEN?.trim();
@@ -30,10 +25,23 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!allowAttempt(clientKey(request), LOGIN_LIMIT, LOGIN_WINDOW_MS)) {
-    return NextResponse.json(
-      { error: "Too many login attempts. Try again later." },
-      { status: 429 },
+  const ip = clientIpFromRequest(request);
+  const limited = await checkRateLimit(
+    "adminLogin",
+    `ip:${ip}`,
+    RATE_LIMITS.adminLogin,
+  );
+  if (!limited.allowed) {
+    await writeAuditLog(
+      {
+        actor: "anonymous",
+        action: "admin.login.rate_limited",
+        metadata: { remaining: limited.remaining },
+      },
+      request,
+    );
+    return tooManyRequestsResponse(
+      "Too many login attempts. Try again later.",
     );
   }
 
@@ -46,6 +54,13 @@ export async function POST(request: Request) {
   }
 
   if (!(await passwordsMatch(password, expected))) {
+    await writeAuditLog(
+      {
+        actor: "anonymous",
+        action: "admin.login.failure",
+      },
+      request,
+    );
     return NextResponse.json(
       { error: "Invalid credentials." },
       { status: 401 },
@@ -53,6 +68,13 @@ export async function POST(request: Request) {
   }
 
   const session = await createAdminSessionToken();
+  await writeAuditLog(
+    {
+      actor: "admin",
+      action: "admin.login.success",
+    },
+    request,
+  );
   const response = NextResponse.json({ ok: true });
   response.cookies.set(
     ADMIN_SESSION_COOKIE,

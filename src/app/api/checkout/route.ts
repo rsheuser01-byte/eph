@@ -26,6 +26,12 @@ import {
 import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
 import { generateLookupToken } from "@/lib/orders/publicStatus";
 import { TaxCalculationError, quoteTax } from "@/lib/tax";
+import {
+  RATE_LIMITS,
+  checkRateLimit,
+  clientIpFromRequest,
+  tooManyRequestsResponse,
+} from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -113,6 +119,15 @@ export async function POST(request: Request) {
       );
     }
     throw error;
+  }
+
+  const limited = await checkRateLimit(
+    "checkout",
+    `ip:${clientIpFromRequest(request)}`,
+    RATE_LIMITS.checkout,
+  );
+  if (!limited.allowed) {
+    return tooManyRequestsResponse();
   }
 
   let body: Record<string, unknown>;

@@ -5,6 +5,13 @@ import {
   seedInventoryFromCatalog,
   type StockMovementReason,
 } from "@/lib/inventory";
+import { writeAuditLog } from "@/lib/security/audit";
+import {
+  RATE_LIMITS,
+  checkRateLimit,
+  clientIpFromRequest,
+  tooManyRequestsResponse,
+} from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -12,6 +19,15 @@ export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   if (!(await assertAdminApiSession())) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
+  const limited = await checkRateLimit(
+    "adminInventory",
+    `ip:${clientIpFromRequest(request)}`,
+    RATE_LIMITS.adminInventory,
+  );
+  if (!limited.allowed) {
+    return tooManyRequestsResponse();
   }
 
   let body: {
@@ -28,6 +44,15 @@ export async function POST(request: Request) {
 
   if (body.seed) {
     const count = await seedInventoryFromCatalog(0);
+    await writeAuditLog(
+      {
+        actor: "admin",
+        action: "inventory.seed",
+        entityType: "inventory",
+        metadata: { seeded: count },
+      },
+      request,
+    );
     return NextResponse.json({ ok: true, seeded: count });
   }
 
@@ -51,6 +76,17 @@ export async function POST(request: Request) {
     const quantityOnHand = await adjustStock(sku, delta, reason, {
       actor: "admin",
     });
+    await writeAuditLog(
+      {
+        actor: "admin",
+        action:
+          reason === "receive" ? "inventory.receive" : "inventory.adjust",
+        entityType: "inventory",
+        entityId: sku,
+        metadata: { delta, reason, quantityOnHand },
+      },
+      request,
+    );
     return NextResponse.json({ ok: true, sku, quantityOnHand });
   } catch (error) {
     return NextResponse.json(

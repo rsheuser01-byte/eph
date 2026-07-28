@@ -9,7 +9,8 @@ Scope: repository map before Phase 1 (Bankful callback authentication and reconc
 **Phase 4 status: complete**  
 **Phase 5 status: complete**  
 **Phase 6 status: complete**  
-**Phase 7 status: complete** (TaxJar sales tax quotes; client cannot override). Next: Phase 8 (rate limits / admin hardening).
+**Phase 7 status: complete**  
+**Phase 8 status: complete** (Upstash rate limits, audit log, security headers, critical alerts). Next: Phase 9 (broader test suite). MFA / per-user IdP remain follow-ups.
 
 ## Existing relevant files
 

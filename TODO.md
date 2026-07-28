@@ -58,4 +58,5 @@ Ordered roughly by priority.
 - [ ] Create `web/.env.example` manually (blocked by the local env-file guard;
       variables are documented in `README.md`).
 - [ ] E2E test (Playwright) for browse → add to cart → checkout → confirmation.
-- [ ] Optional: durable rate limits (Upstash) + Supabase Auth MFA for admin.
+- [ ] Optional: Supabase Auth + MFA for admin (shared `ADMIN_TOKEN` + audit log
+      + Upstash rate limits are already in place).

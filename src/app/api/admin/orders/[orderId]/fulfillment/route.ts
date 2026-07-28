@@ -6,6 +6,13 @@ import {
 } from "@/lib/outbox/enqueue";
 import { getOrderStore } from "@/lib/orders";
 import type { FulfillmentStatus } from "@/lib/orders";
+import { writeAuditLog } from "@/lib/security/audit";
+import {
+  RATE_LIMITS,
+  checkRateLimit,
+  clientIpFromRequest,
+  tooManyRequestsResponse,
+} from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -33,6 +40,16 @@ export async function POST(
   if (!(await assertAdminApiSession())) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
+
+  const limited = await checkRateLimit(
+    "adminFulfillment",
+    `ip:${clientIpFromRequest(request)}`,
+    RATE_LIMITS.adminFulfillment,
+  );
+  if (!limited.allowed) {
+    return tooManyRequestsResponse();
+  }
+
   const { orderId } = await context.params;
 
   let body: FulfillmentBody = {};
@@ -130,6 +147,26 @@ export async function POST(
       console.error("Failed to enqueue order.cancelled", error);
     });
   }
+
+  await writeAuditLog(
+    {
+      actor: "admin",
+      action:
+        nextStatus === "shipped"
+          ? "order.shipped"
+          : nextStatus === "cancelled"
+            ? "order.cancelled"
+            : "order.fulfillment_update",
+      entityType: "order",
+      entityId: orderId,
+      metadata: {
+        fulfillmentStatus: nextStatus,
+        carrier: updated.carrier ?? null,
+        trackingNumber: updated.trackingNumber ?? null,
+      },
+    },
+    request,
+  );
 
   return NextResponse.json({
     ok: true,

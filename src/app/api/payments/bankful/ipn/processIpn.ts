@@ -308,6 +308,19 @@ export function logIpnSecurityEvent(
   detail: Record<string, unknown>,
 ): void {
   console.error(`[security] ${event}`, detail);
+  if (
+    event === "bankful_ipn_signature_rejected" ||
+    event === "bankful_ipn_amount_mismatch"
+  ) {
+    void import("@/lib/security/alerts").then(({ alertCritical }) =>
+      alertCritical(
+        event === "bankful_ipn_signature_rejected"
+          ? "ipn.signature_failure"
+          : "ipn.amount_mismatch",
+        detail ?? {},
+      ),
+    );
+  }
 }
 
 export type { VerifiedBankfulCallback };

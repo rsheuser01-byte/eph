@@ -71,6 +71,13 @@ TAX_FROM_STREET=
 # Optional default product tax code (omit = fully taxable per TaxJar)
 # TAX_PRODUCT_TAX_CODE=
 
+# Durable rate limits (required in production)
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+
+# Optional Sentry DSN for critical payment/ops alerts
+# SENTRY_DSN=
+
 # Orders: "file" (local JSON) or "supabase" (production)
 ORDER_STORE=file
 
@@ -112,6 +119,7 @@ In `NODE_ENV=production` (or `VERCEL_ENV=production`), checkout returns **503** 
 - Supabase URL + service role + `ORDER_STORE=supabase`
 - Resend email config
 - TaxJar (`TAX_PROVIDER=taxjar`, token, origin state/ZIP)
+- Upstash Redis (`UPSTASH_REDIS_REST_URL` + `UPSTASH_REDIS_REST_TOKEN`)
 - Admin + `CRON_SECRET`
 
 Customers never see which variable is missing (logged server-side only).
@@ -142,6 +150,14 @@ Probes:
 - Orders persist `tax`, `tax_provider`, and jurisdiction summary. Bankful amount = subtotal + shipping + tax.
 - Tax failures return a safe 503 — never silently charge $0 tax in production.
 - Configure nexus/product tax codes with a tax advisor; optional `TAX_PRODUCT_TAX_CODE` applies a default TaxJar product code.
+
+### Security, rate limits, and audit
+
+- Durable rate limits via Upstash Redis (memory fallback locally). Applied to checkout, order status, admin login, Bankful IPN (generous), refunds, inventory, and fulfillment.
+- Admin actions write to `admin_audit_log` (or `.data/admin_audit_log.json`) with hashed IPs — never raw addresses.
+- Security headers: CSP, `X-Frame-Options`, `nosniff`, Referrer-Policy; HSTS in production.
+- Critical payment/ops events email the store (cooldown) and optionally emit to Sentry when `SENTRY_DSN` is set.
+- Admin remains a shared `ADMIN_TOKEN` session (httpOnly, 8h). Per-user IdP + MFA are still recommended before multi-staff use.
 
 ### Payments
 

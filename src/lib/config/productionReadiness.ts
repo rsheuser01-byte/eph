@@ -161,6 +161,17 @@ export function assessProductionConfig(
     issues,
   );
 
+  requireNonEmpty(
+    "UPSTASH_REDIS_REST_URL",
+    "Upstash Redis URL is required for durable rate limits.",
+    issues,
+  );
+  requireNonEmpty(
+    "UPSTASH_REDIS_REST_TOKEN",
+    "Upstash Redis token is required for durable rate limits.",
+    issues,
+  );
+
   if (!env("BANKFUL_STATUS_TRANSACTION_TYPE")) {
     issues.push({
       key: "BANKFUL_STATUS_TRANSACTION_TYPE",

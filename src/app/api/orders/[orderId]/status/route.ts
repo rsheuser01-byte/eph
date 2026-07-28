@@ -1,5 +1,11 @@
 import { NextResponse } from "next/server";
 import { loadPublicOrderStatus } from "@/lib/orders/loadPublicStatus";
+import {
+  RATE_LIMITS,
+  checkRateLimit,
+  clientIpFromRequest,
+  tooManyRequestsResponse,
+} from "@/lib/security/rateLimit";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -13,6 +19,15 @@ type RouteContext = {
  * Returns only non-sensitive fields.
  */
 export async function GET(request: Request, context: RouteContext) {
+  const limited = await checkRateLimit(
+    "orderStatus",
+    `ip:${clientIpFromRequest(request)}`,
+    RATE_LIMITS.orderStatus,
+  );
+  if (!limited.allowed) {
+    return tooManyRequestsResponse();
+  }
+
   const { orderId: rawOrderId } = await context.params;
   const orderId = decodeURIComponent(rawOrderId);
   const token = new URL(request.url).searchParams.get("token") ?? "";
