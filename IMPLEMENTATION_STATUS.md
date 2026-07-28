@@ -7,7 +7,8 @@ Scope: repository map before Phase 1 (Bankful callback authentication and reconc
 **Phase 2 status: complete**  
 **Phase 3 status: complete**  
 **Phase 4 status: complete**  
-**Phase 5 status: complete** (DB-backed success status + lookup token polling). Next: Phase 6 (email/fulfillment polish).
+**Phase 5 status: complete**  
+**Phase 6 status: complete** (shipping fields, transactional emails, admin resend). Next: Phase 7 (tax).
 
 ## Existing relevant files
 

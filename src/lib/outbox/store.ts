@@ -262,6 +262,15 @@ export function createFileEmailDeliveryStore(
       await writeJsonArray(filePath, rows);
       return true;
     },
+    async clearDeliveries(eventType, orderId) {
+      const rows = await readJsonArray<Row>(filePath);
+      const next = rows.filter(
+        (row) => !(row.eventType === eventType && row.orderId === orderId),
+      );
+      const removed = rows.length - next.length;
+      await writeJsonArray(filePath, next);
+      return removed;
+    },
   };
 }
 
@@ -283,6 +292,18 @@ export function createSupabaseEmailDeliveryStore(
         throw new Error(`Failed to claim email delivery: ${error.message}`);
       }
       return true;
+    },
+    async clearDeliveries(eventType, orderId) {
+      const { data, error } = await client
+        .from("email_deliveries")
+        .delete()
+        .eq("event_type", eventType)
+        .eq("order_id", orderId)
+        .select("id");
+      if (error) {
+        throw new Error(`Failed to clear email deliveries: ${error.message}`);
+      }
+      return (data ?? []).length;
     },
   };
 }

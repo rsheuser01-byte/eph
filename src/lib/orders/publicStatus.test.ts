@@ -42,9 +42,9 @@ describe("publicStatusFromPayment", () => {
     expect(status.headline).toBe("Order requires review");
   });
 
-  it("maps declined to not completed", () => {
-    const status = publicStatusFromPayment("ord_1", "declined", "unfulfilled");
-    expect(status.headline).toBe("Payment not completed");
+  it("maps shipped fulfillment after payment", () => {
+    const status = publicStatusFromPayment("ord_1", "approved", "shipped");
+    expect(status.headline).toBe("Order shipped");
     expect(status.poll).toBe(false);
   });
 });

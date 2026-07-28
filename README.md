@@ -54,6 +54,8 @@ BANKFUL_PASSWORD=
 EMAIL_PROVIDER=console
 RESEND_API_KEY=
 EMAIL_FROM="Elevate Precision Health <[email protected]>"
+# Optional override for store/ops alerts (defaults to site contact email)
+STORE_NOTIFICATION_EMAIL=
 
 # Orders: "file" (local JSON) or "supabase" (production)
 ORDER_STORE=file
@@ -83,7 +85,7 @@ READINESS_SECRET=
 - Set `ORDER_STORE=supabase` plus Supabase env vars for durable orders on Vercel.
 - SQL migrations: [`supabase/migrations/`](./supabase/migrations/).
 - Import local JSON history: `npx tsx scripts/import-orders-json.ts` (with Supabase env set).
-- Admin: `/admin/login` → `/admin/orders` (fulfill / refund) and `/admin/inventory` (receive / adjust).
+- Admin: `/admin/login` → `/admin/orders` (ship / fulfill / refund / resend emails) and `/admin/inventory` (receive / adjust).
 - Inventory: checkout creates **active reservations** (does not decrement on-hand until payment is verified). Available qty = on hand − active reservations. Call `/api/cron/expire-reservations` with `CRON_SECRET` to expire abandoned HPP checkouts.
 - Legacy RPCs `reserve_stock` / `release_stock` remain for compatibility; new flow uses `create_inventory_reservations` / `commit_inventory_reservations` / `release_inventory_reservations`.
 
@@ -107,8 +109,10 @@ Probes:
 ### Durable paid-order side effects
 
 - Approving payment enqueues an `order.paid` outbox event (does not send email inline).
-- `GET/POST /api/cron/process-outbox` (Bearer `CRON_SECRET`) sends customer + store emails with idempotent `email_deliveries` keys and retries with backoff.
+- Marking an order **shipped** (with tracking) enqueues `order.shipped`; refunds enqueue `order.refunded`; cancel enqueues `order.cancelled`.
+- `GET/POST /api/cron/process-outbox` (Bearer `CRON_SECRET`) sends emails with idempotent `email_deliveries` keys and retries with backoff.
 - After max attempts, the event is marked `failed` and the store receives an alert email.
+- Admins can intentionally resend confirmation or shipping emails via `/api/admin/orders/[orderId]/resend-email`.
 
 ### Checkout status UX
 

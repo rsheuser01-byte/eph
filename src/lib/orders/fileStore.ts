@@ -86,6 +86,30 @@ export function createFileOrderStore(filePath = defaultPath()): OrderStore {
         refundedAmount: patch.refundedAmount ?? current.refundedAmount,
         reservationExpiresAt:
           patch.reservationExpiresAt ?? current.reservationExpiresAt,
+        carrier:
+          patch.carrier === null
+            ? undefined
+            : (patch.carrier ?? current.carrier),
+        trackingNumber:
+          patch.trackingNumber === null
+            ? undefined
+            : (patch.trackingNumber ?? current.trackingNumber),
+        trackingUrl:
+          patch.trackingUrl === null
+            ? undefined
+            : (patch.trackingUrl ?? current.trackingUrl),
+        shippedAt:
+          patch.shippedAt === null
+            ? undefined
+            : (patch.shippedAt ?? current.shippedAt),
+        fulfilledAt:
+          patch.fulfilledAt === null
+            ? undefined
+            : (patch.fulfilledAt ?? current.fulfilledAt),
+        fulfillmentNotes:
+          patch.fulfillmentNotes === null
+            ? undefined
+            : (patch.fulfillmentNotes ?? current.fulfillmentNotes),
         status: paymentStatus,
       });
       orders[index] = updated;

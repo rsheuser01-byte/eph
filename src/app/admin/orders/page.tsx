@@ -106,6 +106,10 @@ export default async function AdminOrdersPage() {
                 }
                 canFulfill={order.paymentStatus === "approved"}
                 fulfillmentStatus={order.fulfillmentStatus}
+                paymentStatus={order.paymentStatus}
+                carrier={order.carrier}
+                trackingNumber={order.trackingNumber}
+                trackingUrl={order.trackingUrl}
               />
             </article>
           ))}

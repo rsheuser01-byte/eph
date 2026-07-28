@@ -10,7 +10,12 @@ export type PaymentStatus =
   | "review_required"
   | "expired";
 
-export type FulfillmentStatus = "unfulfilled" | "fulfilled" | "cancelled";
+export type FulfillmentStatus =
+  | "unfulfilled"
+  | "processing"
+  | "shipped"
+  | "fulfilled"
+  | "cancelled";
 
 // Note: card data is NEVER stored. Only order/customer details are persisted.
 export type OrderRecord = {
@@ -33,6 +38,12 @@ export type OrderRecord = {
   reservationExpiresAt?: string;
   /** Opaque customer-facing token for status lookup (not a secret credential). */
   lookupToken?: string;
+  carrier?: string;
+  trackingNumber?: string;
+  trackingUrl?: string;
+  shippedAt?: string;
+  fulfilledAt?: string;
+  fulfillmentNotes?: string;
 };
 
 export type OrderStatusUpdate = {
@@ -41,6 +52,12 @@ export type OrderStatusUpdate = {
   transactionId?: string;
   refundedAmount?: number;
   reservationExpiresAt?: string;
+  carrier?: string | null;
+  trackingNumber?: string | null;
+  trackingUrl?: string | null;
+  shippedAt?: string | null;
+  fulfilledAt?: string | null;
+  fulfillmentNotes?: string | null;
 };
 
 export interface OrderStore {

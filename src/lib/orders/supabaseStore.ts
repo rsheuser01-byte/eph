@@ -23,6 +23,12 @@ type OrderRow = {
   refunded_amount: number | string;
   reservation_expires_at: string | null;
   lookup_token: string | null;
+  carrier: string | null;
+  tracking_number: string | null;
+  tracking_url: string | null;
+  shipped_at: string | null;
+  fulfilled_at: string | null;
+  fulfillment_notes: string | null;
 };
 
 type OrderItemRow = {
@@ -56,6 +62,12 @@ function mapRow(row: OrderRow, items: OrderItem[]): OrderRecord {
     refundedAmount: asNumber(row.refunded_amount),
     reservationExpiresAt: row.reservation_expires_at ?? undefined,
     lookupToken: row.lookup_token ?? undefined,
+    carrier: row.carrier ?? undefined,
+    trackingNumber: row.tracking_number ?? undefined,
+    trackingUrl: row.tracking_url ?? undefined,
+    shippedAt: row.shipped_at ?? undefined,
+    fulfilledAt: row.fulfilled_at ?? undefined,
+    fulfillmentNotes: row.fulfillment_notes ?? undefined,
   };
 }
 
@@ -92,6 +104,12 @@ export function createSupabaseOrderStore(
           refunded_amount: record.refundedAmount,
           reservation_expires_at: record.reservationExpiresAt ?? null,
           lookup_token: record.lookupToken ?? null,
+          carrier: record.carrier ?? null,
+          tracking_number: record.trackingNumber ?? null,
+          tracking_url: record.trackingUrl ?? null,
+          shipped_at: record.shippedAt ?? null,
+          fulfilled_at: record.fulfilledAt ?? null,
+          fulfillment_notes: record.fulfillmentNotes ?? null,
         },
         { onConflict: "id" },
       );
@@ -208,6 +226,24 @@ export function createSupabaseOrderStore(
       }
       if (patch.reservationExpiresAt !== undefined) {
         updates.reservation_expires_at = patch.reservationExpiresAt;
+      }
+      if (patch.carrier !== undefined) {
+        updates.carrier = patch.carrier;
+      }
+      if (patch.trackingNumber !== undefined) {
+        updates.tracking_number = patch.trackingNumber;
+      }
+      if (patch.trackingUrl !== undefined) {
+        updates.tracking_url = patch.trackingUrl;
+      }
+      if (patch.shippedAt !== undefined) {
+        updates.shipped_at = patch.shippedAt;
+      }
+      if (patch.fulfilledAt !== undefined) {
+        updates.fulfilled_at = patch.fulfilledAt;
+      }
+      if (patch.fulfillmentNotes !== undefined) {
+        updates.fulfillment_notes = patch.fulfillmentNotes;
       }
 
       if (Object.keys(updates).length === 0) {

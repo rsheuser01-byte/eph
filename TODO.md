@@ -34,10 +34,12 @@ Ordered roughly by priority.
       `supabase/migrations/`. Keep `file` for optional local fallback.
 - [x] Admin login with httpOnly signed session cookie (`/admin/login`).
 - [x] Durable `order.paid` outbox + `/api/cron/process-outbox` email retries.
-- [ ] Shipping/tracking notification email once a label is created.
+- [x] Shipping/tracking fields + shipped/refund/cancel emails via outbox;
+      admin mark shipped + intentional resend.
 - [ ] Set `SUPABASE_SERVICE_ROLE_KEY` in Vercel from the Supabase dashboard
       (service role is not exposed via MCP). Project: `elevate-precision-health`.
 - [ ] Receive real starting stock via `/admin/inventory` (seeded at 0).
+- [ ] Optional: set `STORE_NOTIFICATION_EMAIL` for ops alerts (defaults to site email).
 
 ## Trust / compliance
 - [x] Checkout success uses DB status + opaque `lookup_token` (not URL alone);

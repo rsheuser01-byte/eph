@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { assertAdminApiSession } from "@/lib/admin/auth";
 import { adjustStock, stockItemsFromOrder } from "@/lib/inventory";
+import { enqueueOrderRefunded } from "@/lib/outbox/enqueue";
 import { getOrderStore } from "@/lib/orders";
 import { getPaymentProvider } from "@/lib/payments";
 
@@ -85,7 +86,11 @@ export async function POST(
   }
 
   const shouldRestock =
-    body.restock ?? order.fulfillmentStatus === "unfulfilled";
+    body.restock ??
+    (paymentStatus === "refunded" &&
+      (order.fulfillmentStatus === "unfulfilled" ||
+        order.fulfillmentStatus === "processing" ||
+        order.fulfillmentStatus === "cancelled"));
   if (shouldRestock) {
     for (const item of stockItemsFromOrder(order.items)) {
       await adjustStock(item.sku, item.qty, "refund_restock", {
@@ -96,6 +101,15 @@ export async function POST(
       });
     }
   }
+
+  await enqueueOrderRefunded(
+    orderId,
+    amount,
+    refundedAmount,
+    paymentStatus === "partially_refunded",
+  ).catch((error) => {
+    console.error("Failed to enqueue order.refunded", error);
+  });
 
   return NextResponse.json({
     ok: true,

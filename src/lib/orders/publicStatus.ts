@@ -42,7 +42,28 @@ export function publicStatusFromPayment(
   switch (paymentStatus) {
     case "approved":
     case "partially_refunded":
-    case "refunded":
+    case "refunded": {
+      if (paymentStatus === "approved" && fulfillmentStatus === "shipped") {
+        return {
+          orderId,
+          paymentStatus,
+          fulfillmentStatus,
+          headline: "Order shipped",
+          message:
+            "Your order is on the way. Check your email for tracking details.",
+          poll: false,
+        };
+      }
+      if (paymentStatus === "approved" && fulfillmentStatus === "fulfilled") {
+        return {
+          orderId,
+          paymentStatus,
+          fulfillmentStatus,
+          headline: "Order fulfilled",
+          message: "Your order has been fulfilled.",
+          poll: false,
+        };
+      }
       return {
         orderId,
         paymentStatus,
@@ -54,6 +75,7 @@ export function publicStatusFromPayment(
             : "Your payment was previously confirmed. Check your email for updates.",
         poll: false,
       };
+    }
     case "pending":
       return {
         orderId,

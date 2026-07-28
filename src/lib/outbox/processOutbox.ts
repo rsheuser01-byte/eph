@@ -5,11 +5,20 @@ import {
   buildCustomerConfirmation,
   buildStoreNotification,
 } from "@/lib/email/orderConfirmation";
+import {
+  buildCancelledEmail,
+  buildRefundEmail,
+  buildShippedEmail,
+} from "@/lib/email/orderNotifications";
+import { storeNotificationEmail } from "@/lib/email/storeRecipient";
 import { getOrderStore } from "@/lib/orders";
-import type { OrderStore } from "@/lib/orders/types";
+import type { OrderRecord, OrderStore } from "@/lib/orders/types";
 import { getEmailDeliveryStore, getOutboxStore } from "./store";
 import {
+  ORDER_CANCELLED_EVENT,
   ORDER_PAID_EVENT,
+  ORDER_REFUNDED_EVENT,
+  ORDER_SHIPPED_EVENT,
   OUTBOX_MAX_ATTEMPTS,
   type EmailDeliveryStore,
   type OutboxEventRecord,
@@ -32,6 +41,18 @@ export type ProcessOutboxDeps = {
   log?: (message: string, detail?: Record<string, unknown>) => void;
 };
 
+function orderEmailData(order: OrderRecord) {
+  return {
+    orderId: order.orderId,
+    items: order.items,
+    subtotal: order.subtotal,
+    shipping: order.shipping,
+    total: order.total,
+    customer: order.customer,
+    siteName: site.name,
+  };
+}
+
 async function sendOnce(
   deliveries: EmailDeliveryStore,
   eventType: string,
@@ -47,7 +68,14 @@ async function sendOnce(
   if (!shouldSend) {
     return;
   }
-  await send(message);
+  try {
+    await send(message);
+  } catch (error) {
+    if (deliveries.clearDeliveries) {
+      await deliveries.clearDeliveries(eventType, orderId).catch(() => undefined);
+    }
+    throw error;
+  }
 }
 
 async function handleOrderPaid(
@@ -65,16 +93,7 @@ async function handleOrderPaid(
     throw new Error(`Order ${orderId} not found for outbox event`);
   }
 
-  const emailData = {
-    orderId,
-    items: order.items,
-    subtotal: order.subtotal,
-    shipping: order.shipping,
-    total: order.total,
-    customer: order.customer,
-    siteName: site.name,
-  };
-
+  const emailData = orderEmailData(order);
   await sendOnce(
     deps.emailDeliveries,
     "order.paid.customer",
@@ -86,7 +105,88 @@ async function handleOrderPaid(
     deps.emailDeliveries,
     "order.paid.store",
     orderId,
-    buildStoreNotification(emailData, site.email),
+    buildStoreNotification(emailData, storeNotificationEmail()),
+    deps.send,
+  );
+}
+
+async function handleOrderShipped(
+  event: OutboxEventRecord,
+  deps: Required<
+    Pick<ProcessOutboxDeps, "emailDeliveries" | "orderStore" | "send">
+  >,
+): Promise<void> {
+  const orderId = String(event.payload.orderId ?? event.aggregateId);
+  const order = await deps.orderStore.get(orderId);
+  if (!order) {
+    throw new Error(`Order ${orderId} not found for outbox event`);
+  }
+
+  await sendOnce(
+    deps.emailDeliveries,
+    "order.shipped.customer",
+    orderId,
+    buildShippedEmail(orderEmailData(order), {
+      carrier: order.carrier,
+      trackingNumber: order.trackingNumber,
+      trackingUrl: order.trackingUrl,
+    }),
+    deps.send,
+  );
+}
+
+async function handleOrderRefunded(
+  event: OutboxEventRecord,
+  deps: Required<
+    Pick<ProcessOutboxDeps, "emailDeliveries" | "orderStore" | "send">
+  >,
+): Promise<void> {
+  const orderId = String(event.payload.orderId ?? "");
+  if (!orderId) {
+    throw new Error("order.refunded payload missing orderId");
+  }
+  const order = await deps.orderStore.get(orderId);
+  if (!order) {
+    throw new Error(`Order ${orderId} not found for outbox event`);
+  }
+
+  const refundedAmount = Number(event.payload.refundedAmount ?? 0);
+  const totalRefunded = Number(
+    event.payload.totalRefunded ?? order.refundedAmount,
+  );
+  const partial = Boolean(event.payload.partial);
+  const deliveryKey = `order.refunded.customer:${Math.round(refundedAmount * 100)}:${totalRefunded}`;
+
+  await sendOnce(
+    deps.emailDeliveries,
+    deliveryKey,
+    orderId,
+    buildRefundEmail(orderEmailData(order), {
+      refundedAmount,
+      totalRefunded,
+      partial,
+    }),
+    deps.send,
+  );
+}
+
+async function handleOrderCancelled(
+  event: OutboxEventRecord,
+  deps: Required<
+    Pick<ProcessOutboxDeps, "emailDeliveries" | "orderStore" | "send">
+  >,
+): Promise<void> {
+  const orderId = String(event.payload.orderId ?? event.aggregateId);
+  const order = await deps.orderStore.get(orderId);
+  if (!order) {
+    throw new Error(`Order ${orderId} not found for outbox event`);
+  }
+
+  await sendOnce(
+    deps.emailDeliveries,
+    "order.cancelled.customer",
+    orderId,
+    buildCancelledEmail(orderEmailData(order)),
     deps.send,
   );
 }
@@ -99,7 +199,7 @@ async function alertFailedOutbox(
 ): Promise<void> {
   const orderId = event.aggregateId;
   const message: EmailMessage = {
-    to: site.email,
+    to: storeNotificationEmail(),
     subject: `[${site.name}] Paid order needs attention: ${orderId}`,
     text: `Outbox event ${event.eventType} for order ${orderId} failed after ${event.attempts} attempts.\n\nLast error: ${errorMessage}\n\nThe order should still be visible in admin. Investigate email/side effects manually.`,
     html: `<p>Outbox event <code>${event.eventType}</code> for order <code>${orderId}</code> failed after ${event.attempts} attempts.</p><p>Last error: ${errorMessage}</p><p>The order should still be visible in admin. Investigate email/side effects manually.</p>`,
@@ -147,18 +247,26 @@ export async function processOutbox(
     return result;
   }
 
+  const handlerDeps = { emailDeliveries, orderStore, send, log };
+
   for (const event of claimed) {
     result.processed += 1;
     try {
-      if (event.eventType === ORDER_PAID_EVENT) {
-        await handleOrderPaid(event, {
-          emailDeliveries,
-          orderStore,
-          send,
-          log,
-        });
-      } else {
-        throw new Error(`Unsupported outbox event type: ${event.eventType}`);
+      switch (event.eventType) {
+        case ORDER_PAID_EVENT:
+          await handleOrderPaid(event, handlerDeps);
+          break;
+        case ORDER_SHIPPED_EVENT:
+          await handleOrderShipped(event, handlerDeps);
+          break;
+        case ORDER_REFUNDED_EVENT:
+          await handleOrderRefunded(event, handlerDeps);
+          break;
+        case ORDER_CANCELLED_EVENT:
+          await handleOrderCancelled(event, handlerDeps);
+          break;
+        default:
+          throw new Error(`Unsupported outbox event type: ${event.eventType}`);
       }
       await outbox.markCompleted(event.id);
       result.completed += 1;

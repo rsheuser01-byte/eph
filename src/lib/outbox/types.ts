@@ -20,6 +20,9 @@ export type OutboxInsert = {
 };
 
 export const ORDER_PAID_EVENT = "order.paid";
+export const ORDER_SHIPPED_EVENT = "order.shipped";
+export const ORDER_REFUNDED_EVENT = "order.refunded";
+export const ORDER_CANCELLED_EVENT = "order.cancelled";
 export const OUTBOX_MAX_ATTEMPTS = 5;
 
 export function outboxBackoffMinutes(attempt: number): number {
@@ -47,4 +50,6 @@ export type EmailDeliveryStore = {
     orderId: string,
     recipient: string,
   ): Promise<boolean>;
+  /** Clears prior delivery claims so an intentional resend can proceed. */
+  clearDeliveries?(eventType: string, orderId: string): Promise<number>;
 };

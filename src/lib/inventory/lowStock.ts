@@ -1,5 +1,6 @@
 import { site } from "@/data/site";
 import { getEmailProvider } from "@/lib/email";
+import { storeNotificationEmail } from "@/lib/email/storeRecipient";
 import { listInventory } from "@/lib/inventory";
 
 const DEFAULT_THRESHOLD = 5;
@@ -26,7 +27,7 @@ export async function sendLowStockAlerts(
 
   const email = getEmailProvider();
   await email.send({
-    to: site.email,
+    to: storeNotificationEmail(),
     subject: `[${site.name}] Low stock alert (${low.length} SKU${low.length === 1 ? "" : "s"})`,
     text: `The following SKUs are at or below ${threshold} units:\n\n${lines}\n\nReview inventory at /admin/inventory.`,
     html: `<p>The following SKUs are at or below <strong>${threshold}</strong> units:</p><pre>${lines}</pre><p>Review inventory at <code>/admin/inventory</code>.</p>`,
