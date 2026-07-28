@@ -8,7 +8,8 @@ Scope: repository map before Phase 1 (Bankful callback authentication and reconc
 **Phase 3 status: complete**  
 **Phase 4 status: complete**  
 **Phase 5 status: complete**  
-**Phase 6 status: complete** (shipping fields, transactional emails, admin resend). Next: Phase 7 (tax).
+**Phase 6 status: complete**  
+**Phase 7 status: complete** (TaxJar sales tax quotes; client cannot override). Next: Phase 8 (rate limits / admin hardening).
 
 ## Existing relevant files
 

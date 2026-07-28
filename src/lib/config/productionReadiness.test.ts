@@ -24,6 +24,10 @@ function stubProductionEnv(overrides: Record<string, string> = {}) {
   vi.stubEnv("RESEND_API_KEY", "re_test");
   vi.stubEnv("EMAIL_FROM", "orders@example.com");
   vi.stubEnv("CRON_SECRET", "cron-secret");
+  vi.stubEnv("TAX_PROVIDER", "taxjar");
+  vi.stubEnv("TAXJAR_API_TOKEN", "tj_test");
+  vi.stubEnv("TAX_FROM_STATE", "KY");
+  vi.stubEnv("TAX_FROM_ZIP", "40202");
   for (const [key, value] of Object.entries(overrides)) {
     vi.stubEnv(key, value);
   }
@@ -110,6 +114,13 @@ describe("productionReadiness", () => {
       expect(typed.message).toBe(publicCheckoutUnavailableMessage);
       expect(typed.issues.some((i) => i.key === "BANKFUL_PASSWORD")).toBe(true);
     }
+  });
+
+  it("fails closed when tax provider is mock in production", () => {
+    stubProductionEnv({ TAX_PROVIDER: "mock" });
+    const result = assessProductionConfig();
+    expect(result.ok).toBe(false);
+    expect(result.issues.some((i) => i.key === "TAX_PROVIDER")).toBe(true);
   });
 
   it("warns when STATUS lookup is unset but does not block checkout", () => {

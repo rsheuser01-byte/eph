@@ -140,6 +140,27 @@ export function assessProductionConfig(
     issues,
   );
 
+  const taxProvider = env("TAX_PROVIDER").toLowerCase() || "mock";
+  if (taxProvider !== "taxjar") {
+    issues.push({
+      key: "TAX_PROVIDER",
+      message:
+        "Production checkout requires TAX_PROVIDER=taxjar (mock tax is disabled).",
+      severity: "error",
+    });
+  }
+  requireNonEmpty("TAXJAR_API_TOKEN", "TaxJar API token is required.", issues);
+  requireNonEmpty(
+    "TAX_FROM_STATE",
+    "Warehouse/nexus state (TAX_FROM_STATE) is required for TaxJar.",
+    issues,
+  );
+  requireNonEmpty(
+    "TAX_FROM_ZIP",
+    "Warehouse/nexus ZIP (TAX_FROM_ZIP) is required for TaxJar.",
+    issues,
+  );
+
   if (!env("BANKFUL_STATUS_TRANSACTION_TYPE")) {
     issues.push({
       key: "BANKFUL_STATUS_TRANSACTION_TYPE",

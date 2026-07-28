@@ -30,6 +30,8 @@ export type OrderRecord = {
   items: OrderItem[];
   subtotal: number;
   shipping: number;
+  /** Sales tax collected at checkout (server-quoted). */
+  tax: number;
   total: number;
   currency: string;
   customer: BillingInfo;
@@ -44,6 +46,9 @@ export type OrderRecord = {
   shippedAt?: string;
   fulfilledAt?: string;
   fulfillmentNotes?: string;
+  taxProvider?: string;
+  taxQuoteId?: string;
+  taxJurisdiction?: string;
 };
 
 export type OrderStatusUpdate = {
@@ -71,11 +76,12 @@ export interface OrderStore {
 export function approvedOrderDefaults(
   partial: Omit<
     OrderRecord,
-    "paymentStatus" | "fulfillmentStatus" | "refundedAmount" | "status"
+    "paymentStatus" | "fulfillmentStatus" | "refundedAmount" | "status" | "tax"
   > & {
     paymentStatus?: PaymentStatus;
     fulfillmentStatus?: FulfillmentStatus;
     refundedAmount?: number;
+    tax?: number;
     status?: OrderRecord["status"];
   },
 ): OrderRecord {
@@ -86,5 +92,6 @@ export function approvedOrderDefaults(
     paymentStatus,
     fulfillmentStatus: partial.fulfillmentStatus ?? "unfulfilled",
     refundedAmount: partial.refundedAmount ?? 0,
+    tax: partial.tax ?? 0,
   };
 }

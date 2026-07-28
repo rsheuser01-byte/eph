@@ -26,6 +26,7 @@ function emailData(order: OrderRecord) {
     items: order.items,
     subtotal: order.subtotal,
     shipping: order.shipping,
+    tax: order.tax,
     total: order.total,
     customer: order.customer,
     siteName: site.name,

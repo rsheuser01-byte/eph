@@ -14,6 +14,7 @@ export type OrderBuildResult =
       items: OrderItem[];
       subtotal: number;
       shipping: number;
+      /** Pre-tax merchandise + shipping (tax quoted separately). */
       total: number;
     }
   | { ok: false; error: string };

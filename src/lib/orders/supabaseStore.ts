@@ -17,6 +17,7 @@ type OrderRow = {
   fulfillment_status: FulfillmentStatus;
   subtotal: number | string;
   shipping: number | string;
+  tax: number | string | null;
   total: number | string;
   currency: string;
   customer: BillingInfo;
@@ -29,6 +30,9 @@ type OrderRow = {
   shipped_at: string | null;
   fulfilled_at: string | null;
   fulfillment_notes: string | null;
+  tax_provider: string | null;
+  tax_quote_id: string | null;
+  tax_jurisdiction: string | null;
 };
 
 type OrderItemRow = {
@@ -56,6 +60,7 @@ function mapRow(row: OrderRow, items: OrderItem[]): OrderRecord {
     items,
     subtotal: asNumber(row.subtotal),
     shipping: asNumber(row.shipping),
+    tax: asNumber(row.tax ?? 0),
     total: asNumber(row.total),
     currency: row.currency,
     customer: row.customer,
@@ -68,6 +73,9 @@ function mapRow(row: OrderRow, items: OrderItem[]): OrderRecord {
     shippedAt: row.shipped_at ?? undefined,
     fulfilledAt: row.fulfilled_at ?? undefined,
     fulfillmentNotes: row.fulfillment_notes ?? undefined,
+    taxProvider: row.tax_provider ?? undefined,
+    taxQuoteId: row.tax_quote_id ?? undefined,
+    taxJurisdiction: row.tax_jurisdiction ?? undefined,
   };
 }
 
@@ -98,6 +106,7 @@ export function createSupabaseOrderStore(
           fulfillment_status: record.fulfillmentStatus,
           subtotal: record.subtotal,
           shipping: record.shipping,
+          tax: record.tax,
           total: record.total,
           currency: record.currency,
           customer: record.customer,
@@ -110,6 +119,9 @@ export function createSupabaseOrderStore(
           shipped_at: record.shippedAt ?? null,
           fulfilled_at: record.fulfilledAt ?? null,
           fulfillment_notes: record.fulfillmentNotes ?? null,
+          tax_provider: record.taxProvider ?? null,
+          tax_quote_id: record.taxQuoteId ?? null,
+          tax_jurisdiction: record.taxJurisdiction ?? null,
         },
         { onConflict: "id" },
       );

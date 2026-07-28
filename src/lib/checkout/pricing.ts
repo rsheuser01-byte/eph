@@ -8,13 +8,27 @@ export function shippingFor(subtotal: number): number {
   return subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : FLAT_SHIPPING;
 }
 
-export function orderTotals(subtotal: number): {
+export function roundMoney(amount: number): number {
+  return Math.round(amount * 100) / 100;
+}
+
+export function orderTotals(
+  subtotal: number,
+  tax = 0,
+): {
   subtotal: number;
   shipping: number;
+  tax: number;
   total: number;
 } {
   const shipping = shippingFor(subtotal);
-  return { subtotal, shipping, total: subtotal + shipping };
+  const taxAmount = roundMoney(tax);
+  return {
+    subtotal,
+    shipping,
+    tax: taxAmount,
+    total: roundMoney(subtotal + shipping + taxAmount),
+  };
 }
 
 export function formatUSD(amount: number): string {

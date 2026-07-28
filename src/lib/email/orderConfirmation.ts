@@ -7,6 +7,7 @@ export type OrderEmailData = {
   items: OrderItem[];
   subtotal: number;
   shipping: number;
+  tax?: number;
   total: number;
   customer: BillingInfo;
   siteName: string;
@@ -61,6 +62,7 @@ function addressText(customer: BillingInfo): string {
 }
 
 function totalsHtml(data: OrderEmailData): string {
+  const tax = data.tax ?? 0;
   return `
     <table style="width:100%;border-top:1px solid #ddd;margin-top:12px;">
       <tr><td style="padding:4px 0;">Subtotal</td><td style="padding:4px 0;text-align:right;">${formatUSD(
@@ -68,6 +70,9 @@ function totalsHtml(data: OrderEmailData): string {
       )}</td></tr>
       <tr><td style="padding:4px 0;">Shipping</td><td style="padding:4px 0;text-align:right;">${shippingLabel(
         data.shipping,
+      )}</td></tr>
+      <tr><td style="padding:4px 0;">Tax</td><td style="padding:4px 0;text-align:right;">${formatUSD(
+        tax,
       )}</td></tr>
       <tr><td style="padding:8px 0;font-weight:bold;">Total</td><td style="padding:8px 0;text-align:right;font-weight:bold;">${formatUSD(
         data.total,
@@ -106,6 +111,7 @@ function baseText(heading: string, intro: string, data: OrderEmailData): string 
     "",
     `Subtotal: ${formatUSD(data.subtotal)}`,
     `Shipping: ${shippingLabel(data.shipping)}`,
+    `Tax: ${formatUSD(data.tax ?? 0)}`,
     `Total: ${formatUSD(data.total)}`,
     "",
     "Ship to:",

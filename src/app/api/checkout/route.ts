@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildOrder } from "@/lib/checkout/order";
+import { orderTotals } from "@/lib/checkout/pricing";
 import {
   approvedOrderDefaults,
   getOrderStore,
@@ -24,6 +25,7 @@ import {
 } from "@/lib/config/productionReadiness";
 import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
 import { generateLookupToken } from "@/lib/orders/publicStatus";
+import { TaxCalculationError, quoteTax } from "@/lib/tax";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -120,6 +122,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
+  // Client-supplied tax is ignored — always recompute server-side.
   const order = buildOrder(body.items);
   if (!order.ok) {
     return NextResponse.json({ error: order.error }, { status: 400 });
@@ -133,6 +136,34 @@ export async function POST(request: Request) {
     );
   }
 
+  let taxQuote;
+  try {
+    taxQuote = await quoteTax({
+      customer: {
+        country: billing.country,
+        state: billing.state,
+        city: billing.city,
+        zip: billing.zip,
+        address1: billing.address1,
+      },
+      items: order.items.map((item) => ({
+        sku: item.sku,
+        quantity: item.qty,
+        unitPrice: item.unitPrice,
+      })),
+      shipping: order.shipping,
+    });
+  } catch (error) {
+    if (error instanceof TaxCalculationError) {
+      return NextResponse.json(
+        { error: "Unable to calculate sales tax. Please try again." },
+        { status: 503 },
+      );
+    }
+    throw error;
+  }
+
+  const totals = orderTotals(order.subtotal, taxQuote.amount);
   const orderId = generateOrderId();
   const lookupToken = generateLookupToken();
   const provider = getPaymentProvider();
@@ -153,7 +184,6 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Persist pending order first so reservation metadata has an order row.
     await persistOrder(
       approvedOrderDefaults({
         orderId,
@@ -161,13 +191,17 @@ export async function POST(request: Request) {
         provider: provider.name,
         paymentStatus: "pending",
         items: order.items,
-        subtotal: order.subtotal,
-        shipping: order.shipping,
-        total: order.total,
+        subtotal: totals.subtotal,
+        shipping: totals.shipping,
+        tax: totals.tax,
+        total: totals.total,
         currency: "USD",
         customer: billing,
         reservationExpiresAt: expiresAt.toISOString(),
         lookupToken,
+        taxProvider: taxQuote.provider,
+        taxQuoteId: taxQuote.quoteId,
+        taxJurisdiction: taxQuote.jurisdiction,
       }),
     );
 
@@ -182,7 +216,7 @@ export async function POST(request: Request) {
 
     const outcome = await provider.beginCheckout({
       orderId,
-      amount: order.total,
+      amount: totals.total,
       currency: "USD",
       billing,
       card,
@@ -249,7 +283,8 @@ export async function POST(request: Request) {
       orderId: outcome.orderId,
       transactionId: outcome.transactionId,
       lookupToken,
-      total: order.total,
+      total: totals.total,
+      tax: totals.tax,
     });
   } catch (error) {
     if (reserved) {

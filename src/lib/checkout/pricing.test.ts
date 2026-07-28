@@ -24,7 +24,18 @@ describe("shippingFor", () => {
 describe("orderTotals", () => {
   it("adds shipping to the subtotal", () => {
     const totals = orderTotals(50);
-    expect(totals).toEqual({ subtotal: 50, shipping: FLAT_SHIPPING, total: 62 });
+    expect(totals).toEqual({
+      subtotal: 50,
+      shipping: FLAT_SHIPPING,
+      tax: 0,
+      total: 62,
+    });
+  });
+
+  it("includes tax in the charged total", () => {
+    const totals = orderTotals(50, 3.5);
+    expect(totals.tax).toBe(3.5);
+    expect(totals.total).toBe(65.5);
   });
 
   it("keeps totals equal to subtotal when shipping is free", () => {

@@ -71,6 +71,7 @@ export default async function AdminOrdersPage() {
                     {order.refundedAmount > 0
                       ? ` · Refunded ${formatUSD(order.refundedAmount)}`
                       : ""}
+                    {order.tax > 0 ? ` · Tax ${formatUSD(order.tax)}` : ""}
                   </p>
                 </div>
                 <p className="font-display text-lg font-semibold tabular-nums text-ink">

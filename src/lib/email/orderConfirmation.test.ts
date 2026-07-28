@@ -12,6 +12,7 @@ const data: OrderEmailData = {
   ],
   subtotal: 139.98,
   shipping: 12,
+  tax: 0,
   total: 151.98,
   customer: {
     firstName: "Ada",

@@ -19,6 +19,7 @@ function makeOrder(orderId: string, createdAt: string): OrderRecord {
     ],
     subtotal: 69.99,
     shipping: 12,
+    tax: 0,
     total: 81.99,
     currency: "USD",
     customer: {

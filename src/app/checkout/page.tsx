@@ -46,8 +46,7 @@ function CheckoutForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { lines, resolved, subtotal, clear } = useCart();
-  const { shipping, total } = orderTotals(subtotal);
-  const tax = 0;
+  const baseTotals = orderTotals(subtotal);
   const provider = (process.env.NEXT_PUBLIC_PAYMENT_PROVIDER ?? "mock").toLowerCase();
   const requiresCard = provider !== "bankful-hpp" && provider !== "mock-hpp";
   const isHosted = !requiresCard;
@@ -56,6 +55,10 @@ function CheckoutForm() {
   const [researchAck, setResearchAck] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tax, setTax] = useState(0);
+  const [taxLoading, setTaxLoading] = useState(false);
+  const [taxError, setTaxError] = useState<string | null>(null);
+  const displayTotal = orderTotals(subtotal, tax).total;
 
   useEffect(() => {
     const fromQuery = checkoutErrorMessage(searchParams.get("error"));
@@ -63,6 +66,73 @@ function CheckoutForm() {
       setError(fromQuery);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    const addressReady =
+      form.address1.trim() &&
+      form.city.trim() &&
+      form.state.trim() &&
+      form.zip.trim() &&
+      lines.length > 0;
+    if (!addressReady) {
+      setTax(0);
+      setTaxError(null);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = setTimeout(async () => {
+      setTaxLoading(true);
+      setTaxError(null);
+      try {
+        const response = await fetch("/api/checkout/tax", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          signal: controller.signal,
+          body: JSON.stringify({
+            items: lines,
+            customer: {
+              address1: form.address1,
+              city: form.city,
+              state: form.state,
+              zip: form.zip,
+              country: form.country || "US",
+            },
+          }),
+        });
+        const data = (await response.json()) as {
+          tax?: number;
+          error?: string;
+        };
+        if (!response.ok) {
+          setTax(0);
+          setTaxError(data.error ?? "Unable to calculate tax.");
+          return;
+        }
+        setTax(typeof data.tax === "number" ? data.tax : 0);
+      } catch (err) {
+        if ((err as Error).name === "AbortError") {
+          return;
+        }
+        setTax(0);
+        setTaxError("Unable to calculate tax.");
+      } finally {
+        setTaxLoading(false);
+      }
+    }, 400);
+
+    return () => {
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [
+    form.address1,
+    form.city,
+    form.state,
+    form.zip,
+    form.country,
+    lines,
+  ]);
 
   function update(field: keyof typeof initialForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -358,31 +428,41 @@ function CheckoutForm() {
           <div className="mt-2 flex items-center justify-between text-sm text-ink-soft">
             <span>Shipping</span>
             <span className="tabular-nums text-ink">
-              {shipping === 0 ? "Free" : formatUSD(shipping)}
+              {baseTotals.shipping === 0 ? "Free" : formatUSD(baseTotals.shipping)}
             </span>
           </div>
           <div className="mt-2 flex items-center justify-between text-sm text-ink-soft">
             <span>Tax</span>
-            <span className="tabular-nums text-ink">{formatUSD(tax)}</span>
+            <span className="tabular-nums text-ink">
+              {taxLoading ? "…" : formatUSD(tax)}
+            </span>
           </div>
+          {taxError ? (
+            <p className="mt-2 text-[0.7rem] text-red-600">{taxError}</p>
+          ) : (
+            <p className="mt-2 text-[0.7rem] text-ink-soft/80">
+              Tax is calculated from your shipping address and confirmed at
+              payment.
+            </p>
+          )}
           <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
             <span className="font-display text-lg font-semibold text-ink">
               Total
             </span>
             <span className="font-display text-lg font-semibold tabular-nums text-ink">
-              {formatUSD(total + tax)}
+              {formatUSD(displayTotal)}
             </span>
           </div>
           <button
             type="submit"
-            disabled={submitting || !researchAck}
+            disabled={submitting || !researchAck || Boolean(taxError)}
             className="btn btn-primary btn-arrow mt-7 w-full disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting
               ? "Processing…"
               : isHosted
                 ? "Continue to secure payment"
-                : `Pay ${formatUSD(total + tax)}`}
+                : `Pay ${formatUSD(displayTotal)}`}
           </button>
           {isHosted ? (
             <p className="mt-4 text-[0.7rem] leading-relaxed text-ink-soft/80">

@@ -22,7 +22,8 @@ Ordered roughly by priority.
       (search the file for `PLACEHOLDER`).
 - [ ] Confirm real shipping rates (currently flat $12, free at $150) and whether
       international shipping is offered.
-- [ ] Sales tax handling (none today).
+- [x] Sales tax via TaxJar adapter (`TAX_PROVIDER=taxjar`); mock only for local.
+      Still need TaxJar account, nexus config, and advisor sign-off.
 - [x] Inventory / stock status per variant (Supabase `inventory` + admin UI).
 - [x] Inventory **reservations** for HPP pending checkouts (commit/release/expire).
 

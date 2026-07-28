@@ -57,6 +57,20 @@ EMAIL_FROM="Elevate Precision Health <[email protected]>"
 # Optional override for store/ops alerts (defaults to site contact email)
 STORE_NOTIFICATION_EMAIL=
 
+# Sales tax: "mock" (local only, $0) or "taxjar" (required in production)
+TAX_PROVIDER=mock
+TAXJAR_API_TOKEN=
+# Optional TaxJar base URL (default https://api.taxjar.com)
+# TAXJAR_API_URL=https://api.taxjar.com
+# Warehouse / nexus origin address for TaxJar quotes
+TAX_FROM_COUNTRY=US
+TAX_FROM_STATE=
+TAX_FROM_ZIP=
+TAX_FROM_CITY=
+TAX_FROM_STREET=
+# Optional default product tax code (omit = fully taxable per TaxJar)
+# TAX_PRODUCT_TAX_CODE=
+
 # Orders: "file" (local JSON) or "supabase" (production)
 ORDER_STORE=file
 
@@ -97,6 +111,7 @@ In `NODE_ENV=production` (or `VERCEL_ENV=production`), checkout returns **503** 
 - Bankful credentials + `NEXT_PUBLIC_SITE_URL`
 - Supabase URL + service role + `ORDER_STORE=supabase`
 - Resend email config
+- TaxJar (`TAX_PROVIDER=taxjar`, token, origin state/ZIP)
 - Admin + `CRON_SECRET`
 
 Customers never see which variable is missing (logged server-side only).
@@ -119,6 +134,14 @@ Probes:
 - Success URL alone never proves payment. `/checkout/success` loads status from the database using `order` + opaque `token`.
 - Pending payments poll `GET /api/orders/[orderId]/status?token=…`.
 - Hosted checkout CTA: **Continue to secure payment**. Failed/cancelled Bankful returns keep the cart and explain no charge was confirmed.
+
+### Sales tax
+
+- Server quotes tax via TaxJar (`TAX_PROVIDER=taxjar`) using the shipping address; client-supplied tax is ignored.
+- Checkout UI calls `POST /api/checkout/tax` for a live estimate; final charge uses a fresh quote at `POST /api/checkout`.
+- Orders persist `tax`, `tax_provider`, and jurisdiction summary. Bankful amount = subtotal + shipping + tax.
+- Tax failures return a safe 503 — never silently charge $0 tax in production.
+- Configure nexus/product tax codes with a tax advisor; optional `TAX_PRODUCT_TAX_CODE` applies a default TaxJar product code.
 
 ### Payments
 

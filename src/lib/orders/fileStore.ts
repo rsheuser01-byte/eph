@@ -15,6 +15,7 @@ function normalize(record: OrderRecord): OrderRecord {
     paymentStatus,
     fulfillmentStatus: record.fulfillmentStatus ?? "unfulfilled",
     refundedAmount: record.refundedAmount ?? 0,
+    tax: record.tax ?? 0,
     status: paymentStatus,
   };
 }

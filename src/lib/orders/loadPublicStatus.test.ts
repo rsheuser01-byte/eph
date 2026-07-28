@@ -12,6 +12,7 @@ const order: OrderRecord = {
   items: [],
   subtotal: 10,
   shipping: 0,
+  tax: 0,
   total: 10,
   currency: "USD",
   customer: {
