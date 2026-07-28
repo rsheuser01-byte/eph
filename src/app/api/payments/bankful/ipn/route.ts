@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { getOrderStore } from "@/lib/orders";
 import { getPaymentEventStore } from "@/lib/payments/paymentEvents";
 import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
+import {
+  RATE_LIMITS,
+  checkRateLimit,
+  clientIpFromRequest,
+  tooManyRequestsResponse,
+} from "@/lib/security/rateLimit";
 import { logIpnSecurityEvent, processBankfulIpn } from "./processIpn";
 
 export const runtime = "nodejs";
@@ -15,6 +21,15 @@ export const dynamic = "force-dynamic";
  * via payment_events. Paid-order emails are enqueued on the durable outbox.
  */
 export async function POST(request: Request) {
+  const limited = await checkRateLimit(
+    "bankfulIpn",
+    `ip:${clientIpFromRequest(request)}`,
+    RATE_LIMITS.bankfulIpn,
+  );
+  if (!limited.allowed) {
+    return tooManyRequestsResponse();
+  }
+
   const contentType = request.headers.get("content-type") ?? "";
   let fields: Record<string, string> = {};
 
