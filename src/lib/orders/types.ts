@@ -31,6 +31,8 @@ export type OrderRecord = {
   refundedAmount: number;
   /** When inventory reservation for this checkout expires. */
   reservationExpiresAt?: string;
+  /** Opaque customer-facing token for status lookup (not a secret credential). */
+  lookupToken?: string;
 };
 
 export type OrderStatusUpdate = {

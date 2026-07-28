@@ -23,6 +23,7 @@ import {
   publicCheckoutUnavailableMessage,
 } from "@/lib/config/productionReadiness";
 import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
+import { generateLookupToken } from "@/lib/orders/publicStatus";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -133,6 +134,7 @@ export async function POST(request: Request) {
   }
 
   const orderId = generateOrderId();
+  const lookupToken = generateLookupToken();
   const provider = getPaymentProvider();
   const stockItems = stockItemsFromOrder(order.items);
   let reserved = false;
@@ -165,6 +167,7 @@ export async function POST(request: Request) {
         currency: "USD",
         customer: billing,
         reservationExpiresAt: expiresAt.toISOString(),
+        lookupToken,
       }),
     );
 
@@ -184,10 +187,15 @@ export async function POST(request: Request) {
       billing,
       card,
       items: order.items,
+      lookupToken,
     });
 
     if (outcome.kind === "redirect") {
-      return NextResponse.json({ redirectUrl: outcome.url, orderId });
+      return NextResponse.json({
+        redirectUrl: outcome.url,
+        orderId,
+        lookupToken,
+      });
     }
 
     const store = getOrderStore();
@@ -240,6 +248,7 @@ export async function POST(request: Request) {
       status: "approved",
       orderId: outcome.orderId,
       transactionId: outcome.transactionId,
+      lookupToken,
       total: order.total,
     });
   } catch (error) {

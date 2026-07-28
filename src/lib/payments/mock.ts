@@ -46,9 +46,13 @@ export function createMockHppProvider(): PaymentProvider {
       const base =
         process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ??
         "http://localhost:3000";
+      const params = new URLSearchParams({ order: input.orderId });
+      if (input.lookupToken) {
+        params.set("token", input.lookupToken);
+      }
       return {
         kind: "redirect",
-        url: `${base}/api/payments/mock-hpp/complete?order=${encodeURIComponent(input.orderId)}`,
+        url: `${base}/api/payments/mock-hpp/complete?${params.toString()}`,
       };
     },
     async refund(input: RefundInput): Promise<RefundOutcome> {

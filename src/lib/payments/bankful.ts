@@ -170,6 +170,22 @@ function siteBaseUrl(): string {
   );
 }
 
+function successReturnUrl(
+  base: string,
+  orderId: string,
+  lookupToken: string | undefined,
+  pending = false,
+): string {
+  const params = new URLSearchParams({ order: orderId });
+  if (lookupToken) {
+    params.set("token", lookupToken);
+  }
+  if (pending) {
+    params.set("pending", "1");
+  }
+  return `${base}/checkout/success?${params.toString()}`;
+}
+
 export type BankfulTransactionVerification = {
   verified: boolean;
   status: BankfulCallbackStatus;
@@ -311,10 +327,15 @@ export function createBankfulHppProvider(): PaymentProvider {
         bill_addr_zip: input.billing.zip,
         bill_addr_country: input.billing.country,
         xtl_order_id: input.orderId,
-        url_complete: `${base}/checkout/success?order=${encodeURIComponent(input.orderId)}`,
+        url_complete: successReturnUrl(base, input.orderId, input.lookupToken),
         url_failed: `${base}/checkout?error=payment_failed`,
         url_cancel: `${base}/checkout?error=payment_cancelled`,
-        url_pending: `${base}/checkout/success?order=${encodeURIComponent(input.orderId)}&pending=1`,
+        url_pending: successReturnUrl(
+          base,
+          input.orderId,
+          input.lookupToken,
+          true,
+        ),
         url_callback: `${base}/api/payments/bankful/ipn`,
         return_redirect_url: "Y",
       };

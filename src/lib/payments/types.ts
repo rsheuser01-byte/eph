@@ -34,6 +34,8 @@ export type ChargeInput = {
   /** Optional for HPP providers that collect cards off-site. */
   card?: CardInput;
   items: OrderItem[];
+  /** Opaque token included in HPP return URLs for status lookup. */
+  lookupToken?: string;
 };
 
 export type RefundInput = {

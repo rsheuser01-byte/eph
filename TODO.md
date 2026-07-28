@@ -40,8 +40,11 @@ Ordered roughly by priority.
 - [ ] Receive real starting stock via `/admin/inventory` (seeded at 0).
 
 ## Trust / compliance
+- [x] Checkout success uses DB status + opaque `lookup_token` (not URL alone);
+      hosted CTA “Continue to secure payment”; cancel/fail keeps cart.
 - [ ] Keep "Research Use Only" disclaimers on every product + checkout page
-      (required by high-risk underwriting).
+      (required by high-risk underwriting). Server-side ack on `/api/checkout`
+      still optional follow-up.
 - [ ] Review refund/terms/privacy pages against the live payment flow.
 
 ## Infra / QA

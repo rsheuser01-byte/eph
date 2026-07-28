@@ -110,6 +110,12 @@ Probes:
 - `GET/POST /api/cron/process-outbox` (Bearer `CRON_SECRET`) sends customer + store emails with idempotent `email_deliveries` keys and retries with backoff.
 - After max attempts, the event is marked `failed` and the store receives an alert email.
 
+### Checkout status UX
+
+- Success URL alone never proves payment. `/checkout/success` loads status from the database using `order` + opaque `token`.
+- Pending payments poll `GET /api/orders/[orderId]/status?token=…`.
+- Hosted checkout CTA: **Continue to secure payment**. Failed/cancelled Bankful returns keep the cart and explain no charge was confirmed.
+
 ### Payments
 
 - `mock` / `bankful`: on-site card capture (PCI SAQ D for live Bankful direct).

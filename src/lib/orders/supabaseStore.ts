@@ -22,6 +22,7 @@ type OrderRow = {
   customer: BillingInfo;
   refunded_amount: number | string;
   reservation_expires_at: string | null;
+  lookup_token: string | null;
 };
 
 type OrderItemRow = {
@@ -54,6 +55,7 @@ function mapRow(row: OrderRow, items: OrderItem[]): OrderRecord {
     customer: row.customer,
     refundedAmount: asNumber(row.refunded_amount),
     reservationExpiresAt: row.reservation_expires_at ?? undefined,
+    lookupToken: row.lookup_token ?? undefined,
   };
 }
 
@@ -89,6 +91,7 @@ export function createSupabaseOrderStore(
           customer: record.customer,
           refunded_amount: record.refundedAmount,
           reservation_expires_at: record.reservationExpiresAt ?? null,
+          lookup_token: record.lookupToken ?? null,
         },
         { onConflict: "id" },
       );

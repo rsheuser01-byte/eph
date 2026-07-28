@@ -14,6 +14,7 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const orderId = url.searchParams.get("order") ?? "";
+  const token = url.searchParams.get("token") ?? "";
   if (!orderId) {
     return NextResponse.redirect(new URL("/checkout?error=missing_order", url.origin));
   }
@@ -46,7 +47,12 @@ export async function GET(request: Request) {
     }
   }
 
+  const params = new URLSearchParams({ order: orderId });
+  const lookup = token || existing.lookupToken || "";
+  if (lookup) {
+    params.set("token", lookup);
+  }
   return NextResponse.redirect(
-    new URL(`/checkout/success?order=${encodeURIComponent(orderId)}`, url.origin),
+    new URL(`/checkout/success?${params.toString()}`, url.origin),
   );
 }

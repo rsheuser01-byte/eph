@@ -6,7 +6,8 @@ Scope: repository map before Phase 1 (Bankful callback authentication and reconc
 **Phase 1 status: complete**  
 **Phase 2 status: complete**  
 **Phase 3 status: complete**  
-**Phase 4 status: complete** (durable `order.paid` outbox + process-outbox cron). Next: Phase 5 (checkout/success UX).
+**Phase 4 status: complete**  
+**Phase 5 status: complete** (DB-backed success status + lookup token polling). Next: Phase 6 (email/fulfillment polish).
 
 ## Existing relevant files
 

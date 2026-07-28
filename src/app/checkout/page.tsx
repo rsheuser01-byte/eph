@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 import { useCart } from "@/lib/cart/CartContext";
 import { formatUSD, orderTotals } from "@/lib/checkout/pricing";
 
@@ -26,16 +26,43 @@ const initialForm = {
   cvv: "",
 };
 
-export default function CheckoutPage() {
+function checkoutErrorMessage(code: string | null): string | null {
+  switch (code) {
+    case "payment_failed":
+      return "Payment was not completed. No confirmed charge was recorded. Your cart is still available — you can try again.";
+    case "payment_cancelled":
+      return "Payment was cancelled. No confirmed charge was recorded. Your cart is still available — you can try again.";
+    case "missing_order":
+    case "unknown_order":
+      return "We could not find that checkout session. Please try again.";
+    case "inventory_commit_failed":
+      return "Payment may have succeeded but inventory needs review. Contact support with your order details.";
+    default:
+      return code ? "Checkout could not continue. Please try again." : null;
+  }
+}
+
+function CheckoutForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { lines, resolved, subtotal, clear } = useCart();
   const { shipping, total } = orderTotals(subtotal);
+  const tax = 0;
   const provider = (process.env.NEXT_PUBLIC_PAYMENT_PROVIDER ?? "mock").toLowerCase();
   const requiresCard = provider !== "bankful-hpp" && provider !== "mock-hpp";
+  const isHosted = !requiresCard;
 
   const [form, setForm] = useState(initialForm);
+  const [researchAck, setResearchAck] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fromQuery = checkoutErrorMessage(searchParams.get("error"));
+    if (fromQuery) {
+      setError(fromQuery);
+    }
+  }, [searchParams]);
 
   function update(field: keyof typeof initialForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -43,6 +70,12 @@ export default function CheckoutPage() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!researchAck) {
+      setError(
+        "Please confirm research-use-only acknowledgment before continuing.",
+      );
+      return;
+    }
     setSubmitting(true);
     setError(null);
 
@@ -80,11 +113,13 @@ export default function CheckoutPage() {
       const data = (await response.json()) as {
         status?: string;
         orderId?: string;
+        lookupToken?: string;
         redirectUrl?: string;
         error?: string;
       };
 
       if (data.redirectUrl) {
+        // Keep cart until payment is confirmed on the success page.
         window.location.href = data.redirectUrl;
         return;
       }
@@ -95,7 +130,13 @@ export default function CheckoutPage() {
       }
 
       clear();
-      router.push(`/checkout/success?order=${encodeURIComponent(data.orderId ?? "")}`);
+      const params = new URLSearchParams({
+        order: data.orderId ?? "",
+      });
+      if (data.lookupToken) {
+        params.set("token", data.lookupToken);
+      }
+      router.push(`/checkout/success?${params.toString()}`);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -263,14 +304,28 @@ export default function CheckoutPage() {
           ) : (
             <section>
               <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
-                Payment
+                Secure payment
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-ink-soft">
-                You will enter card details on the secure Bankful hosted payment
-                page after you continue.
+                Payment opens in a secure Bankful hosted page. Card details are
+                entered there — not on this site.
               </p>
             </section>
           )}
+
+          <label className="flex items-start gap-3 text-sm leading-relaxed text-ink-soft">
+            <input
+              type="checkbox"
+              className="mt-1"
+              checked={researchAck}
+              onChange={(e) => setResearchAck(e.target.checked)}
+              required
+            />
+            <span>
+              I confirm this purchase is for research use only by a qualified
+              researcher for laboratory use, not for human or veterinary use.
+            </span>
+          </label>
 
           {error ? (
             <p className="border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
@@ -306,31 +361,56 @@ export default function CheckoutPage() {
               {shipping === 0 ? "Free" : formatUSD(shipping)}
             </span>
           </div>
+          <div className="mt-2 flex items-center justify-between text-sm text-ink-soft">
+            <span>Tax</span>
+            <span className="tabular-nums text-ink">{formatUSD(tax)}</span>
+          </div>
           <div className="mt-4 flex items-center justify-between border-t border-line pt-4">
             <span className="font-display text-lg font-semibold text-ink">
               Total
             </span>
             <span className="font-display text-lg font-semibold tabular-nums text-ink">
-              {formatUSD(total)}
+              {formatUSD(total + tax)}
             </span>
           </div>
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submitting || !researchAck}
             className="btn btn-primary btn-arrow mt-7 w-full disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting
               ? "Processing…"
-              : requiresCard
-                ? `Pay ${formatUSD(total)}`
-                : `Continue to payment · ${formatUSD(total)}`}
+              : isHosted
+                ? "Continue to secure payment"
+                : `Pay ${formatUSD(total + tax)}`}
           </button>
-          <p className="mt-4 text-[0.7rem] leading-relaxed text-ink-soft/80">
-            Research use only. By ordering you confirm you are a qualified
-            researcher purchasing for laboratory use.
-          </p>
+          {isHosted ? (
+            <p className="mt-4 text-[0.7rem] leading-relaxed text-ink-soft/80">
+              You will complete payment on Bankful’s secure page, then return
+              here for order status.
+            </p>
+          ) : (
+            <p className="mt-4 text-[0.7rem] leading-relaxed text-ink-soft/80">
+              Research use only. By ordering you confirm you are a qualified
+              researcher purchasing for laboratory use.
+            </p>
+          )}
         </aside>
       </form>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="site-shell py-20">
+          <p className="text-sm text-ink-soft">Loading checkout…</p>
+        </div>
+      }
+    >
+      <CheckoutForm />
+    </Suspense>
   );
 }
