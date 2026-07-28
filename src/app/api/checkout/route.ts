@@ -24,6 +24,11 @@ import {
   releaseReservations,
   reservationExpiresAt,
 } from "@/lib/inventory/reservations";
+import {
+  ProductionConfigurationError,
+  assertProductionCheckoutReady,
+  publicCheckoutUnavailableMessage,
+} from "@/lib/config/productionReadiness";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -111,6 +116,18 @@ async function persistOrder(record: OrderRecord): Promise<void> {
 }
 
 export async function POST(request: Request) {
+  try {
+    assertProductionCheckoutReady();
+  } catch (error) {
+    if (error instanceof ProductionConfigurationError) {
+      return NextResponse.json(
+        { error: publicCheckoutUnavailableMessage },
+        { status: 503 },
+      );
+    }
+    throw error;
+  }
+
   let body: Record<string, unknown>;
   try {
     body = (await request.json()) as Record<string, unknown>;

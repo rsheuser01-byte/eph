@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { isInventoryEnabled, type StockItem } from "./index";
+import { assertInventoryConfigured } from "@/lib/config/productionReadiness";
 
 export const DEFAULT_RESERVATION_MINUTES = 30;
 
@@ -40,6 +41,7 @@ export async function createReservations(
   expiresAt: Date,
   actor = "checkout",
 ): Promise<void> {
+  assertInventoryConfigured();
   if (!isInventoryEnabled()) {
     return;
   }
@@ -60,6 +62,7 @@ export async function commitReservations(
   orderId: string,
   actor = "checkout",
 ): Promise<void> {
+  assertInventoryConfigured();
   if (!isInventoryEnabled()) {
     return;
   }
@@ -78,6 +81,7 @@ export async function releaseReservations(
   orderId: string,
   actor = "checkout",
 ): Promise<void> {
+  assertInventoryConfigured();
   if (!isInventoryEnabled()) {
     return;
   }
@@ -96,6 +100,7 @@ export async function expireReservations(
   orderId: string,
   actor = "cron",
 ): Promise<void> {
+  assertInventoryConfigured();
   if (!isInventoryEnabled()) {
     return;
   }

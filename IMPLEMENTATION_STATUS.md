@@ -4,7 +4,8 @@ Assessment date: 2026-07-28
 Scope: repository map before Phase 1 (Bankful callback authentication and reconciliation).
 
 **Phase 1 status: complete**  
-**Phase 2 status: complete** (reservation lifecycle + expire cron). Next: Phase 3 (fail-closed production config).
+**Phase 2 status: complete**  
+**Phase 3 status: complete** (fail-closed production config + health/readiness). Next: Phase 4 (durable outbox).
 
 ## Existing relevant files
 

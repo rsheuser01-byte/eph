@@ -73,6 +73,9 @@ LOW_STOCK_THRESHOLD=5
 CHECKOUT_RESERVATION_MINUTES=30
 # Protects /api/cron/expire-reservations (Authorization: Bearer …)
 CRON_SECRET=
+# Optional dedicated secret for detailed /api/readiness diagnostics
+# (falls back to CRON_SECRET when unset)
+READINESS_SECRET=
 ```
 
 ### Orders & inventory
@@ -83,6 +86,23 @@ CRON_SECRET=
 - Admin: `/admin/login` → `/admin/orders` (fulfill / refund) and `/admin/inventory` (receive / adjust).
 - Inventory: checkout creates **active reservations** (does not decrement on-hand until payment is verified). Available qty = on hand − active reservations. Call `/api/cron/expire-reservations` with `CRON_SECRET` to expire abandoned HPP checkouts.
 - Legacy RPCs `reserve_stock` / `release_stock` remain for compatibility; new flow uses `create_inventory_reservations` / `commit_inventory_reservations` / `release_inventory_reservations`.
+
+### Production fail-closed
+
+In `NODE_ENV=production` (or `VERCEL_ENV=production`), checkout returns **503** unless:
+
+- `PAYMENT_PROVIDER=bankful-hpp` (mock / direct card capture blocked)
+- Bankful credentials + `NEXT_PUBLIC_SITE_URL`
+- Supabase URL + service role + `ORDER_STORE=supabase`
+- Resend email config
+- Admin + `CRON_SECRET`
+
+Customers never see which variable is missing (logged server-side only).
+
+Probes:
+
+- `GET /api/health` — liveness
+- `GET /api/readiness` — `{ ready }` public; detailed `checks` with `Authorization: Bearer READINESS_SECRET` (or `CRON_SECRET`)
 
 ### Payments
 

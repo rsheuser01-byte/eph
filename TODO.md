@@ -46,6 +46,8 @@ Ordered roughly by priority.
 ## Infra / QA
 - [ ] Set all env vars in Vercel (payment + email + Supabase + admin) for
       preview and production. Set `ORDER_STORE=supabase` in production.
+- [x] Production checkout fail-closed when required deps are missing
+      (`src/lib/config/productionReadiness.ts`, `/api/health`, `/api/readiness`).
 - [ ] Create `web/.env.example` manually (blocked by the local env-file guard;
       variables are documented in `README.md`).
 - [ ] E2E test (Playwright) for browse → add to cart → checkout → confirmation.
