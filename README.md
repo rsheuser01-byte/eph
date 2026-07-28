@@ -44,6 +44,11 @@ NEXT_PUBLIC_PAYMENT_PROVIDER=mock
 BANKFUL_API_BASE_URL=https://api-dev1.bankfulportal.com
 BANKFUL_USERNAME=
 BANKFUL_PASSWORD=
+# Optional: confirmed STATUS/query transaction_type for server-to-server lookup.
+# Leave empty to reconcile from signature-authenticated HPP callbacks (fail closed
+# if neither STATUS type nor authenticated callback is available).
+# TODO: confirm exact value with Bankful merchant docs before enabling in production.
+# BANKFUL_STATUS_TRANSACTION_TYPE=
 
 # Order confirmation emails: "console" (default) or "resend"
 EMAIL_PROVIDER=console
@@ -77,6 +82,8 @@ LOW_STOCK_THRESHOLD=5
 
 - `mock` / `bankful`: on-site card capture (PCI SAQ D for live Bankful direct).
 - `bankful-hpp` / `mock-hpp`: redirect to hosted payment; IPN at `/api/payments/bankful/ipn`. Prefer HPP for production.
+- IPN callbacks require a valid Bankful HMAC signature (`BANKFUL_PASSWORD`), reconcile amount/currency in integer cents against the stored order, and persist idempotent rows in `payment_events` (or `.data/payment_events.json` when `ORDER_STORE=file`).
+- Forged, unsigned, or amount/currency-mismatched callbacks cannot approve an order.
 - Refunds: admin **Refund** on an approved order calls Bankful `REFUND` (or mock). Restocks when fulfillment is still `unfulfilled`.
 
-See [TODO.md](./TODO.md) for remaining production tasks.
+See [TODO.md](./TODO.md) for remaining production tasks. See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for the hardening phase map.

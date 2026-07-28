@@ -10,6 +10,10 @@ Ordered roughly by priority.
       to `https://api.paybybankful.com` and use live credentials.
 - [x] **Hosted Payment Page (HPP)** provider (`bankful-hpp` / `mock-hpp`) +
       IPN at `/api/payments/bankful/ipn`. Prefer HPP for production (SAQ A).
+- [x] IPN signature verification, amount/currency reconciliation (cents),
+      callback idempotency via `payment_events`, and `review_required` on mismatch.
+- [ ] Confirm Bankful **STATUS/query** `transaction_type` with merchant docs and
+      set `BANKFUL_STATUS_TRANSACTION_TYPE` for full server-to-server lookup.
 - [x] Refunds / cancellations — admin refund action + Bankful `REFUND`/`CANCEL`
       (and mock). Restock when fulfillment is still `unfulfilled`.
 

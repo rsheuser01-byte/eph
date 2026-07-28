@@ -6,7 +6,8 @@ export type PaymentStatus =
   | "declined"
   | "refunded"
   | "partially_refunded"
-  | "cancelled";
+  | "cancelled"
+  | "review_required";
 
 export type FulfillmentStatus = "unfulfilled" | "fulfilled" | "cancelled";
 

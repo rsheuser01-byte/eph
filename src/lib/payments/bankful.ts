@@ -1,5 +1,11 @@
 import { createHmac } from "node:crypto";
 import type {
+  BankfulCallbackStatus,
+  VerifiedBankfulCallback,
+} from "./bankfulCallback";
+import { normalizeBankfulStatus } from "./bankfulCallback";
+import { parseAmountToCents } from "./money";
+import type {
   ChargeInput,
   CheckoutOutcome,
   PaymentProvider,
@@ -144,7 +150,10 @@ export function signBankfulHppPayload(
   password: string,
 ): string {
   const message = Object.keys(fields)
-    .filter((key) => key !== "signature" && fields[key] !== "")
+    .filter(
+      (key) =>
+        key.toLowerCase() !== "signature" && fields[key] !== "",
+    )
     .sort()
     .map((key) => `${key}${fields[key]}`)
     .join("");
@@ -159,6 +168,126 @@ function siteBaseUrl(): string {
   throw new Error(
     "NEXT_PUBLIC_SITE_URL is required for Bankful HPP return/callback URLs.",
   );
+}
+
+export type BankfulTransactionVerification = {
+  verified: boolean;
+  status: BankfulCallbackStatus;
+  amountCents?: number;
+  currency?: string;
+  message?: string;
+};
+
+/**
+ * Server-to-server transaction reconciliation.
+ *
+ * Preferred path: when `BANKFUL_STATUS_TRANSACTION_TYPE` is set, query Bankful's
+ * `/api/transaction/api` with that transaction_type and `request_ref_po_id`.
+ *
+ * TODO(bankful-docs): Confirm the exact STATUS/query transaction_type and
+ * request fields against the merchant's current Bankful documentation. Public
+ * docs cover CAPTURE/REFUND/AUTH/CANCEL/CAUTH but not a status lookup.
+ *
+ * Fallback: when the caller supplies a *signature-authenticated* callback
+ * payload, use those fields (Bankful HPP docs require responses to be signed).
+ * Without STATUS config and without an authenticated callback, fail closed.
+ */
+export async function verifyBankfulTransaction(input: {
+  orderId: string;
+  transactionId: string;
+  authenticatedCallback?: VerifiedBankfulCallback;
+}): Promise<BankfulTransactionVerification> {
+  let config: BankfulConfig;
+  try {
+    config = readConfig();
+  } catch (error) {
+    return {
+      verified: false,
+      status: "unknown",
+      message:
+        error instanceof Error ? error.message : "Bankful is not configured.",
+    };
+  }
+
+  const statusType = process.env.BANKFUL_STATUS_TRANSACTION_TYPE?.trim();
+  if (statusType) {
+    try {
+      const data = await postTransaction(config, {
+        transaction_type: statusType,
+        request_ref_po_id: input.transactionId,
+        amount: "0",
+      });
+
+      const rawStatus = String(data.TRANS_STATUS_NAME ?? "");
+      const status = normalizeBankfulStatus(rawStatus);
+      const externalOrderId = String(
+        data.XTL_ORDER_ID ?? data.xtl_order_id ?? "",
+      );
+      if (externalOrderId && externalOrderId !== input.orderId) {
+        return {
+          verified: false,
+          status,
+          message: "Bankful transaction order id mismatch.",
+        };
+      }
+
+      const amountRaw = String(data.TRANS_VALUE ?? data.amount ?? "");
+      const amountCents = parseAmountToCents(amountRaw);
+      const currency = String(data.TRANS_CUR ?? data.request_currency ?? "")
+        .trim()
+        .toUpperCase();
+
+      if (amountCents === null || !currency) {
+        return {
+          verified: false,
+          status,
+          message: "Bankful status response missing amount or currency.",
+        };
+      }
+
+      return {
+        verified: true,
+        status,
+        amountCents,
+        currency,
+      };
+    } catch (error) {
+      return {
+        verified: false,
+        status: "unknown",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Bankful status lookup failed.",
+      };
+    }
+  }
+
+  if (input.authenticatedCallback) {
+    const cb = input.authenticatedCallback;
+    if (cb.orderId !== input.orderId || cb.transactionId !== input.transactionId) {
+      return {
+        verified: false,
+        status: cb.status,
+        message: "Authenticated callback does not match lookup ids.",
+      };
+    }
+    return {
+      verified: true,
+      status: cb.status,
+      amountCents: cb.amountCents,
+      currency: cb.currency,
+      message:
+        "Reconciled from signature-authenticated HPP callback; configure BANKFUL_STATUS_TRANSACTION_TYPE when Bankful status API is confirmed.",
+    };
+  }
+
+  return {
+    verified: false,
+    status: "unknown",
+    message:
+      "Bankful transaction lookup is not configured (TODO: set BANKFUL_STATUS_TRANSACTION_TYPE after confirming docs).",
+  };
 }
 
 export function createBankfulHppProvider(): PaymentProvider {
