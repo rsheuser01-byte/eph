@@ -108,6 +108,7 @@ READINESS_SECRET=
 - Import local JSON history: `npx tsx scripts/import-orders-json.ts` (with Supabase env set).
 - Admin: `/admin/login` → `/admin/orders` (ship / fulfill / refund / resend emails) and `/admin/inventory` (receive / adjust).
 - Inventory: checkout creates **active reservations** (does not decrement on-hand until payment is verified). Available qty = on hand − active reservations. Call `/api/cron/expire-reservations` with `CRON_SECRET` to expire abandoned HPP checkouts.
+- Vercel Cron: Hobby allows **once per day** only. `vercel.json` schedules expire-reservations at 06:00 UTC and process-outbox at 07:00 UTC. Upgrade to Pro (or trigger the routes manually) for the original every-15m / every-5m cadence.
 - Legacy RPCs `reserve_stock` / `release_stock` remain for compatibility; new flow uses `create_inventory_reservations` / `commit_inventory_reservations` / `release_inventory_reservations`.
 
 ### Production fail-closed
