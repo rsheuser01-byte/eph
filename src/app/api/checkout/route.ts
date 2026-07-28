@@ -26,6 +26,7 @@ import {
 import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
 import { generateLookupToken } from "@/lib/orders/publicStatus";
 import { TaxCalculationError, quoteTax } from "@/lib/tax";
+import { researchUseAckError } from "@/lib/checkout/researchAck";
 import {
   RATE_LIMITS,
   checkRateLimit,
@@ -135,6 +136,11 @@ export async function POST(request: Request) {
     body = (await request.json()) as Record<string, unknown>;
   } catch {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+  }
+
+  const ackError = researchUseAckError(body);
+  if (ackError) {
+    return NextResponse.json({ error: ackError }, { status: 400 });
   }
 
   // Client-supplied tax is ignored — always recompute server-side.

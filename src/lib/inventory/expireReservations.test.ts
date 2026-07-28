@@ -51,13 +51,21 @@ describe("processExpiredReservations", () => {
         async list() {
           return [...orders.values()];
         },
-        async updateStatus(id, patch) {
+        async updateStatus(id, patch): Promise<OrderRecord | null> {
           const current = orders.get(id)!;
-          const next = {
+          const next: OrderRecord = {
             ...current,
-            ...patch,
             status: patch.paymentStatus ?? current.paymentStatus,
             paymentStatus: patch.paymentStatus ?? current.paymentStatus,
+            ...(patch.fulfillmentStatus !== undefined
+              ? { fulfillmentStatus: patch.fulfillmentStatus }
+              : {}),
+            ...(patch.transactionId !== undefined
+              ? { transactionId: patch.transactionId ?? undefined }
+              : {}),
+            ...(patch.refundedAmount !== undefined
+              ? { refundedAmount: patch.refundedAmount }
+              : {}),
           };
           orders.set(id, next);
           return next;
@@ -135,13 +143,21 @@ describe("processExpiredReservations", () => {
         async list() {
           return [];
         },
-        async updateStatus(id, patch) {
+        async updateStatus(id, patch): Promise<OrderRecord | null> {
           const current = orders.get(id)!;
-          const next = {
+          const next: OrderRecord = {
             ...current,
-            ...patch,
-            paymentStatus: patch.paymentStatus ?? current.paymentStatus,
             status: patch.paymentStatus ?? current.paymentStatus,
+            paymentStatus: patch.paymentStatus ?? current.paymentStatus,
+            ...(patch.fulfillmentStatus !== undefined
+              ? { fulfillmentStatus: patch.fulfillmentStatus }
+              : {}),
+            ...(patch.transactionId !== undefined
+              ? { transactionId: patch.transactionId ?? undefined }
+              : {}),
+            ...(patch.refundedAmount !== undefined
+              ? { refundedAmount: patch.refundedAmount }
+              : {}),
           };
           orders.set(id, next);
           return next;

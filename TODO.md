@@ -19,7 +19,7 @@ Ordered roughly by priority.
 
 ## Catalog / pricing
 - [ ] Replace PLACEHOLDER variant prices/sizes in `src/data/products.ts`
-      (search the file for `PLACEHOLDER`).
+      (search the file for `PLACEHOLDER`) — **blocks go-live** (see LAUNCH_READINESS).
 - [ ] Confirm real shipping rates (currently flat $12, free at $150) and whether
       international shipping is offered.
 - [x] Sales tax via TaxJar adapter (`TAX_PROVIDER=taxjar`); mock only for local.
@@ -45,14 +45,15 @@ Ordered roughly by priority.
 ## Trust / compliance
 - [x] Checkout success uses DB status + opaque `lookup_token` (not URL alone);
       hosted CTA “Continue to secure payment”; cancel/fail keeps cart.
-- [ ] Keep "Research Use Only" disclaimers on every product + checkout page
-      (required by high-risk underwriting). Server-side ack on `/api/checkout`
-      still optional follow-up.
+- [x] "Research Use Only" acknowledgment required client-side **and** on
+      `POST /api/checkout` (`researchUseAcknowledged: true`). Keep disclaimers
+      on product pages (underwriting).
 - [ ] Review refund/terms/privacy pages against the live payment flow.
+- [ ] Confirm BAC Water size/price (still marked PLACEHOLDER in `products.ts`).
 
 ## Infra / QA
-- [ ] Set all env vars in Vercel (payment + email + Supabase + admin) for
-      preview and production. Set `ORDER_STORE=supabase` in production.
+- [ ] Set all env vars in Vercel (payment + email + Supabase + admin + TaxJar +
+      Upstash) for preview and production. Set `ORDER_STORE=supabase` in production.
 - [x] Production checkout fail-closed when required deps are missing
       (`src/lib/config/productionReadiness.ts`, `/api/health`, `/api/readiness`).
 - [ ] Create `web/.env.example` manually (blocked by the local env-file guard;
@@ -60,5 +61,7 @@ Ordered roughly by priority.
 - [x] E2E test (Playwright) for browse → add to cart → checkout → confirmation
       (`npm run test:e2e`, mock-hpp).
 - [x] CI: GitHub Actions runs lint, unit tests, build, and Playwright.
+- [x] Phase 10 launch readiness: see [`LAUNCH_READINESS.md`](./LAUNCH_READINESS.md)
+      for CODE vs OPS vs BLOCKED checklist sign-off.
 - [ ] Optional: Supabase Auth + MFA for admin (shared `ADMIN_TOKEN` + audit log
       + Upstash rate limits are already in place).

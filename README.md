@@ -173,4 +173,4 @@ Probes:
 - Forged, unsigned, or amount/currency-mismatched callbacks cannot approve an order.
 - Refunds: admin **Refund** on an approved order calls Bankful `REFUND` (or mock). Restocks when fulfillment is still `unfulfilled`.
 
-See [TODO.md](./TODO.md) for remaining production tasks. See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for the hardening phase map.
+See [TODO.md](./TODO.md) for remaining production tasks. See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for the hardening phase map. See [LAUNCH_READINESS.md](./LAUNCH_READINESS.md) for Phase 10 go-live checklist status (CODE / OPS / BLOCKED) and sign-off.

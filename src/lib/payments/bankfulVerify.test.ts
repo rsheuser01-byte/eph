@@ -48,6 +48,7 @@ describe("verifyBankfulTransaction", () => {
         amountCents: 1999,
         currency: "USD",
         rawStatus: "APPROVED",
+        providerEventId: "bankful:tx_1",
       },
     });
     expect(result.verified).toBe(true);

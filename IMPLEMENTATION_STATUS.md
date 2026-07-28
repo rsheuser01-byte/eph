@@ -11,7 +11,8 @@ Scope: repository map before Phase 1 (Bankful callback authentication and reconc
 **Phase 6 status: complete**  
 **Phase 7 status: complete**  
 **Phase 8 status: complete**  
-**Phase 9 status: complete** (unit/integration gaps, Playwright mock-hpp E2E, GitHub Actions CI). Next: Phase 10 (launch checklist sign-off).
+**Phase 9 status: complete**  
+**Phase 10 status: complete** (launch readiness sign-off doc + research-use server ack + refund route tests). Go-live still requires clearing **BLOCKED**/**OPS** items in `LAUNCH_READINESS.md` (BAC placeholders, Bankful/Resend/TaxJar/stock, live txn).
 
 ## Existing relevant files
 

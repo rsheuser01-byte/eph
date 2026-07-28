@@ -14,6 +14,13 @@ describe("catalog integrity", () => {
     expect(new Set(slugs).size).toBe(slugs.length);
   });
 
+  it("has unique variant SKUs", () => {
+    const skus = products.flatMap((product) =>
+      product.variants.map((variant) => variant.sku),
+    );
+    expect(new Set(skus).size).toBe(skus.length);
+  });
+
   it("gives every product at least one variant with a positive price", () => {
     for (const product of products) {
       expect(product.variants.length).toBeGreaterThan(0);

@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { NextResponse } from "next/server";
 import { ADMIN_SESSION_COOKIE } from "@/lib/admin/session";
 import { resetMemoryRateLimits } from "@/lib/security/rateLimit";
 import { POST as login } from "./route";
@@ -15,25 +16,25 @@ describe("POST /api/admin/login", () => {
   });
 
   it("rejects wrong passwords without setting a session cookie", async () => {
-    const response = await login(
+    const response = (await login(
       new Request("http://localhost/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: "wrong" }),
       }),
-    );
+    )) as NextResponse;
     expect(response.status).toBe(401);
     expect(response.cookies.get(ADMIN_SESSION_COOKIE)).toBeUndefined();
   });
 
   it("sets an httpOnly session cookie on success", async () => {
-    const response = await login(
+    const response = (await login(
       new Request("http://localhost/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ password: "correct-password" }),
       }),
-    );
+    )) as NextResponse;
     expect(response.status).toBe(200);
     const cookie = response.cookies.get(ADMIN_SESSION_COOKIE);
     expect(cookie?.value).toBeTruthy();

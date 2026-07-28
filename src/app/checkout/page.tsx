@@ -155,6 +155,7 @@ function CheckoutForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           items: lines,
+          researchUseAcknowledged: researchAck,
           customer: {
             firstName: form.firstName,
             lastName: form.lastName,
