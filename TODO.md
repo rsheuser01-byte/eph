@@ -57,6 +57,8 @@ Ordered roughly by priority.
       (`src/lib/config/productionReadiness.ts`, `/api/health`, `/api/readiness`).
 - [ ] Create `web/.env.example` manually (blocked by the local env-file guard;
       variables are documented in `README.md`).
-- [ ] E2E test (Playwright) for browse → add to cart → checkout → confirmation.
+- [x] E2E test (Playwright) for browse → add to cart → checkout → confirmation
+      (`npm run test:e2e`, mock-hpp).
+- [x] CI: GitHub Actions runs lint, unit tests, build, and Playwright.
 - [ ] Optional: Supabase Auth + MFA for admin (shared `ADMIN_TOKEN` + audit log
       + Upstash rate limits are already in place).

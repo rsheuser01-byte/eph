@@ -10,7 +10,8 @@ Scope: repository map before Phase 1 (Bankful callback authentication and reconc
 **Phase 5 status: complete**  
 **Phase 6 status: complete**  
 **Phase 7 status: complete**  
-**Phase 8 status: complete** (Upstash rate limits, audit log, security headers, critical alerts). Next: Phase 9 (broader test suite). MFA / per-user IdP remain follow-ups.
+**Phase 8 status: complete**  
+**Phase 9 status: complete** (unit/integration gaps, Playwright mock-hpp E2E, GitHub Actions CI). Next: Phase 10 (launch checklist sign-off).
 
 ## Existing relevant files
 

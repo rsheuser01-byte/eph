@@ -261,11 +261,29 @@ describe("processBankfulIpn", () => {
     expect(d.releaseStock).toHaveBeenCalledWith("ord_test_1");
   });
 
+  it("approves after an earlier pending callback for the same order", async () => {
+    const d = deps();
+    const pending = await processBankfulIpn(
+      signedFields({ TRANS_STATUS_NAME: "PENDING", TRANS_REQUEST_ID: "p1" }),
+      d,
+    );
+    expect(pending.status).toBe(200);
+    expect(orders.get("ord_test_1")?.paymentStatus).toBe("pending");
+    expect(enqueuePaid).not.toHaveBeenCalled();
+
+    const approved = await processBankfulIpn(
+      signedFields({ TRANS_STATUS_NAME: "APPROVED", TRANS_REQUEST_ID: "p2" }),
+      d,
+    );
+    expect(approved.status).toBe(200);
+    expect(orders.get("ord_test_1")?.paymentStatus).toBe("approved");
+    expect(enqueuePaid).toHaveBeenCalledTimes(1);
+  });
+
   it("uses a deterministic hash event id when Bankful request ids are absent", async () => {
     const fields = signedFields();
     delete fields.TRANS_REQUEST_ID;
     delete fields.TRANS_RECORD_ID;
-    // Re-sign without those ids.
     const { SIGNATURE: _s, ...unsigned } = fields;
     const resigned = {
       ...unsigned,
@@ -277,7 +295,6 @@ describe("processBankfulIpn", () => {
     const second = await processBankfulIpn(resigned, deps());
     expect(second.body).toMatchObject({ duplicate: true });
     expect(enqueuePaid).not.toHaveBeenCalled();
-    // Sanity: hash is stable
     const hash = createHash("sha256")
       .update(
         ["ord_test_1", "980982121", "APPROVED", "1999", "USD"].join("|"),

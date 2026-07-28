@@ -159,6 +159,12 @@ Probes:
 - Critical payment/ops events email the store (cooldown) and optionally emit to Sentry when `SENTRY_DSN` is set.
 - Admin remains a shared `ADMIN_TOKEN` session (httpOnly, 8h). Per-user IdP + MFA are still recommended before multi-staff use.
 
+### Testing & CI
+
+- Unit/integration: `npm run test` (Vitest).
+- E2E (mock-hpp): `npm run test:e2e` (Playwright). Starts a local Next server with mock payment/tax/file orders.
+- GitHub Actions (`.github/workflows/ci.yml`): lint → unit tests → build → Playwright.
+
 ### Payments
 
 - `mock` / `bankful`: on-site card capture (PCI SAQ D for live Bankful direct).

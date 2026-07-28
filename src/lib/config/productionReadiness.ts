@@ -27,6 +27,10 @@ function env(name: string): string {
 }
 
 export function isProductionRuntime(): boolean {
+  // Playwright / local E2E servers opt out so mock-hpp + mock tax can run.
+  if (process.env.E2E_MODE === "1") {
+    return false;
+  }
   if (process.env.NODE_ENV === "production") {
     return true;
   }

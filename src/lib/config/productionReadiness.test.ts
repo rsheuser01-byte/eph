@@ -45,6 +45,12 @@ describe("productionReadiness", () => {
     expect(isProductionRuntime()).toBe(true);
   });
 
+  it("opts out of production runtime when E2E_MODE=1", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("E2E_MODE", "1");
+    expect(isProductionRuntime()).toBe(false);
+  });
+
   it("does not require production config in development", () => {
     vi.stubEnv("NODE_ENV", "development");
     vi.stubEnv("PAYMENT_PROVIDER", "mock");
