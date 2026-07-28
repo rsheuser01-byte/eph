@@ -32,10 +32,10 @@ describe("buildOrder", () => {
     const result = buildOrder([{ slug: "glp-3", size: "15mg", qty: 1 }]);
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.subtotal).toBe(69.99);
+      expect(result.subtotal).toBe(99.99);
       expect(result.shipping).toBe(12);
-      expect(result.total).toBeCloseTo(81.99, 2);
-      expect(result.items[0].unitPrice).toBe(69.99);
+      expect(result.total).toBeCloseTo(111.99, 2);
+      expect(result.items[0].unitPrice).toBe(99.99);
     }
   });
 
@@ -43,9 +43,9 @@ describe("buildOrder", () => {
     const result = buildOrder([{ slug: "glp-3", size: "60mg", qty: 1 }]);
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.subtotal).toBe(189.99);
+      expect(result.subtotal).toBe(239.99);
       expect(result.shipping).toBe(0);
-      expect(result.total).toBe(189.99);
+      expect(result.total).toBe(239.99);
     }
   });
 });

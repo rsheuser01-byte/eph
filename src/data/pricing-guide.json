@@ -1,0 +1,170 @@
+[
+  {
+    "compound": "BPC-157",
+    "size": "10mg",
+    "listPrice": 59.99,
+    "productSlug": null
+  },
+  {
+    "compound": "TB-500",
+    "size": "10mg",
+    "listPrice": 59.99,
+    "productSlug": null
+  },
+  {
+    "compound": "BPC-157 + TB-500",
+    "size": "20mg",
+    "listPrice": 89.99,
+    "productSlug": "wolverine-blend"
+  },
+  {
+    "compound": "MOTS-c",
+    "size": "10mg",
+    "listPrice": 54.99,
+    "productSlug": "mots-c"
+  },
+  {
+    "compound": "MOTS-c",
+    "size": "20mg",
+    "listPrice": 89.99,
+    "productSlug": "mots-c"
+  },
+  {
+    "compound": "NAD+",
+    "size": "100mg",
+    "listPrice": 39.99,
+    "productSlug": "nad"
+  },
+  {
+    "compound": "NAD+",
+    "size": "500mg",
+    "listPrice": 59.99,
+    "productSlug": "nad"
+  },
+  {
+    "compound": "NAD+",
+    "size": "1000mg",
+    "listPrice": 94.99,
+    "productSlug": "nad"
+  },
+  {
+    "compound": "GHK-Cu",
+    "size": "50mg",
+    "listPrice": 39.99,
+    "productSlug": null
+  },
+  {
+    "compound": "GHK-Cu",
+    "size": "100mg",
+    "listPrice": 59.99,
+    "productSlug": null
+  },
+  {
+    "compound": "KPV",
+    "size": "10mg",
+    "listPrice": 54.99,
+    "productSlug": null
+  },
+  {
+    "compound": "Tesamorelin",
+    "size": "5mg",
+    "listPrice": 44.99,
+    "productSlug": "tesamorelin"
+  },
+  {
+    "compound": "Tesamorelin",
+    "size": "10mg",
+    "listPrice": 79.99,
+    "productSlug": "tesamorelin"
+  },
+  {
+    "compound": "Ipamorelin",
+    "size": "10mg",
+    "listPrice": 69.99,
+    "productSlug": null
+  },
+  {
+    "compound": "CJC-1295 + Ipamorelin",
+    "size": "10mg",
+    "listPrice": 79.99,
+    "productSlug": null
+  },
+  {
+    "compound": "GLP-2 TZ",
+    "size": "10mg",
+    "listPrice": 64.99,
+    "productSlug": "glp-2"
+  },
+  {
+    "compound": "GLP-2 TZ",
+    "size": "20mg",
+    "listPrice": 99.99,
+    "productSlug": "glp-2"
+  },
+  {
+    "compound": "GLP-2 TZ",
+    "size": "30mg",
+    "listPrice": 139.99,
+    "productSlug": "glp-2"
+  },
+  {
+    "compound": "GLP-3 RT",
+    "size": "10mg",
+    "listPrice": 79.99,
+    "productSlug": "glp-3"
+  },
+  {
+    "compound": "GLP-3 RT",
+    "size": "15mg",
+    "listPrice": 99.99,
+    "productSlug": "glp-3"
+  },
+  {
+    "compound": "GLP-3 RT",
+    "size": "30mg",
+    "listPrice": 159.99,
+    "productSlug": "glp-3"
+  },
+  {
+    "compound": "GLP-3 RT",
+    "size": "60mg",
+    "listPrice": 239.99,
+    "productSlug": "glp-3"
+  },
+  {
+    "compound": "KLOW",
+    "size": "80mg",
+    "listPrice": 109.99,
+    "productSlug": "klow-blend"
+  },
+  {
+    "compound": "GLOW",
+    "size": "70mg",
+    "listPrice": 99.99,
+    "productSlug": "glow-blend"
+  },
+  {
+    "compound": "Semax",
+    "size": "10mg",
+    "listPrice": 59.99,
+    "productSlug": null
+  },
+  {
+    "compound": "Selank",
+    "size": "10mg",
+    "listPrice": 59.99,
+    "productSlug": null
+  },
+  {
+    "compound": "PT-141",
+    "size": "10mg",
+    "listPrice": 49.99,
+    "productSlug": null
+  },
+  {
+    "compound": "Melanotan II",
+    "size": "10mg",
+    "listPrice": 44.99,
+    "productSlug": "mt-2"
+  }
+]

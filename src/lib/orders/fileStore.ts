@@ -1,16 +1,32 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import type { OrderRecord, OrderStore } from "./types";
+import type { OrderRecord, OrderStatusUpdate, OrderStore } from "./types";
 
 function defaultPath(): string {
   return process.env.ORDER_STORE_FILE ?? join(process.cwd(), ".data", "orders.json");
+}
+
+function normalize(record: OrderRecord): OrderRecord {
+  const paymentStatus =
+    record.paymentStatus ??
+    (record.status === "approved" ? "approved" : (record.status as OrderRecord["paymentStatus"]));
+  return {
+    ...record,
+    paymentStatus,
+    fulfillmentStatus: record.fulfillmentStatus ?? "unfulfilled",
+    refundedAmount: record.refundedAmount ?? 0,
+    status: paymentStatus,
+  };
 }
 
 async function readAll(filePath: string): Promise<OrderRecord[]> {
   try {
     const raw = await readFile(filePath, "utf8");
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? (parsed as OrderRecord[]) : [];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return (parsed as OrderRecord[]).map(normalize);
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return [];
@@ -19,16 +35,26 @@ async function readAll(filePath: string): Promise<OrderRecord[]> {
   }
 }
 
-// JSON-file store: durable for local/dev and single-instance use. On serverless
-// hosts the filesystem is ephemeral — see TODO.md for the production DB task.
+async function writeAll(filePath: string, orders: OrderRecord[]): Promise<void> {
+  await mkdir(dirname(filePath), { recursive: true });
+  await writeFile(filePath, JSON.stringify(orders, null, 2), "utf8");
+}
+
+// JSON-file store: durable for local/dev and single-instance use. Prefer
+// ORDER_STORE=supabase in production (ephemeral filesystem on serverless).
 export function createFileOrderStore(filePath = defaultPath()): OrderStore {
   return {
     name: "file",
     async save(record: OrderRecord): Promise<void> {
-      await mkdir(dirname(filePath), { recursive: true });
       const orders = await readAll(filePath);
-      orders.push(record);
-      await writeFile(filePath, JSON.stringify(orders, null, 2), "utf8");
+      const next = normalize(record);
+      const index = orders.findIndex((order) => order.orderId === next.orderId);
+      if (index >= 0) {
+        orders[index] = next;
+      } else {
+        orders.push(next);
+      }
+      await writeAll(filePath, orders);
     },
     async list(): Promise<OrderRecord[]> {
       const orders = await readAll(filePath);
@@ -39,6 +65,30 @@ export function createFileOrderStore(filePath = defaultPath()): OrderStore {
     async get(orderId: string): Promise<OrderRecord | null> {
       const orders = await readAll(filePath);
       return orders.find((order) => order.orderId === orderId) ?? null;
+    },
+    async updateStatus(
+      orderId: string,
+      patch: OrderStatusUpdate,
+    ): Promise<OrderRecord | null> {
+      const orders = await readAll(filePath);
+      const index = orders.findIndex((order) => order.orderId === orderId);
+      if (index < 0) {
+        return null;
+      }
+      const current = orders[index];
+      const paymentStatus = patch.paymentStatus ?? current.paymentStatus;
+      const updated = normalize({
+        ...current,
+        paymentStatus,
+        fulfillmentStatus:
+          patch.fulfillmentStatus ?? current.fulfillmentStatus,
+        transactionId: patch.transactionId ?? current.transactionId,
+        refundedAmount: patch.refundedAmount ?? current.refundedAmount,
+        status: paymentStatus,
+      });
+      orders[index] = updated;
+      await writeAll(filePath, orders);
+      return updated;
     },
   };
 }

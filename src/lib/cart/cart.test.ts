@@ -68,10 +68,10 @@ describe("removeLine", () => {
 describe("cartSubtotal", () => {
   it("sums variant prices times quantity", () => {
     const lines: CartLine[] = [
-      { slug: "glp-3", size: "15mg", qty: 2 }, // 69.99 x 2
-      { slug: "mt-2", size: "10mg", qty: 1 }, // 39.99
+      { slug: "glp-3", size: "15mg", qty: 2 }, // 99.99 x 2
+      { slug: "mt-2", size: "10mg", qty: 1 }, // 44.99
     ];
-    expect(cartSubtotal(lines)).toBeCloseTo(179.97, 2);
+    expect(cartSubtotal(lines)).toBeCloseTo(244.97, 2);
   });
 
   it("ignores unknown products", () => {

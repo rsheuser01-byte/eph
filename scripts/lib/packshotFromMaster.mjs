@@ -107,7 +107,7 @@ export async function findDosageRegion(filePath) {
         band.bandHeight >= 12 &&
         band.bandHeight <= 36 &&
         band.bandWidth >= 50 &&
-        band.bandWidth <= 130 &&
+        band.bandWidth <= 160 &&
         band.density > 0.12,
     )
     .sort((a, b) => b.density - a.density || a.y0 - b.y0);
@@ -180,33 +180,105 @@ function cssRgb(rgb) {
 }
 
 /**
+ * Ink bounding box of dosage text on a packshot.
+ * @param {string} filePath
+ */
+export async function measureDosageInk(filePath) {
+  const region = await findDosageRegion(filePath);
+  return {
+    left: region.textLeft,
+    top: region.textTop,
+    width: region.textWidth,
+    height: region.textHeight,
+    ink: region.textWidth * region.textHeight,
+  };
+}
+
+/**
+ * Pick an SVG font-size whose rendered ink height matches the photo dosage.
+ * @param {number} targetInkHeight
+ * @param {string} sampleLabel
+ * @param {string} fill
+ */
+export async function calibrateDosageFontSize(
+  targetInkHeight,
+  sampleLabel,
+  fill,
+) {
+  let bestSize = Math.max(18, targetInkHeight);
+  let bestDelta = Number.POSITIVE_INFINITY;
+
+  for (let fontSize = 16; fontSize <= 42; fontSize++) {
+    const svg = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
+<svg width="240" height="80" xmlns="http://www.w3.org/2000/svg">
+  <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle"
+    font-family="Arial, Helvetica, 'Segoe UI', sans-serif"
+    font-size="${fontSize}" font-weight="700" fill="${fill}">${sampleLabel}</text>
+</svg>`);
+    const { data, info } = await sharp(svg)
+      .ensureAlpha()
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+
+    let minY = info.height;
+    let maxY = 0;
+    for (let y = 0; y < info.height; y++) {
+      for (let x = 0; x < info.width; x++) {
+        const i = (y * info.width + x) * info.channels;
+        if (data[i + 3] < 180) continue;
+        if ((data[i] + data[i + 1] + data[i + 2]) / 3 > 200) continue;
+        if (y < minY) minY = y;
+        if (y > maxY) maxY = y;
+      }
+    }
+    if (maxY < minY) continue;
+    const height = maxY - minY + 1;
+    const delta = Math.abs(height - targetInkHeight);
+    if (delta < bestDelta) {
+      bestDelta = delta;
+      bestSize = fontSize;
+    }
+  }
+
+  return bestSize;
+}
+
+/**
  * Exact copy of the master packshot, with ONLY the dosage line replaced.
  * Vial, lighting, logo, product name, and disclaimer stay byte-identical.
+ * All sizes of a product share one calibrated font size so the dosage text
+ * does not appear to grow/shrink when switching vials.
  *
  * @param {string} masterPath
  * @param {string} newSize catalog size e.g. "30mg"
  * @param {string} outputPath
+ * @param {{ fontSize?: number, region?: Awaited<ReturnType<typeof findDosageRegion>> }} [options]
  */
 export async function derivePackshotFromMaster(
   masterPath,
   newSize,
   outputPath,
+  options = {},
 ) {
   const label = formatDosageLabel(newSize);
-  const region = await findDosageRegion(masterPath);
+  const region = options.region ?? (await findDosageRegion(masterPath));
+  const fill = cssRgb(region.ink);
+  const fontSize =
+    options.fontSize ??
+    (await calibrateDosageFontSize(region.textHeight, label, fill));
 
-  const padX = 22;
-  const padY = 8;
-  const x0 = Math.max(0, region.textLeft - padX);
-  const x1 = Math.min(
-    region.canvasWidth - 1,
-    region.textLeft + region.textWidth - 1 + padX,
-  );
-  const y0 = Math.max(0, region.textTop - padY);
-  const y1 = Math.min(
-    region.canvasHeight - 1,
-    region.textTop + region.textHeight - 1 + padY,
-  );
+  // Wide enough for longest dosages (e.g. "1000 mg") while staying centered.
+  const centerX = region.textLeft + region.textWidth / 2;
+  const centerY = region.textTop + region.textHeight / 2;
+  const padX = 28;
+  const padY = 10;
+  const minPatchW = 170;
+  const patchW = Math.max(region.textWidth + padX * 2, minPatchW);
+  const patchH = region.textHeight + padY * 2;
+  const x0 = Math.max(0, Math.round(centerX - patchW / 2));
+  const x1 = Math.min(region.canvasWidth - 1, x0 + patchW - 1);
+  const y0 = Math.max(0, Math.round(centerY - patchH / 2));
+  const y1 = Math.min(region.canvasHeight - 1, y0 + patchH - 1);
 
   let probeY = region.textTop - 6;
   while (probeY > region.textTop - 24 && probeY > 0) {
@@ -248,8 +320,6 @@ export async function derivePackshotFromMaster(
 
     const patchWidth = x1 - x0 + 1;
     const patchHeight = y1 - y0 + 1;
-    const fontSize = Math.max(18, Math.round(region.textHeight * 0.92));
-    const fill = cssRgb(region.ink);
 
     const svg = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${patchWidth}" height="${patchHeight}" viewBox="0 0 ${patchWidth} ${patchHeight}" xmlns="http://www.w3.org/2000/svg">
@@ -290,6 +360,7 @@ export async function derivePackshotFromMaster(
   return {
     label,
     region,
+    fontSize,
     patchLeft: x0,
     patchTop: y0,
     patchWidth: x1 - x0 + 1,

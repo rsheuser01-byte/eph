@@ -6,9 +6,12 @@ import { ProductPurchase } from "@/components/ProductPurchase";
 import { ProductSpecs } from "@/components/ProductSpecs";
 import { getProductBySlug, products } from "@/data/products";
 import { researchDisclaimer } from "@/data/site";
+import { getAvailabilityMap } from "@/lib/inventory/availability";
 import { pageMetadata } from "@/lib/seo/pageMetadata";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 import { breadcrumbSchema } from "@/lib/seo/structuredData";
+
+export const dynamic = "force-dynamic";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -41,6 +44,10 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  const availability = await getAvailabilityMap(
+    product.variants.map((variant) => variant.sku),
+  );
+
   return (
     <div className="site-shell py-20">
       <JsonLd
@@ -57,7 +64,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         ← Products
       </Link>
 
-      <ProductPurchase product={product} disclaimer={researchDisclaimer} />
+      <ProductPurchase
+        product={product}
+        disclaimer={researchDisclaimer}
+        availability={availability}
+      />
       <ProductSpecs product={product} />
     </div>
   );

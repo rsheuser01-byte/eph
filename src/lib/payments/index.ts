@@ -1,5 +1,8 @@
-import { createBankfulProvider } from "./bankful";
-import { createMockProvider } from "./mock";
+import {
+  createBankfulHppProvider,
+  createBankfulProvider,
+} from "./bankful";
+import { createMockHppProvider, createMockProvider } from "./mock";
 import type { PaymentProvider } from "./types";
 
 export function getPaymentProvider(): PaymentProvider {
@@ -7,11 +10,19 @@ export function getPaymentProvider(): PaymentProvider {
   switch (provider) {
     case "bankful":
       return createBankfulProvider();
+    case "bankful-hpp":
+      return createBankfulHppProvider();
+    case "mock-hpp":
+      return createMockHppProvider();
     case "mock":
       return createMockProvider();
     default:
       throw new Error(`Unknown PAYMENT_PROVIDER: ${provider}`);
   }
+}
+
+export function paymentProviderRequiresCard(providerName: string): boolean {
+  return providerName !== "bankful-hpp" && providerName !== "mock-hpp";
 }
 
 export type {
@@ -21,4 +32,6 @@ export type {
   CheckoutOutcome,
   OrderItem,
   PaymentProvider,
+  RefundInput,
+  RefundOutcome,
 } from "./types";

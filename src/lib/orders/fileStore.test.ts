@@ -12,6 +12,8 @@ function makeOrder(orderId: string, createdAt: string): OrderRecord {
     provider: "mock",
     transactionId: "tx_1",
     status: "approved",
+    paymentStatus: "approved",
+    fulfillmentStatus: "unfulfilled",
     items: [
       { sku: "GLP-3-15MG", name: "GLP-3", size: "15mg", qty: 1, unitPrice: 69.99 },
     ],
@@ -29,6 +31,7 @@ function makeOrder(orderId: string, createdAt: string): OrderRecord {
       zip: "80014",
       country: "US",
     },
+    refundedAmount: 0,
   };
 }
 

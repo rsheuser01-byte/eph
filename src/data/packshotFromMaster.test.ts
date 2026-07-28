@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, rm, copyFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import sharp from "sharp";
 import {
   derivePackshotFromMaster,
   formatDosageLabel,
+  measureDosageInk,
 } from "../../scripts/lib/packshotFromMaster.mjs";
 import { products } from "./products";
 
@@ -73,7 +74,32 @@ describe("derivePackshotFromMaster", () => {
     }
   });
 
-  it("can derive every non-first multi-size packshot from that product master", async () => {
+  it("uses the same dosage font size for every size of a product", async () => {
+    const master = path.join(productsDir, "nad-100mg.png");
+    const dir = await mkdtemp(path.join(tmpdir(), "packshot-"));
+    const photo = path.join(dir, "photo-master.png");
+
+    try {
+      await copyFile(master, photo);
+      const sizes = ["100mg", "500mg", "1000mg"];
+      const heights: number[] = [];
+      for (const size of sizes) {
+        const out = path.join(dir, `nad-${size}.png`);
+        await derivePackshotFromMaster(photo, size, out);
+        const ink = await measureDosageInk(out);
+        heights.push(ink.height);
+      }
+      const spread = Math.max(...heights) - Math.min(...heights);
+      expect(
+        spread,
+        `dosage ink heights ${heights.join(", ")}`,
+      ).toBeLessThanOrEqual(2);
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
+  });
+
+  it("can derive every multi-size packshot from that product master", async () => {
     const multi = products.filter((product) => product.variants.length > 1);
     expect(multi.length).toBeGreaterThan(0);
 
@@ -84,7 +110,7 @@ describe("derivePackshotFromMaster", () => {
       );
       const dir = await mkdtemp(path.join(tmpdir(), "packshot-"));
       try {
-        for (const variant of product.variants.slice(1)) {
+        for (const variant of product.variants) {
           const out = path.join(dir, path.basename(variant.image));
           await expect(
             derivePackshotFromMaster(masterPath, variant.size, out),

@@ -30,6 +30,8 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { lines, resolved, subtotal, clear } = useCart();
   const { shipping, total } = orderTotals(subtotal);
+  const provider = (process.env.NEXT_PUBLIC_PAYMENT_PROVIDER ?? "mock").toLowerCase();
+  const requiresCard = provider !== "bankful-hpp" && provider !== "mock-hpp";
 
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
@@ -62,12 +64,16 @@ export default function CheckoutPage() {
             zip: form.zip,
             country: form.country,
           },
-          card: {
-            number: form.cardNumber,
-            expiryMonth: form.expiryMonth,
-            expiryYear: form.expiryYear,
-            cvv: form.cvv,
-          },
+          ...(requiresCard
+            ? {
+                card: {
+                  number: form.cardNumber,
+                  expiryMonth: form.expiryMonth,
+                  expiryYear: form.expiryYear,
+                  cvv: form.cvv,
+                },
+              }
+            : {}),
         }),
       });
 
@@ -210,49 +216,61 @@ export default function CheckoutPage() {
             </div>
           </section>
 
-          <section>
-            <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
-              Payment
-            </h2>
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <input
-                className={`${inputClass} sm:col-span-2`}
-                placeholder="Card number"
-                inputMode="numeric"
-                autoComplete="cc-number"
-                required
-                value={form.cardNumber}
-                onChange={(e) => update("cardNumber", e.target.value)}
-              />
-              <input
-                className={inputClass}
-                placeholder="Exp. month (MM)"
-                inputMode="numeric"
-                autoComplete="cc-exp-month"
-                required
-                value={form.expiryMonth}
-                onChange={(e) => update("expiryMonth", e.target.value)}
-              />
-              <input
-                className={inputClass}
-                placeholder="Exp. year (YYYY)"
-                inputMode="numeric"
-                autoComplete="cc-exp-year"
-                required
-                value={form.expiryYear}
-                onChange={(e) => update("expiryYear", e.target.value)}
-              />
-              <input
-                className={inputClass}
-                placeholder="CVV"
-                inputMode="numeric"
-                autoComplete="cc-csc"
-                required
-                value={form.cvv}
-                onChange={(e) => update("cvv", e.target.value)}
-              />
-            </div>
-          </section>
+          {requiresCard ? (
+            <section>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
+                Payment
+              </h2>
+              <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                <input
+                  className={`${inputClass} sm:col-span-2`}
+                  placeholder="Card number"
+                  inputMode="numeric"
+                  autoComplete="cc-number"
+                  required
+                  value={form.cardNumber}
+                  onChange={(e) => update("cardNumber", e.target.value)}
+                />
+                <input
+                  className={inputClass}
+                  placeholder="Exp. month (MM)"
+                  inputMode="numeric"
+                  autoComplete="cc-exp-month"
+                  required
+                  value={form.expiryMonth}
+                  onChange={(e) => update("expiryMonth", e.target.value)}
+                />
+                <input
+                  className={inputClass}
+                  placeholder="Exp. year (YYYY)"
+                  inputMode="numeric"
+                  autoComplete="cc-exp-year"
+                  required
+                  value={form.expiryYear}
+                  onChange={(e) => update("expiryYear", e.target.value)}
+                />
+                <input
+                  className={inputClass}
+                  placeholder="CVV"
+                  inputMode="numeric"
+                  autoComplete="cc-csc"
+                  required
+                  value={form.cvv}
+                  onChange={(e) => update("cvv", e.target.value)}
+                />
+              </div>
+            </section>
+          ) : (
+            <section>
+              <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
+                Payment
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+                You will enter card details on the secure Bankful hosted payment
+                page after you continue.
+              </p>
+            </section>
+          )}
 
           {error ? (
             <p className="border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-300">
@@ -301,7 +319,11 @@ export default function CheckoutPage() {
             disabled={submitting}
             className="btn btn-primary btn-arrow mt-7 w-full disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {submitting ? "Processing…" : `Pay ${formatUSD(total)}`}
+            {submitting
+              ? "Processing…"
+              : requiresCard
+                ? `Pay ${formatUSD(total)}`
+                : `Continue to payment · ${formatUSD(total)}`}
           </button>
           <p className="mt-4 text-[0.7rem] leading-relaxed text-ink-soft/80">
             Research use only. By ordering you confirm you are a qualified

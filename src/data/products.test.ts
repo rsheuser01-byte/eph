@@ -54,27 +54,27 @@ describe("productPriceRange", () => {
     const product = getProductBySlug("glp-3");
     expect(product).toBeDefined();
     const range = productPriceRange(product!);
-    expect(range.min).toBe(69.99);
-    expect(range.max).toBe(189.99);
+    expect(range.min).toBe(79.99);
+    expect(range.max).toBe(239.99);
   });
 });
 
 describe("formatPrice", () => {
   it("shows a single price when min equals max", () => {
     const product = getProductBySlug("mt-2");
-    expect(formatPrice(product!)).toBe("$39.99");
+    expect(formatPrice(product!)).toBe("$44.99");
   });
 
   it("shows a range when variants differ", () => {
     const product = getProductBySlug("glp-3");
-    expect(formatPrice(product!)).toBe("$69.99 – $189.99");
+    expect(formatPrice(product!)).toBe("$79.99 – $239.99");
   });
 });
 
 describe("getVariant", () => {
   it("finds a variant by size", () => {
     const product = getProductBySlug("glp-3");
-    expect(getVariant(product!, "60mg")?.price).toBe(189.99);
+    expect(getVariant(product!, "60mg")?.price).toBe(239.99);
   });
 
   it("returns undefined for an unknown size", () => {
@@ -84,16 +84,18 @@ describe("getVariant", () => {
 });
 
 describe("NAD+", () => {
-  it("is listed with 100mg and 500mg variants", () => {
+  it("is listed with 100mg, 500mg, and 1000mg variants", () => {
     const product = getProductBySlug("nad");
     expect(product).toBeDefined();
     expect(product!.name).toBe("NAD+");
     expect(product!.variants.map((variant) => variant.size)).toEqual([
       "100mg",
       "500mg",
+      "1000mg",
     ]);
     expect(getVariant(product!, "100mg")?.sku).toBe("NAD-100MG");
     expect(getVariant(product!, "500mg")?.sku).toBe("NAD-500MG");
+    expect(getVariant(product!, "1000mg")?.sku).toBe("NAD-1000MG");
   });
 
   it("includes verified molecular identity fields", () => {

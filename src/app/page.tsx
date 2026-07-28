@@ -23,10 +23,7 @@ export default function HomePage() {
         <div className="hero-banner-scrim" aria-hidden />
 
         <div className="site-shell relative z-[2] flex min-h-[min(92vh,880px)] flex-col justify-end pb-16 pt-28 sm:pb-24">
-          <p className="label label-on-dark animate-rise">
-            Precision peptide science
-          </p>
-          <h1 className="animate-rise font-display mt-6 max-w-4xl text-[clamp(3rem,11vw,7rem)] font-semibold leading-[0.9] tracking-[-0.05em] text-on-dark">
+          <h1 className="animate-rise font-display max-w-4xl text-[clamp(3rem,11vw,7rem)] font-semibold leading-[0.9] tracking-[-0.05em] text-on-dark">
             Elevate
             <br />
             Precision

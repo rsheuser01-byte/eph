@@ -4,44 +4,34 @@ Follow-ups to take the Bankful checkout store from working demo to production.
 Ordered roughly by priority.
 
 ## Payments / go-live
-- [ ] Obtain Bankful **sandbox** credentials; set `PAYMENT_PROVIDER=bankful` +
-      `BANKFUL_USERNAME` / `BANKFUL_PASSWORD` and re-test with sandbox test cards.
+- [ ] Obtain Bankful **sandbox** credentials; set `PAYMENT_PROVIDER=bankful` (or
+      `bankful-hpp`) + `BANKFUL_USERNAME` / `BANKFUL_PASSWORD` and re-test.
 - [ ] Complete Bankful **live** merchant onboarding; swap `BANKFUL_API_BASE_URL`
       to `https://api.paybybankful.com` and use live credentials.
-- [ ] **Hosted Payment Page (HPP)** provider for production. The current on-site
-      card form puts us in **PCI DSS SAQ D** scope. Add a `bankful-hpp` provider
-      that returns `{ kind: "redirect", url }` so card entry happens on Bankful's
-      PCI-compliant page (SAQ A). The checkout API already supports the redirect
-      outcome — only a new provider + return/callback route are needed.
-- [ ] Handle Bankful HPP return + postback/IPN (verify status server-side before
-      confirming the order).
-- [ ] Refunds / cancellations (Bankful supports `REFUND` and `CANCEL`) — admin
-      action or support workflow.
+- [x] **Hosted Payment Page (HPP)** provider (`bankful-hpp` / `mock-hpp`) +
+      IPN at `/api/payments/bankful/ipn`. Prefer HPP for production (SAQ A).
+- [x] Refunds / cancellations — admin refund action + Bankful `REFUND`/`CANCEL`
+      (and mock). Restock when fulfillment is still `unfulfilled`.
 
 ## Catalog / pricing
-- [ ] Replace PLACEHOLDER variant prices/sizes in `src/data/products.ts`:
-      GLP-3 15/30/60mg prices, GLP-2 20mg, MOTS-c (sizes + prices), Tesamorelin 5mg,
-      BAC (sizes + prices), NAD+ 100mg and 500mg. (Search the file for `PLACEHOLDER`.)
+- [ ] Replace PLACEHOLDER variant prices/sizes in `src/data/products.ts`
+      (search the file for `PLACEHOLDER`).
 - [ ] Confirm real shipping rates (currently flat $12, free at $150) and whether
       international shipping is offered.
 - [ ] Sales tax handling (none today).
-- [ ] Inventory / stock status per variant (no stock tracking today).
+- [x] Inventory / stock status per variant (Supabase `inventory` + admin UI).
 
 ## Orders / email
 - [ ] Set up Resend: verify sending domain, set `EMAIL_PROVIDER=resend`,
       `RESEND_API_KEY`, `EMAIL_FROM`.
-- [x] Persist orders — approved orders are saved via the order store
-      (`src/lib/orders`), viewable at `/admin/orders?key=ADMIN_TOKEN`.
-- [ ] Move the order store from the JSON file (`ORDER_STORE=file`, not durable
-      on serverless) to a real database (e.g. Supabase). Add a `supabase` /
-      `db` implementation of `OrderStore`.
-      DEFERRED (2026-07-14): the JSON file store is not durable on Vercel, but
-      every order is also captured by the store-notification email + Bankful's
-      dashboard, so this is acceptable for launch. Revisit before relying on the
-      in-app `/admin/orders` history in production or under real traffic.
-- [ ] Replace the `ADMIN_TOKEN` query-key guard on `/admin/orders` with proper
-      authentication before production.
+- [x] Persist orders via order store; view at `/admin/orders` after `/admin/login`.
+- [x] Supabase `OrderStore` (`ORDER_STORE=supabase`) + migrations under
+      `supabase/migrations/`. Keep `file` for optional local fallback.
+- [x] Admin login with httpOnly signed session cookie (`/admin/login`).
 - [ ] Shipping/tracking notification email once a label is created.
+- [ ] Set `SUPABASE_SERVICE_ROLE_KEY` in Vercel from the Supabase dashboard
+      (service role is not exposed via MCP). Project: `elevate-precision-health`.
+- [ ] Receive real starting stock via `/admin/inventory` (seeded at 0).
 
 ## Trust / compliance
 - [ ] Keep "Research Use Only" disclaimers on every product + checkout page
@@ -49,7 +39,9 @@ Ordered roughly by priority.
 - [ ] Review refund/terms/privacy pages against the live payment flow.
 
 ## Infra / QA
-- [ ] Set all env vars in Vercel (payment + email) for preview and production.
+- [ ] Set all env vars in Vercel (payment + email + Supabase + admin) for
+      preview and production. Set `ORDER_STORE=supabase` in production.
 - [ ] Create `web/.env.example` manually (blocked by the local env-file guard;
       variables are documented in `README.md`).
 - [ ] E2E test (Playwright) for browse → add to cart → checkout → confirmation.
+- [ ] Optional: durable rate limits (Upstash) + Supabase Auth MFA for admin.

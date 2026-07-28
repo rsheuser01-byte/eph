@@ -234,14 +234,30 @@ export async function listPngs(dir) {
 
 /**
  * @param {string} inputDir
- * @param {string} [outputDir]
+ * @param {string | { onlyFiles?: string[] }} [outputDirOrOptions]
+ * @param {{ onlyFiles?: string[] }} [maybeOptions]
  */
-export async function normalizePackshotDir(inputDir, outputDir = inputDir) {
+export async function normalizePackshotDir(
+  inputDir,
+  outputDirOrOptions = inputDir,
+  maybeOptions = {},
+) {
+  const outputDir =
+    typeof outputDirOrOptions === "string" ? outputDirOrOptions : inputDir;
+  const options =
+    typeof outputDirOrOptions === "string" ? maybeOptions : outputDirOrOptions;
+
   if (outputDir !== inputDir) {
     await mkdir(outputDir, { recursive: true });
   }
 
-  const files = await listPngs(inputDir);
+  const only = options.onlyFiles
+    ? new Set(options.onlyFiles.map((name) => path.basename(name)))
+    : null;
+
+  const files = (await listPngs(inputDir)).filter((file) =>
+    only ? only.has(path.basename(file)) : true,
+  );
   /** @type {{ file: string, before: Awaited<ReturnType<typeof measurePackshot>>, after: Awaited<ReturnType<typeof measurePackshot>> }[]} */
   const results = [];
 

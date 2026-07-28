@@ -1,3 +1,5 @@
+import { listPrice } from "./pricing";
+
 export type ProductVariant = {
   size: string;
   price: number;
@@ -44,8 +46,8 @@ const POWDER_APPEARANCE = "White to off-white powder";
 const LYOPHILIZED_STORAGE =
   "Store lyophilized powder at −20°C. Protect from light and moisture. Keep tightly sealed until use.";
 
-// Prices/sizes seeded from the Bourbon Peptides catalog. Values marked
-// PLACEHOLDER are interpolated or assumed and should be confirmed.
+// List prices come from pricing-guide.json (edit that file to change prices).
+// BAC Water is not in the guide and keeps local supply pricing.
 export const products: Product[] = [
   {
     slug: "glp-3",
@@ -57,23 +59,29 @@ export const products: Product[] = [
     featured: true,
     variants: [
       {
+        size: "10mg",
+        price: listPrice("glp-3", "10mg"),
+        sku: "GLP-3-10MG",
+        image: "/products/glp-3-10mg.png",
+      },
+      {
         size: "15mg",
-        price: 69.99,
+        price: listPrice("glp-3", "15mg"),
         sku: "GLP-3-15MG",
         image: "/products/glp-3-15mg.png",
-      }, // PLACEHOLDER price
+      },
       {
         size: "30mg",
-        price: 129.99,
+        price: listPrice("glp-3", "30mg"),
         sku: "GLP-3-30MG",
         image: "/products/glp-3-30mg.png",
-      }, // PLACEHOLDER price
+      },
       {
         size: "60mg",
-        price: 189.99,
+        price: listPrice("glp-3", "60mg"),
         sku: "GLP-3-60MG",
         image: "/products/glp-3-60mg.png",
-      }, // PLACEHOLDER price
+      },
     ],
     specs: {
       form: LYOPHILIZED,
@@ -97,19 +105,19 @@ export const products: Product[] = [
     variants: [
       {
         size: "10mg",
-        price: 44.99,
+        price: listPrice("glp-2", "10mg"),
         sku: "GLP-2-10MG",
         image: "/products/glp-2-10mg.png",
       },
       {
         size: "20mg",
-        price: 62.49,
+        price: listPrice("glp-2", "20mg"),
         sku: "GLP-2-20MG",
         image: "/products/glp-2-20mg.png",
-      }, // PLACEHOLDER price
+      },
       {
         size: "30mg",
-        price: 79.99,
+        price: listPrice("glp-2", "30mg"),
         sku: "GLP-2-30MG",
         image: "/products/glp-2-30mg.png",
       },
@@ -136,16 +144,16 @@ export const products: Product[] = [
     variants: [
       {
         size: "10mg",
-        price: 30.0,
+        price: listPrice("mots-c", "10mg"),
         sku: "MOTS-10MG",
         image: "/products/mots-c-10mg.png",
-      }, // PLACEHOLDER size/price
+      },
       {
         size: "20mg",
-        price: 84.99,
+        price: listPrice("mots-c", "20mg"),
         sku: "MOTS-20MG",
         image: "/products/mots-c-20mg.png",
-      }, // PLACEHOLDER size/price
+      },
     ],
     specs: {
       form: LYOPHILIZED,
@@ -170,13 +178,13 @@ export const products: Product[] = [
     variants: [
       {
         size: "5mg",
-        price: 49.99,
+        price: listPrice("tesamorelin", "5mg"),
         sku: "TESA-5MG",
         image: "/products/tesamorelin-5mg.png",
-      }, // PLACEHOLDER price
+      },
       {
         size: "10mg",
-        price: 59.99,
+        price: listPrice("tesamorelin", "10mg"),
         sku: "TESA-10MG",
         image: "/products/tesamorelin-10mg.png",
       },
@@ -203,7 +211,7 @@ export const products: Product[] = [
     variants: [
       {
         size: "10mg",
-        price: 39.99,
+        price: listPrice("mt-2", "10mg"),
         sku: "MT2-10MG",
         image: "/products/mt-2-10mg.png",
       },
@@ -231,16 +239,22 @@ export const products: Product[] = [
     variants: [
       {
         size: "100mg",
-        price: 49.99,
+        price: listPrice("nad", "100mg"),
         sku: "NAD-100MG",
         image: "/products/nad-100mg.png",
-      }, // PLACEHOLDER price
+      },
       {
         size: "500mg",
-        price: 149.99,
+        price: listPrice("nad", "500mg"),
         sku: "NAD-500MG",
         image: "/products/nad-500mg.png",
-      }, // PLACEHOLDER price
+      },
+      {
+        size: "1000mg",
+        price: listPrice("nad", "1000mg"),
+        sku: "NAD-1000MG",
+        image: "/products/nad-1000mg.png",
+      },
     ],
     specs: {
       form: LYOPHILIZED,
@@ -264,7 +278,7 @@ export const products: Product[] = [
     variants: [
       {
         size: "20mg",
-        price: 79.95,
+        price: listPrice("wolverine-blend", "20mg"),
         sku: "WOLV-20MG",
         image: "/products/wolverine-blend-20mg.png",
       },
@@ -289,7 +303,7 @@ export const products: Product[] = [
     variants: [
       {
         size: "70mg",
-        price: 84.99,
+        price: listPrice("glow-blend", "70mg"),
         sku: "GLOW-70MG",
         image: "/products/glow-blend-70mg.png",
       },
@@ -314,10 +328,10 @@ export const products: Product[] = [
     variants: [
       {
         size: "80mg",
-        price: 94.99,
+        price: listPrice("klow-blend", "80mg"),
         sku: "KLOW-80MG",
         image: "/products/klow-blend-80mg.png",
-      }, // PLACEHOLDER price
+      },
     ],
     specs: {
       form: LYOPHILIZED,

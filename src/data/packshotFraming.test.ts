@@ -161,4 +161,128 @@ describe("packshot framing", () => {
       }
     }
   });
+
+  it("keeps the same vial pixels across sizes of one product (only dosage may differ)", async () => {
+    // Secondary sizes must be master copies with only the dosage band changed.
+    // Otherwise switching sizes on the product page makes the bottle jump.
+    const dosageBand = { minY: Math.floor(1024 * 0.78), maxY: Math.floor(1024 * 0.88) };
+
+    for (const product of products) {
+      if (product.variants.length < 2) continue;
+
+      const masterPath = path.join(
+        productsDir,
+        path.basename(product.variants[0]!.image),
+      );
+      const master = await sharp(masterPath)
+        .ensureAlpha()
+        .raw()
+        .toBuffer({ resolveWithObject: true });
+
+      for (const variant of product.variants.slice(1)) {
+        const variantPath = path.join(
+          productsDir,
+          path.basename(variant.image),
+        );
+        const other = await sharp(variantPath)
+          .ensureAlpha()
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+
+        expect(other.info.width).toBe(master.info.width);
+        expect(other.info.height).toBe(master.info.height);
+
+        const w = master.info.width;
+        const ch = master.info.channels;
+        let outsideDiffs = 0;
+        let driftX = 0;
+        let driftSamples = 0;
+
+        for (let y = 0; y < master.info.height; y++) {
+          const inDosageBand = y >= dosageBand.minY && y <= dosageBand.maxY;
+          for (let x = 0; x < w; x++) {
+            const i = (y * w + x) * ch;
+            const differs =
+              master.data[i] !== other.data[i] ||
+              master.data[i + 1] !== other.data[i + 1] ||
+              master.data[i + 2] !== other.data[i + 2];
+            if (!differs) continue;
+            if (inDosageBand) continue;
+            outsideDiffs++;
+          }
+
+          // Mid-body rows: opaque column centers must match (catches sideways jumps).
+          if (y < 180 || y > 720) continue;
+          let masterMin = -1;
+          let masterMax = -1;
+          let otherMin = -1;
+          let otherMax = -1;
+          for (let x = 0; x < w; x++) {
+            const i = (y * w + x) * ch;
+            const masterInk =
+              master.data[i + 3]! > 8 &&
+              (master.data[i]! < VIAL_BODY_THRESHOLD ||
+                master.data[i + 1]! < VIAL_BODY_THRESHOLD ||
+                master.data[i + 2]! < VIAL_BODY_THRESHOLD);
+            const otherInk =
+              other.data[i + 3]! > 8 &&
+              (other.data[i]! < VIAL_BODY_THRESHOLD ||
+                other.data[i + 1]! < VIAL_BODY_THRESHOLD ||
+                other.data[i + 2]! < VIAL_BODY_THRESHOLD);
+            if (masterInk) {
+              if (masterMin < 0) masterMin = x;
+              masterMax = x;
+            }
+            if (otherInk) {
+              if (otherMin < 0) otherMin = x;
+              otherMax = x;
+            }
+          }
+          if (masterMin >= 0 && otherMin >= 0) {
+            const masterCenter = (masterMin + masterMax) / 2;
+            const otherCenter = (otherMin + otherMax) / 2;
+            driftX += otherCenter - masterCenter;
+            driftSamples++;
+          }
+        }
+
+        expect(
+          outsideDiffs,
+          `${product.slug} ${variant.size} differs from master outside dosage band`,
+        ).toBe(0);
+
+        const avgDrift = driftSamples ? driftX / driftSamples : 0;
+        expect(
+          Math.abs(avgDrift),
+          `${product.slug} ${variant.size} vial drift ${avgDrift.toFixed(2)}px`,
+        ).toBeLessThanOrEqual(0.5);
+      }
+    }
+  });
+
+  it("keeps dosage text the same height across sizes of one product", async () => {
+    const { measureDosageInk } = await import(
+      "../../scripts/lib/packshotFromMaster.mjs"
+    );
+
+    for (const product of products) {
+      if (product.variants.length < 2) continue;
+
+      const heights: number[] = [];
+      for (const variant of product.variants) {
+        const filePath = path.join(
+          productsDir,
+          path.basename(variant.image),
+        );
+        const ink = await measureDosageInk(filePath);
+        heights.push(ink.height);
+      }
+
+      const spread = Math.max(...heights) - Math.min(...heights);
+      expect(
+        spread,
+        `${product.slug} dosage heights ${heights.join(", ")}`,
+      ).toBeLessThanOrEqual(2);
+    }
+  });
 });

@@ -10,21 +10,33 @@ import { formatUSD } from "@/lib/checkout/pricing";
 type ProductPurchaseProps = {
   product: Product;
   disclaimer: string;
+  /** sku -> qty on hand. null means inventory not configured (treat as available). */
+  availability?: Record<string, number | null>;
 };
 
-export function ProductPurchase({ product, disclaimer }: ProductPurchaseProps) {
+export function ProductPurchase({
+  product,
+  disclaimer,
+  availability = {},
+}: ProductPurchaseProps) {
   const { add } = useCart();
   const [size, setSize] = useState(product.variants[0]?.size ?? "");
   const [qty, setQty] = useState(1);
 
   const variant = product.variants.find((item) => item.size === size);
   const hasVariants = product.variants.length > 0;
+  const stock =
+    variant && Object.prototype.hasOwnProperty.call(availability, variant.sku)
+      ? availability[variant.sku]
+      : null;
+  const inStock = stock === null || stock === undefined || stock > 0;
+  const maxQty = stock === null || stock === undefined ? 99 : Math.max(0, stock);
 
   function handleAdd() {
-    if (!variant) {
+    if (!variant || !inStock) {
       return;
     }
-    add(product.slug, variant.size, qty);
+    add(product.slug, variant.size, Math.min(qty, maxQty || 1));
   }
 
   return (
@@ -48,6 +60,16 @@ export function ProductPurchase({ product, disclaimer }: ProductPurchaseProps) {
               <div className="flex flex-wrap gap-2">
                 {product.variants.map((item) => {
                   const active = item.size === size;
+                  const itemStock = Object.prototype.hasOwnProperty.call(
+                    availability,
+                    item.sku,
+                  )
+                    ? availability[item.sku]
+                    : null;
+                  const itemInStock =
+                    itemStock === null ||
+                    itemStock === undefined ||
+                    itemStock > 0;
                   return (
                     <button
                       key={item.sku}
@@ -58,12 +80,17 @@ export function ProductPurchase({ product, disclaimer }: ProductPurchaseProps) {
                         active
                           ? "border-accent bg-accent/10 text-ink"
                           : "border-line text-ink-soft hover:border-ink/40 hover:text-ink"
-                      }`}
+                      } ${itemInStock ? "" : "opacity-50"}`}
                     >
                       {item.size}
                       <span className="ml-2 text-ink-soft">
                         {formatUSD(item.price)}
                       </span>
+                      {!itemInStock ? (
+                        <span className="ml-2 text-[0.65rem] uppercase tracking-[0.12em]">
+                          Out
+                        </span>
+                      ) : null}
                     </button>
                   );
                 })}
@@ -101,7 +128,9 @@ export function ProductPurchase({ product, disclaimer }: ProductPurchaseProps) {
               <button
                 type="button"
                 aria-label="Increase quantity"
-                onClick={() => setQty((value) => Math.min(99, value + 1))}
+                onClick={() =>
+                  setQty((value) => Math.min(Math.max(maxQty, 1), value + 1))
+                }
                 className="px-4 py-3 text-lg text-ink-soft transition hover:text-ink"
               >
                 +
@@ -111,12 +140,16 @@ export function ProductPurchase({ product, disclaimer }: ProductPurchaseProps) {
             <button
               type="button"
               onClick={handleAdd}
-              disabled={!hasVariants || !variant}
+              disabled={!hasVariants || !variant || !inStock || maxQty < 1}
               className="btn btn-primary btn-arrow flex-1 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              Add to cart
+              {!inStock || maxQty < 1 ? "Out of stock" : "Add to cart"}
             </button>
           </div>
+
+          {stock !== null && stock !== undefined && stock > 0 ? (
+            <p className="mt-3 text-xs text-ink-soft">{stock} in stock</p>
+          ) : null}
 
           <div className="mt-8">
             <Link
@@ -132,16 +165,25 @@ export function ProductPurchase({ product, disclaimer }: ProductPurchaseProps) {
           </p>
         </div>
 
-        {variant?.image ? (
+        {product.variants.some((item) => item.image) ? (
           <div className="relative mx-auto aspect-square w-full max-w-[18rem] overflow-hidden border border-line bg-white sm:mx-0 sm:justify-self-end">
-            <Image
-              src={variant.image}
-              alt={`${product.name} ${variant.size} research vial`}
-              fill
-              sizes="288px"
-              className="object-contain p-3"
-              priority
-            />
+            {product.variants.map((item) =>
+              item.image ? (
+                <Image
+                  key={item.sku}
+                  src={item.image}
+                  alt={`${product.name} ${item.size} research vial`}
+                  fill
+                  sizes="288px"
+                  priority={item.size === product.variants[0]?.size}
+                  className={`object-contain object-center p-3 transition-opacity duration-200 ${
+                    item.size === size
+                      ? "opacity-100"
+                      : "pointer-events-none opacity-0"
+                  }`}
+                />
+              ) : null,
+            )}
           </div>
         ) : null}
       </div>

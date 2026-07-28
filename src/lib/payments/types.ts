@@ -31,8 +31,22 @@ export type ChargeInput = {
   amount: number;
   currency: string;
   billing: BillingInfo;
-  card: CardInput;
+  /** Optional for HPP providers that collect cards off-site. */
+  card?: CardInput;
   items: OrderItem[];
+};
+
+export type RefundInput = {
+  orderId: string;
+  transactionId: string;
+  amount: number;
+  currency: string;
+};
+
+export type RefundOutcome = {
+  ok: boolean;
+  transactionId?: string;
+  message?: string;
 };
 
 // Direct/mock providers settle synchronously and return a `result`. A hosted
@@ -51,4 +65,9 @@ export type CheckoutOutcome =
 export interface PaymentProvider {
   readonly name: string;
   beginCheckout(input: ChargeInput): Promise<CheckoutOutcome>;
+  refund?(input: RefundInput): Promise<RefundOutcome>;
+  cancel?(input: {
+    orderId: string;
+    transactionId: string;
+  }): Promise<RefundOutcome>;
 }

@@ -7,9 +7,21 @@ import {
   buildStoreNotification,
   type OrderEmailData,
 } from "@/lib/email/orderConfirmation";
-import { getOrderStore, type OrderRecord } from "@/lib/orders";
-import { getPaymentProvider } from "@/lib/payments";
+import {
+  approvedOrderDefaults,
+  getOrderStore,
+  type OrderRecord,
+} from "@/lib/orders";
+import {
+  getPaymentProvider,
+  paymentProviderRequiresCard,
+} from "@/lib/payments";
 import type { BillingInfo, CardInput } from "@/lib/payments/types";
+import {
+  reserveStock,
+  releaseStock,
+  stockItemsFromOrder,
+} from "@/lib/inventory";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -123,18 +135,33 @@ export async function POST(request: Request) {
     );
   }
 
-  const card = parseCard(body.card);
-  if (!card) {
-    return NextResponse.json(
-      { error: "Invalid card details." },
-      { status: 400 },
-    );
-  }
-
   const orderId = generateOrderId();
   const provider = getPaymentProvider();
+  const stockItems = stockItemsFromOrder(order.items);
+  let stockReserved = false;
+
+  let card: CardInput | undefined;
+  if (paymentProviderRequiresCard(provider.name)) {
+    const parsed = parseCard(body.card);
+    if (!parsed) {
+      return NextResponse.json(
+        { error: "Invalid card details." },
+        { status: 400 },
+      );
+    }
+    card = parsed;
+  }
 
   try {
+    try {
+      await reserveStock(stockItems, orderId);
+      stockReserved = true;
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Insufficient stock.";
+      return NextResponse.json({ error: message }, { status: 409 });
+    }
+
     const outcome = await provider.beginCheckout({
       orderId,
       amount: order.total,
@@ -145,29 +172,50 @@ export async function POST(request: Request) {
     });
 
     if (outcome.kind === "redirect") {
-      return NextResponse.json({ redirectUrl: outcome.url });
+      await persistOrder(
+        approvedOrderDefaults({
+          orderId,
+          createdAt: new Date().toISOString(),
+          provider: provider.name,
+          paymentStatus: "pending",
+          items: order.items,
+          subtotal: order.subtotal,
+          shipping: order.shipping,
+          total: order.total,
+          currency: "USD",
+          customer: billing,
+        }),
+      );
+      return NextResponse.json({ redirectUrl: outcome.url, orderId });
     }
 
     if (!outcome.approved) {
+      if (stockReserved) {
+        await releaseStock(stockItems, orderId).catch((releaseError) => {
+          console.error(`Failed to release stock for ${orderId}:`, releaseError);
+        });
+      }
       return NextResponse.json(
         { error: outcome.message ?? "Payment was declined." },
         { status: 402 },
       );
     }
 
-    await persistOrder({
-      orderId: outcome.orderId,
-      createdAt: new Date().toISOString(),
-      provider: provider.name,
-      transactionId: outcome.transactionId,
-      status: "approved",
-      items: order.items,
-      subtotal: order.subtotal,
-      shipping: order.shipping,
-      total: order.total,
-      currency: "USD",
-      customer: billing,
-    });
+    await persistOrder(
+      approvedOrderDefaults({
+        orderId: outcome.orderId,
+        createdAt: new Date().toISOString(),
+        provider: provider.name,
+        transactionId: outcome.transactionId,
+        paymentStatus: "approved",
+        items: order.items,
+        subtotal: order.subtotal,
+        shipping: order.shipping,
+        total: order.total,
+        currency: "USD",
+        customer: billing,
+      }),
+    );
 
     await sendOrderEmails({
       orderId: outcome.orderId,
@@ -186,6 +234,11 @@ export async function POST(request: Request) {
       total: order.total,
     });
   } catch (error) {
+    if (stockReserved) {
+      await releaseStock(stockItems, orderId).catch((releaseError) => {
+        console.error(`Failed to release stock for ${orderId}:`, releaseError);
+      });
+    }
     console.error("Checkout error:", error);
     return NextResponse.json(
       { error: "Payment processing failed. Please try again." },
