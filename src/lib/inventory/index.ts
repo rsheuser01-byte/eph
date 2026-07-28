@@ -14,6 +14,8 @@ export type StockMovementReason =
 export type InventoryRow = {
   sku: string;
   quantityOnHand: number;
+  /** on_hand minus active reservations */
+  quantityAvailable: number;
   updatedAt: string;
 };
 
@@ -60,18 +62,13 @@ export async function getStockBySku(sku: string): Promise<number | null> {
     return null;
   }
   const client = getSupabaseAdmin();
-  const { data, error } = await client
-    .from("inventory")
-    .select("quantity_on_hand")
-    .eq("sku", sku)
-    .maybeSingle();
+  const { data, error } = await client.rpc("inventory_available_qty", {
+    p_sku: sku,
+  });
   if (error) {
     throw new Error(error.message);
   }
-  if (!data) {
-    return 0;
-  }
-  return Number(data.quantity_on_hand);
+  return Number(data ?? 0);
 }
 
 export async function listInventory(): Promise<InventoryRow[]> {
@@ -86,11 +83,34 @@ export async function listInventory(): Promise<InventoryRow[]> {
   if (error) {
     throw new Error(error.message);
   }
-  return (data ?? []).map((row) => ({
-    sku: String(row.sku),
-    quantityOnHand: Number(row.quantity_on_hand),
-    updatedAt: String(row.updated_at),
-  }));
+
+  const { data: reservedRows, error: reservedError } = await client
+    .from("inventory_reservations")
+    .select("sku, quantity")
+    .eq("status", "active");
+  if (reservedError) {
+    throw new Error(reservedError.message);
+  }
+
+  const reservedBySku = new Map<string, number>();
+  for (const row of reservedRows ?? []) {
+    const sku = String(row.sku);
+    reservedBySku.set(
+      sku,
+      (reservedBySku.get(sku) ?? 0) + Number(row.quantity),
+    );
+  }
+
+  return (data ?? []).map((row) => {
+    const onHand = Number(row.quantity_on_hand);
+    const reserved = reservedBySku.get(String(row.sku)) ?? 0;
+    return {
+      sku: String(row.sku),
+      quantityOnHand: onHand,
+      quantityAvailable: Math.max(0, onHand - reserved),
+      updatedAt: String(row.updated_at),
+    };
+  });
 }
 
 export async function listMovements(

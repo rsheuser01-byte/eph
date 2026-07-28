@@ -68,6 +68,11 @@ ADMIN_SESSION_SECRET=
 
 # Optional low-stock email threshold (default 5)
 LOW_STOCK_THRESHOLD=5
+
+# Inventory reservations (HPP pending checkouts)
+CHECKOUT_RESERVATION_MINUTES=30
+# Protects /api/cron/expire-reservations (Authorization: Bearer …)
+CRON_SECRET=
 ```
 
 ### Orders & inventory
@@ -76,7 +81,8 @@ LOW_STOCK_THRESHOLD=5
 - SQL migrations: [`supabase/migrations/`](./supabase/migrations/).
 - Import local JSON history: `npx tsx scripts/import-orders-json.ts` (with Supabase env set).
 - Admin: `/admin/login` → `/admin/orders` (fulfill / refund) and `/admin/inventory` (receive / adjust).
-- Inventory RPCs: `reserve_stock`, `release_stock`, `adjust_stock`. Checkout decrements stock when Supabase is configured; without Supabase keys, stock checks are skipped (local-only).
+- Inventory: checkout creates **active reservations** (does not decrement on-hand until payment is verified). Available qty = on hand − active reservations. Call `/api/cron/expire-reservations` with `CRON_SECRET` to expire abandoned HPP checkouts.
+- Legacy RPCs `reserve_stock` / `release_stock` remain for compatibility; new flow uses `create_inventory_reservations` / `commit_inventory_reservations` / `release_inventory_reservations`.
 
 ### Payments
 

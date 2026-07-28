@@ -38,6 +38,7 @@ export default async function AdminInventoryPage() {
       sku: variant.sku,
       label: `${product.name} · ${variant.size}`,
       quantityOnHand: bySku.get(variant.sku)?.quantityOnHand ?? 0,
+      quantityAvailable: bySku.get(variant.sku)?.quantityAvailable ?? 0,
     })),
   );
 
@@ -50,7 +51,8 @@ export default async function AdminInventoryPage() {
             Inventory
           </h1>
           <p className="mt-4 text-sm text-ink-soft">
-            Simple quantity on hand per variant SKU.
+            Simple quantity on hand per variant SKU (available excludes active
+            checkout reservations).
           </p>
           <p className="mt-3 text-sm">
             <Link href="/admin/orders" className="link-underline text-ink-soft">
@@ -75,6 +77,7 @@ export default async function AdminInventoryPage() {
                 <th className="py-3 pr-4 font-semibold">SKU</th>
                 <th className="py-3 pr-4 font-semibold">Product</th>
                 <th className="py-3 pr-4 font-semibold">On hand</th>
+                <th className="py-3 pr-4 font-semibold">Available</th>
                 <th className="py-3 pr-4 font-semibold">Adjust</th>
               </tr>
             </thead>
@@ -85,6 +88,9 @@ export default async function AdminInventoryPage() {
                   <td className="py-4 pr-4 text-ink-soft">{row.label}</td>
                   <td className="py-4 pr-4 tabular-nums text-ink">
                     {row.quantityOnHand}
+                  </td>
+                  <td className="py-4 pr-4 tabular-nums text-ink">
+                    {row.quantityAvailable}
                   </td>
                   <td className="py-4 pr-4">
                     <AdminInventoryAdjust sku={row.sku} />

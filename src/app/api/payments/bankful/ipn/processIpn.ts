@@ -12,6 +12,10 @@ import {
 } from "@/lib/payments/bankfulCallback";
 import { toCents } from "@/lib/payments/money";
 import type { PaymentEventStore } from "@/lib/payments/paymentEvents";
+import {
+  commitReservations,
+  releaseReservations,
+} from "@/lib/inventory/reservations";
 
 export type IpnProcessResult = {
   status: number;
@@ -25,6 +29,8 @@ export type IpnDependencies = {
   sendEmails: (orderId: string) => Promise<void>;
   logSecurityEvent: (event: string, detail: Record<string, unknown>) => void;
   verifyTransaction?: typeof verifyBankfulTransaction;
+  commitStock?: (orderId: string) => Promise<void>;
+  releaseStock?: (orderId: string) => Promise<void>;
 };
 
 /**
@@ -221,8 +227,33 @@ export async function processBankfulIpn(
   }
 
   const reconciledStatus = reconciliation.status;
+  const commitStock = deps.commitStock ?? commitReservations;
+  const releaseStock = deps.releaseStock ?? releaseReservations;
 
   if (reconciledStatus === "approved") {
+    try {
+      await commitStock(callback.orderId);
+    } catch (error) {
+      deps.logSecurityEvent("bankful_ipn_commit_stock_failed", {
+        orderId: callback.orderId,
+        message: error instanceof Error ? error.message : "unknown",
+      });
+      if (deps.orderStore.updateStatus) {
+        await deps.orderStore.updateStatus(callback.orderId, {
+          paymentStatus: "review_required",
+          transactionId: callback.transactionId,
+        });
+      }
+      await deps.paymentEvents.markProcessed(event.id, {
+        processingStatus: "failed",
+        errorMessage: "commit_stock_failed",
+      });
+      return {
+        status: 409,
+        body: { error: "Payment verified but inventory commit failed." },
+      };
+    }
+
     if (deps.orderStore.updateStatus) {
       await deps.orderStore.updateStatus(callback.orderId, {
         paymentStatus: "approved",
@@ -247,6 +278,12 @@ export async function processBankfulIpn(
     reconciledStatus === "declined" ||
     reconciledStatus === "cancelled"
   ) {
+    await releaseStock(callback.orderId).catch((error) => {
+      deps.logSecurityEvent("bankful_ipn_release_stock_failed", {
+        orderId: callback.orderId,
+        message: error instanceof Error ? error.message : "unknown",
+      });
+    });
     if (deps.orderStore.updateStatus) {
       await deps.orderStore.updateStatus(callback.orderId, {
         paymentStatus:

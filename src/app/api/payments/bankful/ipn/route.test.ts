@@ -167,6 +167,8 @@ describe("processBankfulIpn", () => {
       paymentEvents: events,
       sendEmails: emailSend,
       logSecurityEvent: vi.fn(),
+      commitStock: vi.fn().mockResolvedValue(undefined),
+      releaseStock: vi.fn().mockResolvedValue(undefined),
     };
   }
 
@@ -185,11 +187,13 @@ describe("processBankfulIpn", () => {
   });
 
   it("approves a valid signed callback once and emails once", async () => {
-    const result = await processBankfulIpn(signedFields(), deps());
+    const d = deps();
+    const result = await processBankfulIpn(signedFields(), d);
     expect(result.status).toBe(200);
     expect(result.body).toMatchObject({ ok: true, approved: true });
     expect(orders.get("ord_test_1")?.paymentStatus).toBe("approved");
     expect(emailSend).toHaveBeenCalledTimes(1);
+    expect(d.commitStock).toHaveBeenCalledWith("ord_test_1");
   });
 
   it("is idempotent on replay of the same approved callback", async () => {
@@ -243,14 +247,16 @@ describe("processBankfulIpn", () => {
   });
 
   it("marks declined pending orders without emailing", async () => {
+    const d = deps();
     const result = await processBankfulIpn(
       signedFields({ TRANS_STATUS_NAME: "DECLINED" }),
-      deps(),
+      d,
     );
     expect(result.status).toBe(200);
     expect(result.body).toMatchObject({ ok: true, approved: false });
     expect(orders.get("ord_test_1")?.paymentStatus).toBe("declined");
     expect(emailSend).not.toHaveBeenCalled();
+    expect(d.releaseStock).toHaveBeenCalledWith("ord_test_1");
   });
 
   it("uses a deterministic hash event id when Bankful request ids are absent", async () => {

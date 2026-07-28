@@ -7,7 +7,8 @@ export type PaymentStatus =
   | "refunded"
   | "partially_refunded"
   | "cancelled"
-  | "review_required";
+  | "review_required"
+  | "expired";
 
 export type FulfillmentStatus = "unfulfilled" | "fulfilled" | "cancelled";
 
@@ -28,6 +29,8 @@ export type OrderRecord = {
   currency: string;
   customer: BillingInfo;
   refundedAmount: number;
+  /** When inventory reservation for this checkout expires. */
+  reservationExpiresAt?: string;
 };
 
 export type OrderStatusUpdate = {
@@ -35,6 +38,7 @@ export type OrderStatusUpdate = {
   fulfillmentStatus?: FulfillmentStatus;
   transactionId?: string;
   refundedAmount?: number;
+  reservationExpiresAt?: string;
 };
 
 export interface OrderStore {

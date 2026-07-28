@@ -17,11 +17,13 @@ import {
   paymentProviderRequiresCard,
 } from "@/lib/payments";
 import type { BillingInfo, CardInput } from "@/lib/payments/types";
+import { stockItemsFromOrder } from "@/lib/inventory";
 import {
-  reserveStock,
-  releaseStock,
-  stockItemsFromOrder,
-} from "@/lib/inventory";
+  commitReservations,
+  createReservations,
+  releaseReservations,
+  reservationExpiresAt,
+} from "@/lib/inventory/reservations";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -94,7 +96,6 @@ function generateOrderId(): string {
   return `EPH-${Date.now().toString(36).toUpperCase()}-${random}`;
 }
 
-// Email failures must never void a paid order, so errors are logged, not thrown.
 async function sendOrderEmails(data: OrderEmailData): Promise<void> {
   try {
     const email = getEmailProvider();
@@ -105,13 +106,8 @@ async function sendOrderEmails(data: OrderEmailData): Promise<void> {
   }
 }
 
-// Persistence failures are logged but never void a paid order.
 async function persistOrder(record: OrderRecord): Promise<void> {
-  try {
-    await getOrderStore().save(record);
-  } catch (error) {
-    console.error(`Order ${record.orderId} could not be saved:`, error);
-  }
+  await getOrderStore().save(record);
 }
 
 export async function POST(request: Request) {
@@ -138,7 +134,8 @@ export async function POST(request: Request) {
   const orderId = generateOrderId();
   const provider = getPaymentProvider();
   const stockItems = stockItemsFromOrder(order.items);
-  let stockReserved = false;
+  let reserved = false;
+  const expiresAt = reservationExpiresAt();
 
   let card: CardInput | undefined;
   if (paymentProviderRequiresCard(provider.name)) {
@@ -153,9 +150,26 @@ export async function POST(request: Request) {
   }
 
   try {
+    // Persist pending order first so reservation metadata has an order row.
+    await persistOrder(
+      approvedOrderDefaults({
+        orderId,
+        createdAt: new Date().toISOString(),
+        provider: provider.name,
+        paymentStatus: "pending",
+        items: order.items,
+        subtotal: order.subtotal,
+        shipping: order.shipping,
+        total: order.total,
+        currency: "USD",
+        customer: billing,
+        reservationExpiresAt: expiresAt.toISOString(),
+      }),
+    );
+
     try {
-      await reserveStock(stockItems, orderId);
-      stockReserved = true;
+      await createReservations(stockItems, orderId, expiresAt);
+      reserved = true;
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Insufficient stock.";
@@ -172,28 +186,19 @@ export async function POST(request: Request) {
     });
 
     if (outcome.kind === "redirect") {
-      await persistOrder(
-        approvedOrderDefaults({
-          orderId,
-          createdAt: new Date().toISOString(),
-          provider: provider.name,
-          paymentStatus: "pending",
-          items: order.items,
-          subtotal: order.subtotal,
-          shipping: order.shipping,
-          total: order.total,
-          currency: "USD",
-          customer: billing,
-        }),
-      );
       return NextResponse.json({ redirectUrl: outcome.url, orderId });
     }
 
+    const store = getOrderStore();
+
     if (!outcome.approved) {
-      if (stockReserved) {
-        await releaseStock(stockItems, orderId).catch((releaseError) => {
-          console.error(`Failed to release stock for ${orderId}:`, releaseError);
+      if (reserved) {
+        await releaseReservations(orderId).catch((releaseError) => {
+          console.error(`Failed to release reservation for ${orderId}:`, releaseError);
         });
+      }
+      if (store.updateStatus) {
+        await store.updateStatus(orderId, { paymentStatus: "declined" });
       }
       return NextResponse.json(
         { error: outcome.message ?? "Payment was declined." },
@@ -201,21 +206,28 @@ export async function POST(request: Request) {
       );
     }
 
-    await persistOrder(
-      approvedOrderDefaults({
-        orderId: outcome.orderId,
-        createdAt: new Date().toISOString(),
-        provider: provider.name,
-        transactionId: outcome.transactionId,
+    try {
+      await commitReservations(orderId);
+    } catch (error) {
+      console.error(`Failed to commit reservation for ${orderId}:`, error);
+      if (store.updateStatus) {
+        await store.updateStatus(orderId, {
+          paymentStatus: "review_required",
+          transactionId: outcome.transactionId,
+        });
+      }
+      return NextResponse.json(
+        { error: "Payment received but inventory could not be confirmed. We will contact you." },
+        { status: 409 },
+      );
+    }
+
+    if (store.updateStatus) {
+      await store.updateStatus(orderId, {
         paymentStatus: "approved",
-        items: order.items,
-        subtotal: order.subtotal,
-        shipping: order.shipping,
-        total: order.total,
-        currency: "USD",
-        customer: billing,
-      }),
-    );
+        transactionId: outcome.transactionId,
+      });
+    }
 
     await sendOrderEmails({
       orderId: outcome.orderId,
@@ -234,9 +246,9 @@ export async function POST(request: Request) {
       total: order.total,
     });
   } catch (error) {
-    if (stockReserved) {
-      await releaseStock(stockItems, orderId).catch((releaseError) => {
-        console.error(`Failed to release stock for ${orderId}:`, releaseError);
+    if (reserved) {
+      await releaseReservations(orderId).catch((releaseError) => {
+        console.error(`Failed to release reservation for ${orderId}:`, releaseError);
       });
     }
     console.error("Checkout error:", error);

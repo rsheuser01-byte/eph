@@ -21,6 +21,7 @@ type OrderRow = {
   currency: string;
   customer: BillingInfo;
   refunded_amount: number | string;
+  reservation_expires_at: string | null;
 };
 
 type OrderItemRow = {
@@ -52,6 +53,7 @@ function mapRow(row: OrderRow, items: OrderItem[]): OrderRecord {
     currency: row.currency,
     customer: row.customer,
     refundedAmount: asNumber(row.refunded_amount),
+    reservationExpiresAt: row.reservation_expires_at ?? undefined,
   };
 }
 
@@ -86,6 +88,7 @@ export function createSupabaseOrderStore(
           currency: record.currency,
           customer: record.customer,
           refunded_amount: record.refundedAmount,
+          reservation_expires_at: record.reservationExpiresAt ?? null,
         },
         { onConflict: "id" },
       );
@@ -199,6 +202,9 @@ export function createSupabaseOrderStore(
       }
       if (patch.refundedAmount !== undefined) {
         updates.refunded_amount = patch.refundedAmount;
+      }
+      if (patch.reservationExpiresAt !== undefined) {
+        updates.reservation_expires_at = patch.reservationExpiresAt;
       }
 
       if (Object.keys(updates).length === 0) {

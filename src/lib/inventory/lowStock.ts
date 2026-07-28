@@ -12,13 +12,16 @@ export async function sendLowStockAlerts(
   threshold = Number(process.env.LOW_STOCK_THRESHOLD ?? DEFAULT_THRESHOLD),
 ): Promise<{ sent: boolean; skus: string[] }> {
   const rows = await listInventory();
-  const low = rows.filter((row) => row.quantityOnHand <= threshold);
+  const low = rows.filter((row) => row.quantityAvailable <= threshold);
   if (low.length === 0) {
     return { sent: false, skus: [] };
   }
 
   const lines = low
-    .map((row) => `- ${row.sku}: ${row.quantityOnHand} on hand`)
+    .map(
+      (row) =>
+        `- ${row.sku}: ${row.quantityAvailable} available (${row.quantityOnHand} on hand)`,
+    )
     .join("\n");
 
   const email = getEmailProvider();

@@ -24,6 +24,7 @@ Ordered roughly by priority.
       international shipping is offered.
 - [ ] Sales tax handling (none today).
 - [x] Inventory / stock status per variant (Supabase `inventory` + admin UI).
+- [x] Inventory **reservations** for HPP pending checkouts (commit/release/expire).
 
 ## Orders / email
 - [ ] Set up Resend: verify sending domain, set `EMAIL_PROVIDER=resend`,

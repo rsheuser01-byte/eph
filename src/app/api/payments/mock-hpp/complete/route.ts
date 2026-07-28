@@ -5,6 +5,7 @@ import {
   buildCustomerConfirmation,
   buildStoreNotification,
 } from "@/lib/email/orderConfirmation";
+import { commitReservations } from "@/lib/inventory/reservations";
 import { getOrderStore } from "@/lib/orders";
 
 export const runtime = "nodejs";
@@ -29,6 +30,15 @@ export async function GET(request: Request) {
   }
 
   if (existing.paymentStatus !== "approved" && store.updateStatus) {
+    try {
+      await commitReservations(orderId);
+    } catch (error) {
+      console.error(`Mock HPP commit reservation failed for ${orderId}:`, error);
+      return NextResponse.redirect(
+        new URL("/checkout?error=inventory_commit_failed", url.origin),
+      );
+    }
+
     await store.updateStatus(orderId, {
       paymentStatus: "approved",
       transactionId: `mock_hpp_${Date.now()}`,

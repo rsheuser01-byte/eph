@@ -84,6 +84,8 @@ export function createFileOrderStore(filePath = defaultPath()): OrderStore {
           patch.fulfillmentStatus ?? current.fulfillmentStatus,
         transactionId: patch.transactionId ?? current.transactionId,
         refundedAmount: patch.refundedAmount ?? current.refundedAmount,
+        reservationExpiresAt:
+          patch.reservationExpiresAt ?? current.reservationExpiresAt,
         status: paymentStatus,
       });
       orders[index] = updated;

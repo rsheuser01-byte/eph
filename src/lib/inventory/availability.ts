@@ -23,7 +23,7 @@ export async function getAvailabilityMap(
   }
 
   const rows = await listInventory();
-  const bySku = new Map(rows.map((row) => [row.sku, row.quantityOnHand]));
+  const bySku = new Map(rows.map((row) => [row.sku, row.quantityAvailable]));
   for (const sku of skus) {
     result[sku] = bySku.get(sku) ?? 0;
   }
