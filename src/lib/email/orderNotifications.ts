@@ -1,15 +1,10 @@
 import { formatUSD } from "@/lib/checkout/pricing";
 import type { EmailMessage } from "./types";
 import type { OrderEmailData } from "./orderConfirmation";
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
+import {
+  escapeEmailHtml,
+  wrapTransactionalEmailHtml,
+} from "./emailLayout";
 
 /** Allow only http(s) tracking links in customer email. */
 export function safeTrackingUrl(url: string | undefined): string | undefined {
@@ -42,6 +37,16 @@ export type RefundEmailDetails = {
   partial: boolean;
 };
 
+function simpleBody(orderId: string, extraHtml: string): string {
+  return `
+    <p style="margin:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0a1628;">
+      Order reference: <strong style="color:#00a0ec;">${escapeEmailHtml(
+        orderId,
+      )}</strong>
+    </p>
+    ${extraHtml}`;
+}
+
 export function buildShippedEmail(
   data: OrderEmailData,
   shipping: ShippingEmailDetails,
@@ -60,6 +65,8 @@ export function buildShippedEmail(
   const intro = `Good news — ${data.siteName} has shipped your order.`;
 
   const text = [
+    data.siteName,
+    "",
     heading,
     intro,
     "",
@@ -71,37 +78,39 @@ export function buildShippedEmail(
   ].join("\n");
 
   const trackingHtml = `
-    <p style="margin:16px 0 0;">Carrier: <strong>${escapeHtml(carrier)}</strong></p>
-    ${
-      trackingNumber
-        ? `<p style="margin:6px 0 0;">Tracking number: <strong>${escapeHtml(
-            trackingNumber,
-          )}</strong></p>`
-        : ""
-    }
-    ${
-      trackingUrl
-        ? `<p style="margin:6px 0 0;"><a href="${escapeHtml(
-            trackingUrl,
-          )}">Track your shipment</a></p>`
-        : ""
-    }`;
-
-  const html = `<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;color:#111;line-height:1.5;">
-    <div style="max-width:560px;margin:0 auto;padding:24px;">
-      <h1 style="font-size:20px;margin:0 0 4px;">${escapeHtml(heading)}</h1>
-      <p style="color:#555;margin:0 0 16px;">${escapeHtml(intro)}</p>
-      <p style="margin:0 0 16px;">Order reference: <strong>${escapeHtml(
-        data.orderId,
-      )}</strong></p>
-      ${trackingHtml}
-      <p style="color:#888;font-size:12px;margin-top:24px;">Research use only. Not for human or veterinary use.</p>
-    </div></body></html>`;
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f0f4f8;border:1px solid #e2e8f0;">
+      <tr>
+        <td style="padding:16px 18px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;color:#0a1628;">
+          <p style="margin:0 0 8px;">Carrier: <strong>${escapeEmailHtml(
+            carrier,
+          )}</strong></p>
+          ${
+            trackingNumber
+              ? `<p style="margin:0 0 8px;">Tracking number: <strong>${escapeEmailHtml(
+                  trackingNumber,
+                )}</strong></p>`
+              : ""
+          }
+          ${
+            trackingUrl
+              ? `<p style="margin:0;"><a href="${escapeEmailHtml(
+                  trackingUrl,
+                )}" style="color:#00a0ec;font-weight:600;">Track your shipment</a></p>`
+              : ""
+          }
+        </td>
+      </tr>
+    </table>`;
 
   return {
     to: data.customer.email,
     subject: `${data.siteName} order shipped — ${data.orderId}`,
-    html,
+    html: wrapTransactionalEmailHtml({
+      siteName: data.siteName,
+      heading,
+      intro,
+      bodyHtml: simpleBody(data.orderId, trackingHtml),
+    }),
     text,
   };
 }
@@ -117,6 +126,8 @@ export function buildRefundEmail(
   )} for your ${data.siteName} order.`;
 
   const text = [
+    data.siteName,
+    "",
     heading,
     intro,
     "",
@@ -128,27 +139,37 @@ export function buildRefundEmail(
     "Research use only. Not for human or veterinary use.",
   ].join("\n");
 
-  const html = `<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;color:#111;line-height:1.5;">
-    <div style="max-width:560px;margin:0 auto;padding:24px;">
-      <h1 style="font-size:20px;margin:0 0 4px;">${escapeHtml(heading)}</h1>
-      <p style="color:#555;margin:0 0 16px;">${escapeHtml(intro)}</p>
-      <p style="margin:0 0 8px;">Order reference: <strong>${escapeHtml(
-        data.orderId,
-      )}</strong></p>
-      <p style="margin:0 0 4px;">Refund amount: <strong>${formatUSD(
-        refund.refundedAmount,
-      )}</strong></p>
-      <p style="margin:0 0 4px;">Total refunded to date: ${formatUSD(
-        refund.totalRefunded,
-      )}</p>
-      <p style="margin:0;">Order total: ${formatUSD(data.total)}</p>
-      <p style="color:#888;font-size:12px;margin-top:24px;">Research use only. Not for human or veterinary use.</p>
-    </div></body></html>`;
+  const detailsHtml = `
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid #e2e8f0;">
+      <tr>
+        <td style="padding:8px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#5a6a7e;">Refund amount</td>
+        <td style="padding:8px 0;text-align:right;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0a1628;font-weight:700;">${formatUSD(
+          refund.refundedAmount,
+        )}</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#5a6a7e;">Total refunded to date</td>
+        <td style="padding:8px 0;text-align:right;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0a1628;">${formatUSD(
+          refund.totalRefunded,
+        )}</td>
+      </tr>
+      <tr>
+        <td style="padding:8px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#5a6a7e;">Order total</td>
+        <td style="padding:8px 0;text-align:right;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0a1628;">${formatUSD(
+          data.total,
+        )}</td>
+      </tr>
+    </table>`;
 
   return {
     to: data.customer.email,
     subject: `${data.siteName} ${kind} — ${data.orderId}`,
-    html,
+    html: wrapTransactionalEmailHtml({
+      siteName: data.siteName,
+      heading,
+      intro,
+      bodyHtml: simpleBody(data.orderId, detailsHtml),
+    }),
     text,
   };
 }
@@ -158,6 +179,8 @@ export function buildCancelledEmail(data: OrderEmailData): EmailMessage {
   const intro = `Your ${data.siteName} order has been cancelled. If you were charged, a refund will follow according to our refund policy.`;
 
   const text = [
+    data.siteName,
+    "",
     heading,
     intro,
     "",
@@ -166,20 +189,15 @@ export function buildCancelledEmail(data: OrderEmailData): EmailMessage {
     "Research use only. Not for human or veterinary use.",
   ].join("\n");
 
-  const html = `<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;color:#111;line-height:1.5;">
-    <div style="max-width:560px;margin:0 auto;padding:24px;">
-      <h1 style="font-size:20px;margin:0 0 4px;">${escapeHtml(heading)}</h1>
-      <p style="color:#555;margin:0 0 16px;">${escapeHtml(intro)}</p>
-      <p style="margin:0;">Order reference: <strong>${escapeHtml(
-        data.orderId,
-      )}</strong></p>
-      <p style="color:#888;font-size:12px;margin-top:24px;">Research use only. Not for human or veterinary use.</p>
-    </div></body></html>`;
-
   return {
     to: data.customer.email,
     subject: `${data.siteName} order cancelled — ${data.orderId}`,
-    html,
+    html: wrapTransactionalEmailHtml({
+      siteName: data.siteName,
+      heading,
+      intro,
+      bodyHtml: simpleBody(data.orderId, ""),
+    }),
     text,
   };
 }

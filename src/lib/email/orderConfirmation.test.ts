@@ -1,9 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { OrderEmailData } from "./orderConfirmation";
 import {
   buildCustomerConfirmation,
   buildStoreNotification,
 } from "./orderConfirmation";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 const data: OrderEmailData = {
   orderId: "EPH-TEST-1",
@@ -29,12 +33,15 @@ const data: OrderEmailData = {
 
 describe("buildCustomerConfirmation", () => {
   it("addresses the customer and includes the order reference and total", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const message = buildCustomerConfirmation(data);
     expect(message.to).toBe("[email protected]");
     expect(message.subject).toContain("EPH-TEST-1");
     expect(message.text).toContain("EPH-TEST-1");
     expect(message.text).toContain("$151.98");
     expect(message.html).toContain("GLP-3");
+    expect(message.html).toContain("https://example.com/images/logo.png");
+    expect(message.html).toContain('alt="Elevate Precision Health"');
   });
 
   it("escapes HTML in customer-provided fields", () => {

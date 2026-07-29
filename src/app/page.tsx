@@ -18,11 +18,11 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="hero-banner relative min-h-[min(92vh,880px)] overflow-hidden">
+      <section className="hero-banner relative min-h-[min(78vh,720px)] overflow-hidden">
         <div className="hero-banner-media" aria-hidden />
         <div className="hero-banner-scrim" aria-hidden />
 
-        <div className="site-shell relative z-[2] flex min-h-[min(92vh,880px)] flex-col justify-end pb-16 pt-28 sm:pb-24">
+        <div className="site-shell relative z-[2] flex min-h-[min(78vh,720px)] flex-col justify-center pb-16 pt-24 sm:pb-20 sm:pt-28">
           <h1 className="animate-rise font-display max-w-4xl text-[clamp(3rem,11vw,7rem)] font-semibold leading-[0.9] tracking-[-0.05em] text-on-dark">
             Elevate
             <br />
@@ -33,7 +33,7 @@ export default function HomePage() {
           <div className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
             <div>
               <p className="animate-rise-delay max-w-md text-xl font-medium leading-snug text-on-dark sm:text-2xl">
-                Precision peptide science for personalized wellness.
+                Precision peptide science for personalized wellness research.
               </p>
               <p className="animate-rise-delay-2 mt-5 max-w-md text-[0.95rem] leading-relaxed text-[color:var(--on-dark-muted)]">
                 A disciplined catalog. Lot-aware documentation. Support that

@@ -1,9 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { navLinks } from "@/data/site";
+import { navLinks, site } from "@/data/site";
 import { useCart } from "@/lib/cart/CartContext";
 
 // The header shows a dedicated "Products" CTA button, so drop it from the
@@ -40,13 +41,26 @@ export function SiteHeader() {
           scrolled ? "h-16" : "h-[4.5rem]"
         }`}
       >
-        <Link href="/" className="group min-w-0" onClick={() => setOpen(false)}>
-          <span className="font-display block text-[1.1rem] font-semibold uppercase tracking-[0.18em] text-on-dark transition duration-300 group-hover:tracking-[0.24em]">
-            Elevate
-          </span>
-          <span className="mt-1 block text-[0.62rem] font-medium uppercase tracking-[0.26em] text-[color:var(--on-dark-muted)]">
-            Precision Health
-          </span>
+        <Link
+          href="/"
+          className="group relative shrink-0"
+          onClick={() => setOpen(false)}
+        >
+          <span
+            aria-hidden
+            className="pointer-events-none absolute left-1/2 top-1/2 h-[240%] w-[175%] -translate-x-1/2 -translate-y-1/2 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.6)_0%,rgba(255,255,255,0.24)_40%,transparent_76%)] blur-[8px] transition duration-300 group-hover:opacity-90"
+          />
+          <Image
+            src="/images/logo-header-transparent.png"
+            alt={site.name}
+            width={1022}
+            height={255}
+            priority
+            unoptimized
+            className={`relative z-[1] w-auto max-w-[min(100%,220px)] transition-[height] duration-300 sm:max-w-[260px] ${
+              scrolled ? "h-9" : "h-10 sm:h-11"
+            }`}
+          />
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex" aria-label="Primary">

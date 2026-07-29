@@ -6,14 +6,15 @@
   --ink: #eaf1f9;
   --ink-soft: #93a6bd;
   --line: #1c2740;
-  --accent: #38c1ef;
-  --accent-deep: #1c9fd0;
-  --accent-soft: #8fdcf7;
+  /* Matched to vial / logo accent cyan (~0,160,236) */
+  --accent: #00a0ec;
+  --accent-deep: #0280c4;
+  --accent-soft: #7ad0f7;
   --panel: #04070f;
   --on-dark: #eaf1f9;
   --on-dark-muted: rgba(234, 241, 249, 0.72);
   --on-dark-soft: rgba(234, 241, 249, 0.5);
-  --focus: #38c1ef;
+  --focus: #00a0ec;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -239,7 +240,7 @@ a {
   z-index: 0;
   background-image: url("/images/hero-banner.png");
   background-size: cover;
-  background-position: 78% center;
+  background-position: 78% 40%;
   background-repeat: no-repeat;
 }
 
@@ -257,22 +258,22 @@ a {
     ),
     linear-gradient(
       180deg,
-      rgba(4, 7, 15, 0.2) 0%,
-      rgba(4, 7, 15, 0.1) 45%,
-      rgba(4, 7, 15, 0.55) 100%
+      rgba(4, 7, 15, 0.12) 0%,
+      rgba(4, 7, 15, 0.06) 40%,
+      rgba(4, 7, 15, 0.5) 100%
     );
 }
 
 @media (max-width: 767px) {
   .hero-banner-media {
-    background-position: 70% center;
+    background-position: 70% 35%;
   }
 
   .hero-banner-scrim {
     background: linear-gradient(
       180deg,
-      rgba(4, 7, 15, 0.55) 0%,
-      rgba(4, 7, 15, 0.6) 40%,
+      rgba(4, 7, 15, 0.45) 0%,
+      rgba(4, 7, 15, 0.55) 40%,
       rgba(4, 7, 15, 0.9) 100%
     );
   }

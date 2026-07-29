@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 
 /**
- * Shared social share image. Resolved against `metadataBase` (root layout),
- * so a relative path is turned into an absolute URL by Next.js. Dimensions
- * match the physical file in `public/` (the 1.91:1 ratio platforms expect).
+ * Shared social share image — same asset as the homepage hero.
+ * Resolved against `metadataBase` (root layout), so a relative path is
+ * turned into an absolute URL by Next.js. Dimensions match the file.
  */
 export const ogImage = {
-  url: "/og-image.png",
-  width: 1200,
-  height: 630,
+  url: "/images/hero-banner.png",
+  width: 1024,
+  height: 438,
 } as const;
 
 type PageMetadataInput = {

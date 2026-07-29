@@ -1,6 +1,10 @@
 import { formatUSD } from "@/lib/checkout/pricing";
 import type { BillingInfo, OrderItem } from "@/lib/payments/types";
 import type { EmailMessage } from "./types";
+import {
+  escapeEmailHtml,
+  wrapTransactionalEmailHtml,
+} from "./emailLayout";
 
 export type OrderEmailData = {
   orderId: string;
@@ -12,15 +16,6 @@ export type OrderEmailData = {
   customer: BillingInfo;
   siteName: string;
 };
-
-function escapeHtml(value: string): string {
-  return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
 
 function shippingLabel(shipping: number): string {
   return shipping === 0 ? "Free" : formatUSD(shipping);
@@ -41,11 +36,16 @@ function itemsHtml(items: OrderItem[]): string {
   return items
     .map(
       (item) =>
-        `<tr><td style="padding:6px 0;">${escapeHtml(item.name)} (${escapeHtml(
-          item.size,
-        )}) &times;${item.qty}</td><td style="padding:6px 0;text-align:right;">${formatUSD(
-          item.unitPrice * item.qty,
-        )}</td></tr>`,
+        `<tr>
+          <td style="padding:10px 0;border-bottom:1px solid #e2e8f0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0a1628;">${escapeEmailHtml(
+            item.name,
+          )} <span style="color:#5a6a7e;">(${escapeEmailHtml(
+            item.size,
+          )}) &times;${item.qty}</span></td>
+          <td style="padding:10px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0a1628;white-space:nowrap;">${formatUSD(
+            item.unitPrice * item.qty,
+          )}</td>
+        </tr>`,
     )
     .join("");
 }
@@ -63,45 +63,48 @@ function addressText(customer: BillingInfo): string {
 
 function totalsHtml(data: OrderEmailData): string {
   const tax = data.tax ?? 0;
+  const row = (label: string, value: string, bold = false) =>
+    `<tr>
+      <td style="padding:6px 0;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:${
+        bold ? "#0a1628" : "#5a6a7e"
+      };${bold ? "font-weight:700;" : ""}">${label}</td>
+      <td style="padding:6px 0;text-align:right;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0a1628;${
+        bold ? "font-weight:700;" : ""
+      }">${value}</td>
+    </tr>`;
+
   return `
-    <table style="width:100%;border-top:1px solid #ddd;margin-top:12px;">
-      <tr><td style="padding:4px 0;">Subtotal</td><td style="padding:4px 0;text-align:right;">${formatUSD(
-        data.subtotal,
-      )}</td></tr>
-      <tr><td style="padding:4px 0;">Shipping</td><td style="padding:4px 0;text-align:right;">${shippingLabel(
-        data.shipping,
-      )}</td></tr>
-      <tr><td style="padding:4px 0;">Tax</td><td style="padding:4px 0;text-align:right;">${formatUSD(
-        tax,
-      )}</td></tr>
-      <tr><td style="padding:8px 0;font-weight:bold;">Total</td><td style="padding:8px 0;text-align:right;font-weight:bold;">${formatUSD(
-        data.total,
-      )}</td></tr>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:8px;border-top:1px solid #e2e8f0;">
+      ${row("Subtotal", formatUSD(data.subtotal))}
+      ${row("Shipping", shippingLabel(data.shipping))}
+      ${row("Tax", formatUSD(tax))}
+      ${row("Total", formatUSD(data.total), true)}
     </table>`;
 }
 
-function baseHtml(heading: string, intro: string, data: OrderEmailData): string {
-  return `<!doctype html><html><body style="font-family:Arial,Helvetica,sans-serif;color:#111;line-height:1.5;">
-    <div style="max-width:560px;margin:0 auto;padding:24px;">
-      <h1 style="font-size:20px;margin:0 0 4px;">${escapeHtml(heading)}</h1>
-      <p style="color:#555;margin:0 0 16px;">${escapeHtml(intro)}</p>
-      <p style="margin:0 0 16px;">Order reference: <strong>${escapeHtml(
+function orderBodyHtml(data: OrderEmailData): string {
+  return `
+    <p style="margin:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0a1628;">
+      Order reference: <strong style="color:#00a0ec;">${escapeEmailHtml(
         data.orderId,
-      )}</strong></p>
-      <table style="width:100%;border-collapse:collapse;">${itemsHtml(
-        data.items,
-      )}</table>
-      ${totalsHtml(data)}
-      <h2 style="font-size:15px;margin:24px 0 6px;">Ship to</h2>
-      <p style="white-space:pre-line;margin:0;color:#333;">${escapeHtml(
-        addressText(data.customer),
-      )}</p>
-      <p style="color:#888;font-size:12px;margin-top:24px;">Research use only. Not for human or veterinary use.</p>
-    </div></body></html>`;
+      )}</strong>
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+      ${itemsHtml(data.items)}
+    </table>
+    ${totalsHtml(data)}
+    <p style="margin:24px 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#5a6a7e;">
+      Ship to
+    </p>
+    <p style="white-space:pre-line;margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.5;color:#0a1628;">${escapeEmailHtml(
+      addressText(data.customer),
+    )}</p>`;
 }
 
 function baseText(heading: string, intro: string, data: OrderEmailData): string {
   return [
+    data.siteName,
+    "",
     heading,
     intro,
     "",
@@ -121,15 +124,36 @@ function baseText(heading: string, intro: string, data: OrderEmailData): string 
   ].join("\n");
 }
 
+function buildOrderEmail(
+  data: OrderEmailData,
+  to: string,
+  subject: string,
+  heading: string,
+  intro: string,
+): EmailMessage {
+  return {
+    to,
+    subject,
+    html: wrapTransactionalEmailHtml({
+      siteName: data.siteName,
+      heading,
+      intro,
+      bodyHtml: orderBodyHtml(data),
+    }),
+    text: baseText(heading, intro, data),
+  };
+}
+
 export function buildCustomerConfirmation(data: OrderEmailData): EmailMessage {
   const heading = `Order confirmed — ${data.orderId}`;
   const intro = `Thank you for your order with ${data.siteName}. Payment was approved and your order is being prepared.`;
-  return {
-    to: data.customer.email,
-    subject: `${data.siteName} order confirmation — ${data.orderId}`,
-    html: baseHtml(heading, intro, data),
-    text: baseText(heading, intro, data),
-  };
+  return buildOrderEmail(
+    data,
+    data.customer.email,
+    `${data.siteName} order confirmation — ${data.orderId}`,
+    heading,
+    intro,
+  );
 }
 
 export function buildStoreNotification(
@@ -138,10 +162,11 @@ export function buildStoreNotification(
 ): EmailMessage {
   const heading = `New order — ${data.orderId}`;
   const intro = `New order from ${data.customer.firstName} ${data.customer.lastName} (${data.customer.email}).`;
-  return {
+  return buildOrderEmail(
+    data,
     to,
-    subject: `New order ${data.orderId} — ${formatUSD(data.total)}`,
-    html: baseHtml(heading, intro, data),
-    text: baseText(heading, intro, data),
-  };
+    `New order ${data.orderId} — ${formatUSD(data.total)}`,
+    heading,
+    intro,
+  );
 }

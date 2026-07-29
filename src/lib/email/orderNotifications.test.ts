@@ -1,10 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { OrderEmailData } from "./orderConfirmation";
 import {
   buildCancelledEmail,
   buildRefundEmail,
   buildShippedEmail,
 } from "./orderNotifications";
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 const data: OrderEmailData = {
   orderId: "EPH-SHIP-1",
@@ -30,6 +34,7 @@ const data: OrderEmailData = {
 
 describe("buildShippedEmail", () => {
   it("includes carrier and tracking details", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const message = buildShippedEmail(data, {
       carrier: "UPS",
       trackingNumber: "1Z999",
@@ -41,6 +46,7 @@ describe("buildShippedEmail", () => {
     expect(message.text).toContain("1Z999");
     expect(message.text).toContain("https://track.example/1Z999");
     expect(message.html).toContain("https://track.example/1Z999");
+    expect(message.html).toContain("https://example.com/images/logo.png");
   });
 
   it("omits non-http tracking URLs from HTML links", () => {
@@ -56,6 +62,7 @@ describe("buildShippedEmail", () => {
 
 describe("buildRefundEmail", () => {
   it("describes a full refund", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const message = buildRefundEmail(data, {
       refundedAmount: 81.99,
       totalRefunded: 81.99,
@@ -64,6 +71,7 @@ describe("buildRefundEmail", () => {
     expect(message.subject.toLowerCase()).toContain("refund");
     expect(message.text).toContain("$81.99");
     expect(message.text.toLowerCase()).toContain("full");
+    expect(message.html).toContain("https://example.com/images/logo.png");
   });
 
   it("describes a partial refund", () => {
@@ -79,9 +87,11 @@ describe("buildRefundEmail", () => {
 
 describe("buildCancelledEmail", () => {
   it("notifies the customer the order was cancelled", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
     const message = buildCancelledEmail(data);
     expect(message.to).toBe("ada@example.com");
     expect(message.subject.toLowerCase()).toContain("cancelled");
     expect(message.text).toContain("EPH-SHIP-1");
+    expect(message.html).toContain("https://example.com/images/logo.png");
   });
 });
