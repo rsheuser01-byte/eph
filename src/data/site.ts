@@ -53,7 +53,7 @@ export const operatingNotes = [
   {
     step: "02",
     title: "Document the lot",
-    body: "Identity and purity paperwork stay attached to each product, not buried in a generic FAQ.",
+    body: "Identity and purity paperwork stays with the lot — available on request, backed by our manufacturing and analytical partner BoHai Peptide.",
   },
   {
     step: "03",

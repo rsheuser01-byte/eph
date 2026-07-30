@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
 import { useState } from "react";
 import type { Product } from "@/data/products";
+import { ProductAssaySignals } from "@/components/ProductAssaySignals";
+import { RestockNotifyForm } from "@/components/RestockNotifyForm";
 import { useCart } from "@/lib/cart/CartContext";
 import { formatUSD } from "@/lib/checkout/pricing";
 
@@ -31,6 +32,8 @@ export function ProductPurchase({
       : null;
   const inStock = stock === null || stock === undefined || stock > 0;
   const maxQty = stock === null || stock === undefined ? 99 : Math.max(0, stock);
+  const showNotify = Boolean(variant) && (!inStock || maxQty < 1);
+  const showAssay = product.category !== "Supply";
 
   function handleAdd() {
     if (!variant || !inStock) {
@@ -51,6 +54,10 @@ export function ProductPurchase({
       <p className="mt-8 max-w-2xl text-base leading-relaxed text-ink-soft">
         {product.shortDescription}
       </p>
+
+      {showAssay ? (
+        <ProductAssaySignals productSlug={product.slug} variant="detail" />
+      ) : null}
 
       <div className="mt-10 grid gap-10 border-t border-line pt-10 sm:grid-cols-[minmax(0,1fr)_minmax(0,14rem)] sm:items-start lg:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
         <div className="min-w-0 max-w-md">
@@ -108,57 +115,58 @@ export function ProductPurchase({
             </p>
           ) : null}
 
-          <div
-            className={`flex flex-col gap-3 sm:flex-row sm:items-stretch ${
-              variant ? "mt-6" : ""
-            }`}
-          >
-            <div className="flex items-center border border-line">
+          {showNotify && variant ? (
+            <RestockNotifyForm
+              key={variant.sku}
+              productSlug={product.slug}
+              productName={product.name}
+              sku={variant.sku}
+              size={variant.size}
+            />
+          ) : (
+            <div
+              className={`flex flex-col gap-3 sm:flex-row sm:items-stretch ${
+                variant ? "mt-6" : ""
+              }`}
+            >
+              <div className="flex items-center border border-line">
+                <button
+                  type="button"
+                  aria-label="Decrease quantity"
+                  onClick={() => setQty((value) => Math.max(1, value - 1))}
+                  className="px-4 py-3 text-lg text-ink-soft transition hover:text-ink"
+                >
+                  −
+                </button>
+                <span className="min-w-10 text-center text-sm font-semibold tabular-nums text-ink">
+                  {qty}
+                </span>
+                <button
+                  type="button"
+                  aria-label="Increase quantity"
+                  onClick={() =>
+                    setQty((value) => Math.min(Math.max(maxQty, 1), value + 1))
+                  }
+                  className="px-4 py-3 text-lg text-ink-soft transition hover:text-ink"
+                >
+                  +
+                </button>
+              </div>
+
               <button
                 type="button"
-                aria-label="Decrease quantity"
-                onClick={() => setQty((value) => Math.max(1, value - 1))}
-                className="px-4 py-3 text-lg text-ink-soft transition hover:text-ink"
+                onClick={handleAdd}
+                disabled={!hasVariants || !variant || !inStock || maxQty < 1}
+                className="btn btn-primary btn-arrow flex-1 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                −
-              </button>
-              <span className="min-w-10 text-center text-sm font-semibold tabular-nums text-ink">
-                {qty}
-              </span>
-              <button
-                type="button"
-                aria-label="Increase quantity"
-                onClick={() =>
-                  setQty((value) => Math.min(Math.max(maxQty, 1), value + 1))
-                }
-                className="px-4 py-3 text-lg text-ink-soft transition hover:text-ink"
-              >
-                +
+                Add to cart
               </button>
             </div>
-
-            <button
-              type="button"
-              onClick={handleAdd}
-              disabled={!hasVariants || !variant || !inStock || maxQty < 1}
-              className="btn btn-primary btn-arrow flex-1 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {!inStock || maxQty < 1 ? "Out of stock" : "Add to cart"}
-            </button>
-          </div>
+          )}
 
           {stock !== null && stock !== undefined && stock > 0 ? (
             <p className="mt-3 text-xs text-ink-soft">{stock} in stock</p>
           ) : null}
-
-          <div className="mt-8">
-            <Link
-              href="/coa"
-              className="link-underline text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft"
-            >
-              Assay policy →
-            </Link>
-          </div>
 
           <p className="mt-12 text-[0.7rem] leading-relaxed text-ink-soft/80">
             {disclaimer}

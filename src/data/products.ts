@@ -229,6 +229,33 @@ export const products: Product[] = [
     },
   },
   {
+    slug: "pt-141",
+    name: "PT-141",
+    sku: "PT141",
+    category: "Peptide",
+    shortDescription:
+      "Bremelanotide research peptide for melanocortin receptor pathway studies.",
+    featured: false,
+    variants: [
+      {
+        size: "10mg",
+        price: listPrice("pt-141", "10mg"),
+        sku: "PT141-10MG",
+        image: "/products/pt-141-10mg.png",
+      },
+    ],
+    specs: {
+      form: LYOPHILIZED,
+      researchApplication:
+        "Melanocortin receptor signaling studies in controlled laboratory models.",
+      molecularWeight: "1025.2 g/mol",
+      sequence: "Ac-Nle-cyclo[Asp-His-D-Phe-Arg-Trp-Lys]-OH",
+      appearance: POWDER_APPEARANCE,
+      storage: LYOPHILIZED_STORAGE,
+      synonyms: "Bremelanotide",
+    },
+  },
+  {
     slug: "nad",
     name: "NAD+",
     sku: "NAD",

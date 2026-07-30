@@ -116,6 +116,8 @@ export const RATE_LIMITS = {
   adminRefund: { limit: 30, windowMs: 10 * 60_000 },
   adminInventory: { limit: 60, windowMs: 10 * 60_000 },
   adminFulfillment: { limit: 60, windowMs: 10 * 60_000 },
+  /** Restock notify form on product pages. */
+  stockNotify: { limit: 10, windowMs: 10 * 60_000 },
 } as const;
 
 export function resetMemoryRateLimits(): void {

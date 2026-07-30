@@ -1,4 +1,5 @@
 import { productSpecRows, type Product } from "@/data/products";
+import { getProductAssaySignals } from "@/data/coa";
 import { molecularFormulaParts } from "@/lib/chemistry/molecularFormula";
 
 type ProductSpecsProps = {
@@ -7,6 +8,25 @@ type ProductSpecsProps = {
 
 export function ProductSpecs({ product }: ProductSpecsProps) {
   const rows = productSpecRows(product);
+  const assay = getProductAssaySignals(product.slug);
+  const assayRows =
+    product.category === "Supply"
+      ? []
+      : [
+          assay.purity ? { label: "Lot purity", value: assay.purity } : null,
+          assay.testMethods
+            ? { label: "Test methods", value: assay.testMethods }
+            : null,
+          assay.testingLabName
+            ? {
+                label: assay.hasPublishedCoa
+                  ? "Third-party lab"
+                  : "Analytical partner",
+                value: assay.testingLabName,
+              }
+            : null,
+        ].filter((row): row is { label: string; value: string } => row !== null);
+  const allRows = [...assayRows, ...rows];
 
   return (
     <section className="mt-20 border-t border-line pt-14" aria-labelledby="product-specs">
@@ -23,7 +43,7 @@ export function ProductSpecs({ product }: ProductSpecsProps) {
       </p>
 
       <dl className="mt-10 border-t border-ink/20">
-        {rows.map((row) => (
+        {allRows.map((row) => (
           <div
             key={row.label}
             className="grid gap-2 border-b border-line py-5 sm:grid-cols-[14rem_1fr] sm:gap-8"

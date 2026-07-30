@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
+import {
+  listPublishedCoas,
+  productsWithoutPublishedCoa,
+} from "@/data/coa";
 import { site } from "@/data/site";
+import { trustSignals } from "@/data/trustSignals";
 import { pageMetadata } from "@/lib/seo/pageMetadata";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 import { breadcrumbSchema } from "@/lib/seo/structuredData";
@@ -14,6 +19,9 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function CoaPage() {
+  const published = listPublishedCoas();
+  const pending = productsWithoutPublishedCoa();
+
   return (
     <div>
       <JsonLd
@@ -29,8 +37,8 @@ export default function CoaPage() {
             Identity first. Purity next. File on request.
           </h1>
           <p className="mt-8 max-w-lg text-[0.95rem] leading-relaxed text-[color:var(--on-dark-muted)]">
-            Certificate access stays practical: ask for the lot, receive the
-            paperwork that belongs with it.
+            Download certificates that are already on file, or email for a lot
+            that is not listed yet.
           </p>
         </div>
       </section>
@@ -53,31 +61,96 @@ export default function CoaPage() {
                 </span>
               </li>
             ))}
+            {trustSignals.testingLabName ? (
+              <li className="flex gap-5">
+                <span className="font-display text-sm font-semibold tracking-[0.18em] text-accent">
+                  04
+                </span>
+                <span className="pt-0.5 text-sm leading-relaxed text-ink-soft">
+                  Manufacturing and analytical partner:{" "}
+                  {trustSignals.testingLabUrl ? (
+                    <a
+                      href={trustSignals.testingLabUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-ink underline decoration-line underline-offset-4 transition hover:decoration-ink"
+                    >
+                      {trustSignals.testingLabName}
+                    </a>
+                  ) : (
+                    trustSignals.testingLabName
+                  )}
+                </span>
+              </li>
+            ) : null}
           </ol>
         </div>
 
-        <div className="border border-line bg-bg-elevated p-8 sm:p-10">
-          <p className="label">Request</p>
-          <h2 className="font-display mt-4 text-2xl font-semibold tracking-tight text-ink">
-            Get a certificate
-          </h2>
-          <p className="mt-4 text-sm leading-relaxed text-ink-soft">
-            Public downloads are rolling out by SKU. Until then, email the
-            compound and lot to{" "}
-            <a
-              href={`mailto:${site.email}`}
-              className="text-ink underline decoration-line underline-offset-4 transition hover:decoration-ink"
+        <div className="space-y-8">
+          <div className="border border-line bg-bg-elevated p-8 sm:p-10">
+            <p className="label">Downloads</p>
+            <h2 className="font-display mt-4 text-2xl font-semibold tracking-tight text-ink">
+              Certificates on file
+            </h2>
+            {published.length > 0 ? (
+              <ul className="mt-6 space-y-4">
+                {published.map((doc) => (
+                  <li key={doc.productSlug}>
+                    <a
+                      href={doc.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="link-underline text-sm font-semibold text-ink"
+                    >
+                      {doc.productName} — view PDF
+                    </a>
+                    <p className="mt-1 text-xs text-ink-soft">
+                      {[
+                        doc.purity ? `${doc.purity} purity` : null,
+                        doc.testMethods,
+                        doc.testingLabName,
+                        doc.note,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+                No public downloads yet.
+              </p>
+            )}
+          </div>
+
+          <div className="border border-line bg-bg-elevated p-8 sm:p-10">
+            <p className="label">Request</p>
+            <h2 className="font-display mt-4 text-2xl font-semibold tracking-tight text-ink">
+              Need another lot or SKU?
+            </h2>
+            <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+              Public files are expanding SKU by SKU. For products not listed
+              above
+              {pending.length > 0
+                ? ` (${pending.map((item) => item.name).join(", ")})`
+                : ""}
+              , email the compound and lot to{" "}
+              <a
+                href={`mailto:${site.email}`}
+                className="text-ink underline decoration-line underline-offset-4 transition hover:decoration-ink"
+              >
+                {site.email}
+              </a>
+              .
+            </p>
+            <Link
+              href="/products"
+              className="btn btn-primary btn-arrow mt-10"
             >
-              {site.email}
-            </a>
-            .
-          </p>
-          <Link
-            href="/products"
-            className="btn btn-primary btn-arrow mt-10"
-          >
-            Products
-          </Link>
+              Products
+            </Link>
+          </div>
         </div>
       </div>
     </div>

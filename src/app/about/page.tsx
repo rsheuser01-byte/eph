@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
 import { site } from "@/data/site";
+import {
+  formatAddressLines,
+  trustSignals,
+} from "@/data/trustSignals";
 import { pageMetadata } from "@/lib/seo/pageMetadata";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 import { breadcrumbSchema } from "@/lib/seo/structuredData";
@@ -14,6 +18,8 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function AboutPage() {
+  const addressLines = formatAddressLines();
+
   return (
     <div>
       <JsonLd
@@ -48,6 +54,10 @@ export default function AboutPage() {
         </aside>
 
         <div className="max-w-2xl space-y-6 text-[1.02rem] leading-relaxed text-ink-soft">
+          {trustSignals.companyStatement ? (
+            <p>{trustSignals.companyStatement}</p>
+          ) : null}
+
           <p>
             {site.name} is for researchers who already know what they need and
             want a supplier that keeps the process calm. We do not chase every
@@ -62,6 +72,28 @@ export default function AboutPage() {
             Planning a larger study or recurring cadence? Tell us the schedule.
             We would rather plan with you than surprise you with stockouts.
           </p>
+
+          {trustSignals.legalEntityName || addressLines.length > 0 ? (
+            <div className="border-t border-line pt-6 text-sm leading-relaxed">
+              {trustSignals.legalEntityName ? (
+                <p className="font-medium text-ink">
+                  {trustSignals.legalEntityName}
+                </p>
+              ) : null}
+              {addressLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+              <p className="mt-3">
+                Preferred contact:{" "}
+                <a
+                  href={`mailto:${site.email}`}
+                  className="text-ink underline decoration-line underline-offset-4"
+                >
+                  {site.email}
+                </a>
+              </p>
+            </div>
+          ) : null}
 
           <div className="flex flex-col gap-3 pt-6 sm:flex-row">
             <Link href="/products" className="btn btn-primary btn-arrow">

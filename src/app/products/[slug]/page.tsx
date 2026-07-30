@@ -9,7 +9,10 @@ import { researchDisclaimer } from "@/data/site";
 import { getAvailabilityMap } from "@/lib/inventory/availability";
 import { pageMetadata } from "@/lib/seo/pageMetadata";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
-import { breadcrumbSchema } from "@/lib/seo/structuredData";
+import {
+  breadcrumbSchema,
+  productSchema,
+} from "@/lib/seo/structuredData";
 
 export const dynamic = "force-dynamic";
 
@@ -51,11 +54,14 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
   return (
     <div className="site-shell py-20">
       <JsonLd
-        data={breadcrumbSchema(getSiteUrl(), [
-          { name: "Home", path: "/" },
-          { name: "Products", path: "/products" },
-          { name: product.name, path: `/products/${product.slug}` },
-        ])}
+        data={[
+          breadcrumbSchema(getSiteUrl(), [
+            { name: "Home", path: "/" },
+            { name: "Products", path: "/products" },
+            { name: product.name, path: `/products/${product.slug}` },
+          ]),
+          productSchema(getSiteUrl(), product, availability),
+        ]}
       />
       <Link
         href="/products"

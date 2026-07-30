@@ -11,9 +11,12 @@ afterEach(() => {
 
 describe("getEmailLogoUrl", () => {
   it("builds an absolute URL to logo.png from the site origin", () => {
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://elevateprecisionhealth.com");
+    vi.stubEnv(
+      "NEXT_PUBLIC_SITE_URL",
+      "https://www.elevateprecisionhealth.com",
+    );
     expect(getEmailLogoUrl()).toBe(
-      `https://elevateprecisionhealth.com${EMAIL_LOGO_PATH}`,
+      `https://www.elevateprecisionhealth.com${EMAIL_LOGO_PATH}`,
     );
     expect(EMAIL_LOGO_PATH).toBe("/images/logo.png");
   });

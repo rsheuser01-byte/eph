@@ -38,7 +38,7 @@ export function SiteHeader() {
     >
       <div
         className={`site-shell flex items-center justify-between gap-4 transition-[height] duration-300 ${
-          scrolled ? "h-16" : "h-[4.5rem]"
+          scrolled ? "h-[4.25rem] sm:h-[4.5rem]" : "h-20 sm:h-[5.25rem]"
         }`}
       >
         <Link
@@ -57,8 +57,8 @@ export function SiteHeader() {
             height={255}
             priority
             unoptimized
-            className={`relative z-[1] w-auto max-w-[min(100%,220px)] transition-[height] duration-300 sm:max-w-[260px] ${
-              scrolled ? "h-9" : "h-10 sm:h-11"
+            className={`relative z-[1] w-auto max-w-[min(100%,280px)] transition-[height] duration-300 sm:max-w-[340px] ${
+              scrolled ? "h-12" : "h-14 sm:h-16"
             }`}
           />
         </Link>

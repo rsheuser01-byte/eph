@@ -167,3 +167,25 @@ describe("GLP catalog identities", () => {
     expect(product!.specs.synonyms).toMatch(/Tirzepatide/);
   });
 });
+
+describe("PT-141", () => {
+  it("is listed as a 10mg bremelanotide peptide with COA-backed identity fields", () => {
+    const product = getProductBySlug("pt-141");
+    expect(product).toBeDefined();
+    expect(product!.name).toBe("PT-141");
+    expect(product!.category).toBe("Peptide");
+    expect(product!.featured).toBe(false);
+    expect(product!.variants.map((variant) => variant.size)).toEqual(["10mg"]);
+    expect(getVariant(product!, "10mg")?.sku).toBe("PT141-10MG");
+    expect(getVariant(product!, "10mg")?.image).toBe(
+      "/products/pt-141-10mg.png",
+    );
+    expect(getVariant(product!, "10mg")?.price).toBe(49.99);
+    expect(product!.specs.molecularWeight).toBe("1025.2 g/mol");
+    expect(product!.specs.sequence).toBe(
+      "Ac-Nle-cyclo[Asp-His-D-Phe-Arg-Trp-Lys]-OH",
+    );
+    expect(product!.specs.synonyms).toMatch(/Bremelanotide/);
+    expect(product!.specs.molecularFormula).toBeUndefined();
+  });
+});

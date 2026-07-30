@@ -3,9 +3,14 @@
 import { useState, type FormEvent } from "react";
 import { FaqList } from "@/components/FaqList";
 import { site } from "@/data/site";
+import {
+  formatAddressLines,
+  trustSignals,
+} from "@/data/trustSignals";
 
 export default function ContactPage() {
   const [status, setStatus] = useState<"idle" | "sent">("idle");
+  const addressLines = formatAddressLines();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -32,7 +37,7 @@ export default function ContactPage() {
         </h1>
         <p className="mt-6 text-sm leading-relaxed text-ink-soft">
           Assay files, stock checks, shipping, or a multi-lot plan — one clear
-          note is enough.
+          note is enough. Email is the best way to reach us.
         </p>
       </div>
 
@@ -81,6 +86,19 @@ export default function ContactPage() {
               {site.email}
             </a>
           </p>
+
+          {trustSignals.legalEntityName || addressLines.length > 0 ? (
+            <div className="border-t border-line pt-6 text-sm leading-relaxed text-ink-soft">
+              {trustSignals.legalEntityName ? (
+                <p className="font-medium text-ink">
+                  {trustSignals.legalEntityName}
+                </p>
+              ) : null}
+              {addressLines.map((line) => (
+                <p key={line}>{line}</p>
+              ))}
+            </div>
+          ) : null}
         </form>
 
         <div>

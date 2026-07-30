@@ -58,8 +58,8 @@ describe("pricing-guide.json", () => {
         "CJC-1295 + Ipamorelin",
         "Semax",
         "Selank",
-        "PT-141",
       ]),
     );
+    expect(compounds).not.toContain("PT-141");
   });
 });

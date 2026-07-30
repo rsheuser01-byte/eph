@@ -1,7 +1,14 @@
 import Link from "next/link";
 import { navLinks, researchDisclaimer, site } from "@/data/site";
+import {
+  formatAddressLine,
+  trustSignals,
+} from "@/data/trustSignals";
 
 export function SiteFooter() {
+  const addressLine = formatAddressLine();
+  const copyrightName = trustSignals.legalEntityName ?? site.name;
+
   return (
     <footer className="mt-auto border-t border-white/12 bg-panel text-on-dark">
       <div className="site-shell py-16">
@@ -53,13 +60,16 @@ export function SiteFooter() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-6 py-10 sm:flex-row sm:items-center sm:justify-between">
-          <a
-            href={`mailto:${site.email}`}
-            className="link-underline text-sm text-[color:var(--on-dark-muted)]"
-          >
-            {site.email}
-          </a>
+        <div className="flex flex-col gap-6 py-10 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-2 text-sm text-[color:var(--on-dark-muted)]">
+            <a
+              href={`mailto:${site.email}`}
+              className="link-underline block"
+            >
+              {site.email}
+            </a>
+            {addressLine ? <p>{addressLine}</p> : null}
+          </div>
           <p className="text-xs font-medium uppercase tracking-[0.14em] text-[color:var(--on-dark-soft)]">
             {site.shippingNote}
           </p>
@@ -69,7 +79,7 @@ export function SiteFooter() {
           {researchDisclaimer}
         </p>
         <p className="mt-8 text-[0.7rem] font-medium uppercase tracking-[0.16em] text-[color:var(--on-dark-soft)]">
-          © {new Date().getFullYear()} {site.name}
+          © {new Date().getFullYear()} {copyrightName}
         </p>
       </div>
     </footer>
