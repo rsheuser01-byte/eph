@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { JsonLd } from "@/components/JsonLd";
+import { InstitutionalCta } from "@/components/InstitutionalCta";
 import { ProductPurchase } from "@/components/ProductPurchase";
+import { ProductResearchContext } from "@/components/ProductResearchContext";
 import { ProductSpecs } from "@/components/ProductSpecs";
 import { getProductBySlug, products } from "@/data/products";
 import { researchDisclaimer } from "@/data/site";
@@ -77,6 +79,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         availability={availability}
       />
       <ProductSpecs product={product} />
+      <ProductResearchContext
+        productSlug={product.slug}
+        productName={product.name}
+      />
+      <InstitutionalCta variant="compact" className="mt-16" />
     </div>
   );
 }

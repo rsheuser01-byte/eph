@@ -3,8 +3,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
+import { InstitutionalCta } from "@/components/InstitutionalCta";
+import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { products } from "@/data/products";
-import { operatingNotes, site } from "@/data/site";
+import { operatingNotes } from "@/data/site";
 import { pageMetadata } from "@/lib/seo/pageMetadata";
 
 export const metadata: Metadata = pageMetadata({
@@ -149,30 +151,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="site-shell py-24">
-        <Reveal>
-          <div className="grid gap-10 border border-line bg-bg-elevated p-8 transition duration-300 hover:border-ink/40 sm:p-12 lg:grid-cols-[1.3fr_0.7fr] lg:items-center">
-            <div>
-              <p className="label">Institutions</p>
-              <h2 className="font-display mt-4 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
-                Need a multi-lot plan?
-              </h2>
-              <p className="mt-5 max-w-lg text-[0.95rem] leading-relaxed text-ink-soft">
-                Send quantities and preferred SKUs. We reply with availability,
-                paperwork notes, and a direct path to order.
-              </p>
-            </div>
-            <div className="lg:text-right">
-              <Link href="/contact" className="btn btn-primary btn-arrow">
-                Start a conversation
-              </Link>
-              <p className="mt-4 text-xs font-medium tracking-wide text-ink-soft">
-                {site.shippingNote}
-              </p>
-            </div>
-          </div>
-        </Reveal>
-      </section>
+      <TestimonialsSection />
+
+      <Reveal>
+        <InstitutionalCta />
+      </Reveal>
     </>
   );
 }

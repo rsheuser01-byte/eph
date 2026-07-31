@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import { getProductBySlug, products } from "@/data/products";
-import { site } from "@/data/site";
-import { organizationSchema, productSchema, catalogItemListSchema } from "./structuredData";
+import { faqs, site } from "@/data/site";
+import {
+  catalogItemListSchema,
+  faqPageSchema,
+  organizationSchema,
+  productSchema,
+} from "./structuredData";
 
 const BASE = "https://www.elevateprecisionhealth.com";
 
@@ -33,6 +38,26 @@ describe("organizationSchema", () => {
     expect(
       (organizationSchema(BASE).address as Record<string, unknown>),
     ).not.toHaveProperty("postOfficeBoxNumber");
+  });
+});
+
+describe("faqPageSchema", () => {
+  it("emits FAQPage Question/Answer entities from site FAQs", () => {
+    const schema = faqPageSchema(faqs);
+    expect(schema).toMatchObject({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+    });
+    const entities = schema.mainEntity as Array<Record<string, unknown>>;
+    expect(entities).toHaveLength(faqs.length);
+    expect(entities[0]).toMatchObject({
+      "@type": "Question",
+      name: faqs[0]!.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: faqs[0]!.answer,
+      },
+    });
   });
 });
 

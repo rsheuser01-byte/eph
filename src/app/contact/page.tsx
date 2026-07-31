@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import Link from "next/link";
+import { useEffect, useState, type FormEvent } from "react";
 import { FaqList } from "@/components/FaqList";
 import { site } from "@/data/site";
 import {
@@ -10,7 +11,20 @@ import {
 
 export default function ContactPage() {
   const [status, setStatus] = useState<"idle" | "sent">("idle");
+  const [topic, setTopic] = useState<string | null>(null);
+  const [messageDraft, setMessageDraft] = useState("");
   const addressLines = formatAddressLines();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const nextTopic = params.get("topic");
+    setTopic(nextTopic);
+    if (nextTopic === "lab-feedback") {
+      setMessageDraft(
+        "Lab feedback (ordering / documentation / support):\n\n",
+      );
+    }
+  }, []);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -19,7 +33,11 @@ export default function ContactPage() {
     const email = String(form.get("email") ?? "").trim();
     const message = String(form.get("message") ?? "").trim();
 
-    const subject = encodeURIComponent(`Note from ${name || "site visitor"}`);
+    const subjectLabel =
+      topic === "lab-feedback"
+        ? `Lab feedback from ${name || "site visitor"}`
+        : `Note from ${name || "site visitor"}`;
+    const subject = encodeURIComponent(subjectLabel);
     const body = encodeURIComponent(
       `Name: ${name}\nEmail: ${email}\n\n${message}`,
     );
@@ -66,6 +84,8 @@ export default function ContactPage() {
               name="message"
               required
               rows={4}
+              value={messageDraft}
+              onChange={(event) => setMessageDraft(event.target.value)}
               className="mt-3 w-full resize-y border-0 border-b border-line bg-transparent px-0 py-3 text-sm outline-none transition focus:border-ink"
             />
           </label>
@@ -102,10 +122,42 @@ export default function ContactPage() {
         </form>
 
         <div>
-          <p className="label">Questions</p>
-          <div className="mt-6">
-            <FaqList />
-          </div>
+          <section aria-labelledby="contact-faq">
+            <p className="label">FAQ</p>
+            <h2
+              id="contact-faq"
+              className="font-display mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl"
+            >
+              Common questions
+            </h2>
+            <div className="mt-6">
+              <FaqList />
+            </div>
+            <p className="mt-8 text-sm leading-relaxed text-ink-soft">
+              Looking for handling or compliance detail? Start with{" "}
+              <Link
+                href="/resources/research-use-only"
+                className="text-ink underline decoration-line underline-offset-4"
+              >
+                research use only
+              </Link>
+              ,{" "}
+              <Link
+                href="/resources/identity-and-purity"
+                className="text-ink underline decoration-line underline-offset-4"
+              >
+                identity and purity
+              </Link>
+              , or{" "}
+              <Link
+                href="/resources/reconstitution-and-storage"
+                className="text-ink underline decoration-line underline-offset-4"
+              >
+                reconstitution and storage
+              </Link>
+              .
+            </p>
+          </section>
         </div>
       </div>
     </div>

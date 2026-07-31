@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { navLinks, researchDisclaimer, site } from "@/data/site";
+import { resourcePages } from "@/data/resources";
 import {
   formatAddressLine,
   trustSignals,
@@ -12,7 +13,7 @@ export function SiteFooter() {
   return (
     <footer className="mt-auto border-t border-white/12 bg-panel text-on-dark">
       <div className="site-shell py-16">
-        <div className="grid gap-12 border-b border-white/12 pb-12 lg:grid-cols-[1.4fr_1fr]">
+        <div className="grid gap-12 border-b border-white/12 pb-12 lg:grid-cols-[1fr_1.6fr]">
           <div>
             <p className="font-display text-3xl font-semibold tracking-tight sm:text-4xl">
               Elevate
@@ -24,7 +25,7 @@ export function SiteFooter() {
               {site.tagline}
             </p>
           </div>
-          <div className="flex flex-col justify-between gap-8 sm:flex-row lg:justify-end lg:gap-16">
+          <div className="flex flex-col justify-between gap-8 sm:flex-row sm:flex-wrap lg:justify-end lg:gap-12 xl:gap-16">
             <div>
               <p className="label label-on-dark">Navigate</p>
               <ul className="mt-4 space-y-3 text-sm text-[color:var(--on-dark-muted)]">
@@ -32,6 +33,26 @@ export function SiteFooter() {
                   <li key={link.href}>
                     <Link href={link.href} className="link-underline">
                       {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div>
+              <p className="label label-on-dark">Resources</p>
+              <ul className="mt-4 space-y-3 text-sm text-[color:var(--on-dark-muted)]">
+                <li>
+                  <Link href="/resources" className="link-underline">
+                    All guides
+                  </Link>
+                </li>
+                {resourcePages.map((page) => (
+                  <li key={page.slug}>
+                    <Link
+                      href={`/resources/${page.slug}`}
+                      className="link-underline"
+                    >
+                      {page.navLabel}
                     </Link>
                   </li>
                 ))}

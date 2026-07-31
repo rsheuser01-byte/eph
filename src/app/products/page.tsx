@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { InstitutionalCta } from "@/components/InstitutionalCta";
 import { JsonLd } from "@/components/JsonLd";
 import { ProductCard } from "@/components/ProductCard";
 import { products } from "@/data/products";
@@ -51,6 +52,8 @@ export default function ProductsPage() {
           />
         ))}
       </div>
+
+      <InstitutionalCta variant="compact" className="mt-20" />
     </div>
   );
 }

@@ -1,6 +1,9 @@
 import { productSpecRows, type Product } from "@/data/products";
 import { getProductAssaySignals } from "@/data/coa";
+import { productContentUpdatedOn } from "@/data/contentDates";
+import { LastUpdated } from "@/components/LastUpdated";
 import { molecularFormulaParts } from "@/lib/chemistry/molecularFormula";
+import { buildProductSpecSections } from "@/lib/products/productSpecQuestions";
 
 type ProductSpecsProps = {
   product: Product;
@@ -8,6 +11,7 @@ type ProductSpecsProps = {
 
 export function ProductSpecs({ product }: ProductSpecsProps) {
   const rows = productSpecRows(product);
+  const sections = buildProductSpecSections(product);
   const assay = getProductAssaySignals(product.slug);
   const assayRows =
     product.category === "Supply"
@@ -27,22 +31,70 @@ export function ProductSpecs({ product }: ProductSpecsProps) {
             : null,
         ].filter((row): row is { label: string; value: string } => row !== null);
   const allRows = [...assayRows, ...rows];
+  const [primary, ...rest] = sections;
+  const attributeSection = rest.find(
+    (section) => section.id === "product-specs-attributes",
+  );
+  const middle = rest.filter(
+    (section) => section.id !== "product-specs-attributes",
+  );
 
   return (
-    <section className="mt-20 border-t border-line pt-14" aria-labelledby="product-specs">
+    <section
+      className="mt-20 border-t border-line pt-14"
+      aria-labelledby={primary?.id ?? "product-specs"}
+    >
       <p className="label">Specifications</p>
-      <h2
-        id="product-specs"
-        className="font-display mt-4 text-2xl font-semibold tracking-tight text-ink sm:text-3xl"
-      >
-        Research details
-      </h2>
-      <p className="mt-4 max-w-2xl text-sm leading-relaxed text-ink-soft">
-        Laboratory reference attributes for {product.name}. Research use only —
-        not for human or veterinary use.
-      </p>
 
-      <dl className="mt-10 border-t border-ink/20">
+      {primary ? (
+        <div className="mt-4 max-w-2xl">
+          <h2
+            id={primary.id}
+            className="font-display text-2xl font-semibold tracking-tight text-ink sm:text-3xl"
+          >
+            {primary.question}
+          </h2>
+          <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+            {primary.answer}
+          </p>
+        </div>
+      ) : null}
+
+      {middle.map((section) => (
+        <div key={section.id} className="mt-8 max-w-2xl">
+          <h3
+            id={section.id}
+            className="font-display text-lg font-semibold tracking-tight text-ink sm:text-xl"
+          >
+            {section.question}
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+            {section.answer}
+          </p>
+        </div>
+      ))}
+
+      <LastUpdated
+        date={productContentUpdatedOn(product)}
+        label="Specs last updated"
+        className="mt-6"
+      />
+
+      {attributeSection ? (
+        <div className="mt-10 max-w-2xl">
+          <h3
+            id={attributeSection.id}
+            className="font-display text-lg font-semibold tracking-tight text-ink sm:text-xl"
+          >
+            {attributeSection.question}
+          </h3>
+          <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+            {attributeSection.answer}
+          </p>
+        </div>
+      ) : null}
+
+      <dl className="mt-6 border-t border-ink/20">
         {allRows.map((row) => (
           <div
             key={row.label}

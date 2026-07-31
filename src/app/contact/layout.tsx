@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { JsonLd } from "@/components/JsonLd";
+import { faqs } from "@/data/site";
 import { pageMetadata } from "@/lib/seo/pageMetadata";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
-import { breadcrumbSchema } from "@/lib/seo/structuredData";
+import { breadcrumbSchema, faqPageSchema } from "@/lib/seo/structuredData";
 
 export const metadata: Metadata = pageMetadata({
   title: "Contact",
@@ -20,10 +21,13 @@ export default function ContactLayout({
   return (
     <>
       <JsonLd
-        data={breadcrumbSchema(getSiteUrl(), [
-          { name: "Home", path: "/" },
-          { name: "Contact", path: "/contact" },
-        ])}
+        data={[
+          breadcrumbSchema(getSiteUrl(), [
+            { name: "Home", path: "/" },
+            { name: "Contact", path: "/contact" },
+          ]),
+          faqPageSchema(faqs),
+        ]}
       />
       {children}
     </>

@@ -1,6 +1,14 @@
 import type { Product } from "@/data/products";
 import { productPriceRange, productPrimaryImage } from "@/data/products";
+import { productContentUpdatedOn } from "@/data/contentDates";
 import { site } from "@/data/site";
+import {
+  averageRating,
+  canEmitReviewSchema,
+  ratedTestimonials,
+  testimonials,
+  type Testimonial,
+} from "@/data/testimonials";
 import {
   hasPostalAddress,
   trustSignals,
@@ -74,6 +82,56 @@ export function websiteSchema(baseUrl: string): JsonLdObject {
   };
 }
 
+/**
+ * Organization review / aggregateRating block (Phase 3 #4).
+ * Returns null until enough vetted, rated testimonials exist — never invent ratings.
+ */
+export function organizationReviewSchema(
+  baseUrl: string,
+  entries: readonly Testimonial[] = testimonials,
+): JsonLdObject | null {
+  if (!canEmitReviewSchema(entries)) {
+    return null;
+  }
+
+  const rated = ratedTestimonials(entries);
+  const avg = averageRating(entries);
+  if (avg === null) {
+    return null;
+  }
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: site.name,
+    url: baseUrl,
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: avg.toFixed(1).replace(/\.0$/, ""),
+      reviewCount: String(rated.length),
+      bestRating: "5",
+      worstRating: "1",
+    },
+    review: rated.map((entry) => ({
+      "@type": "Review",
+      reviewBody: entry.quote,
+      datePublished: entry.publishedOn,
+      author: {
+        "@type": "Organization",
+        name: entry.attributionName
+          ? `${entry.attributionName} (${entry.institutionType})`
+          : entry.institutionType,
+      },
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: String(entry.rating),
+        bestRating: "5",
+        worstRating: "1",
+      },
+    })),
+  };
+}
+
 export function breadcrumbSchema(
   baseUrl: string,
   crumbs: ReadonlyArray<{ name: string; path: string }>,
@@ -86,6 +144,26 @@ export function breadcrumbSchema(
       position: index + 1,
       name: crumb.name,
       item: crumb.path === "/" ? `${baseUrl}/` : `${baseUrl}${crumb.path}`,
+    })),
+  };
+}
+
+/**
+ * FAQPage JSON-LD for the contact FAQ section (Phase 3 #2).
+ */
+export function faqPageSchema(
+  items: ReadonlyArray<{ question: string; answer: string }>,
+): JsonLdObject {
+  return {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: items.map((item) => ({
+      "@type": "Question",
+      name: item.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.answer,
+      },
     })),
   };
 }
@@ -142,6 +220,7 @@ export function productSchema(
     url,
     image: imagePath ? `${baseUrl}${imagePath}` : undefined,
     brand,
+    dateModified: productContentUpdatedOn(product),
     offers: buildOffers(baseUrl, url, product, availability),
   };
 }

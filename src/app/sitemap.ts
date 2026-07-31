@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { products } from "@/data/products";
+import { resourcePages } from "@/data/resources";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 
 // Public, canonical, indexable routes only. Transactional/private routes
@@ -11,6 +12,7 @@ const STATIC_PATHS = [
   "/about",
   "/coa",
   "/contact",
+  "/resources",
   "/privacy",
   "/terms",
   "/refunds",
@@ -23,11 +25,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: path === "/" ? `${baseUrl}/` : `${baseUrl}${path}`,
   }));
 
+  const resourceEntries: MetadataRoute.Sitemap = resourcePages.map((page) => ({
+    url: `${baseUrl}/resources/${page.slug}`,
+  }));
+
   const productEntries: MetadataRoute.Sitemap = products.map((product) => ({
     url: `${baseUrl}/products/${product.slug}`,
   }));
 
   // `lastModified` is intentionally omitted: the catalog data contains no
   // trustworthy modification timestamps, so inventing one would be misleading.
-  return [...staticEntries, ...productEntries];
+  return [...staticEntries, ...resourceEntries, ...productEntries];
 }

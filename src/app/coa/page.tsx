@@ -38,7 +38,15 @@ export default function CoaPage() {
           </h1>
           <p className="mt-8 max-w-lg text-[0.95rem] leading-relaxed text-[color:var(--on-dark-muted)]">
             Download certificates already on file from product pages or below,
-            or email for a lot that is not listed yet.
+            or email for a lot that is not listed yet. For how we think about
+            identity versus purity, see{" "}
+            <Link
+              href="/resources/identity-and-purity"
+              className="text-on-dark underline decoration-white/30 underline-offset-4 transition hover:decoration-white"
+            >
+              How we verify identity and purity
+            </Link>
+            .
           </p>
         </div>
       </section>

@@ -18,6 +18,16 @@ export const navLinks = [
 
 export const faqs = [
   {
+    question: "Are these products for human use?",
+    answer:
+      "No. Everything we sell is for laboratory research only — not for human or veterinary use, diagnosis, treatment, or consumption. See our Research use only resource for the full framing.",
+  },
+  {
+    question: "Can I share lab feedback for the site?",
+    answer:
+      "Yes. Email a short note about ordering, documentation, or support for your research protocol. We only publish manually vetted notes — never invented reviews — and we can attribute by institution type if you prefer not to use a personal name.",
+  },
+  {
     question: "How quickly do packages leave?",
     answer:
       "Weekday orders that clear before afternoon cutoff typically leave the same day. Friday late and weekend orders move on the next business morning.",
@@ -30,7 +40,7 @@ export const faqs = [
   {
     question: "Can I request assay paperwork?",
     answer:
-      "Yes. Many product pages include a downloadable certificate when one is on file. For lots not listed yet, email the compound and lot and we will share what we have.",
+      "Yes. Many product pages include a downloadable certificate when one is on file. For lots not listed yet, email the compound and lot and we will share what we have. Our Identity and purity resource explains what to file with a protocol.",
   },
   {
     question: "Is volume pricing available?",

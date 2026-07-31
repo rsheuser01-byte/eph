@@ -7,10 +7,15 @@ import { JsonLd } from "@/components/JsonLd";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
 import { site } from "@/data/site";
+import {
+  canEmitReviewSchema,
+  testimonials,
+} from "@/data/testimonials";
 import { CartProvider } from "@/lib/cart/CartContext";
 import { ogImage } from "@/lib/seo/pageMetadata";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 import {
+  organizationReviewSchema,
   organizationSchema,
   websiteSchema,
 } from "@/lib/seo/structuredData";
@@ -76,7 +81,13 @@ export default function RootLayout({
           <style>{`.reveal{opacity:1!important;transform:none!important;}`}</style>
         </noscript>
         <JsonLd
-          data={[organizationSchema(siteUrl), websiteSchema(siteUrl)]}
+          data={[
+            organizationSchema(siteUrl),
+            websiteSchema(siteUrl),
+            ...(canEmitReviewSchema(testimonials)
+              ? [organizationReviewSchema(siteUrl, testimonials)!]
+              : []),
+          ]}
         />
         <CartProvider>
           <AgeGate />

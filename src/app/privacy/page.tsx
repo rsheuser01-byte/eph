@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { JsonLd } from "@/components/JsonLd";
+import { LastUpdated } from "@/components/LastUpdated";
+import { legalPagesUpdatedOn } from "@/data/contentDates";
 import { site } from "@/data/site";
 import { pageMetadata } from "@/lib/seo/pageMetadata";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
@@ -15,7 +17,7 @@ export const metadata: Metadata = pageMetadata({
 
 export default function PrivacyPage() {
   return (
-    <LegalLayout title="Privacy policy">
+    <LegalLayout title="Privacy policy" updatedOn={legalPagesUpdatedOn.privacy}>
       <JsonLd
         data={breadcrumbSchema(getSiteUrl(), [
           { name: "Home", path: "/" },
@@ -47,14 +49,17 @@ export default function PrivacyPage() {
 
 function LegalLayout({
   title,
+  updatedOn,
   children,
 }: {
   title: string;
+  updatedOn: string;
   children: ReactNode;
 }) {
   return (
     <div className="site-shell py-16">
       <h1 className="font-display text-4xl text-ink">{title}</h1>
+      <LastUpdated date={updatedOn} className="mt-4" />
       <div className="prose-legal mt-8 max-w-3xl space-y-4 text-sm leading-relaxed text-ink-soft [&_a]:text-accent [&_h2]:mt-8 [&_h2]:text-base [&_h2]:font-semibold [&_h2]:text-ink">
         {children}
       </div>
