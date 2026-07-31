@@ -15,7 +15,10 @@ test.describe("checkout mock-hpp happy path", () => {
       await ageGate.click();
     }
 
-    await expect(page.getByRole("heading", { name: /GLP-3/i })).toBeVisible();
+    // Exact H1 — Phase 3 added several other headings that also contain "GLP-3".
+    await expect(
+      page.getByRole("heading", { level: 1, name: "GLP-3", exact: true }),
+    ).toBeVisible();
     await page.getByRole("button", { name: "Add to cart" }).click();
 
     await page.goto("/cart");
