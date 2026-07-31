@@ -2,6 +2,7 @@ import { formatUSD } from "@/lib/checkout/pricing";
 import type { BillingInfo, OrderItem } from "@/lib/payments/types";
 import type { EmailMessage } from "./types";
 import {
+  emailSupportFooterText,
   escapeEmailHtml,
   wrapTransactionalEmailHtml,
 } from "./emailLayout";
@@ -120,7 +121,7 @@ function baseText(heading: string, intro: string, data: OrderEmailData): string 
     "Ship to:",
     addressText(data.customer),
     "",
-    "Research use only. Not for human or veterinary use.",
+    emailSupportFooterText(),
   ].join("\n");
 }
 

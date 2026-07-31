@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { CANONICAL_PRODUCTION_ORIGIN } from "@/lib/seo/siteUrl";
 import type { OrderEmailData } from "./orderConfirmation";
 import {
   buildCancelledEmail,
@@ -46,7 +47,9 @@ describe("buildShippedEmail", () => {
     expect(message.text).toContain("1Z999");
     expect(message.text).toContain("https://track.example/1Z999");
     expect(message.html).toContain("https://track.example/1Z999");
-    expect(message.html).toContain("https://example.com/images/logo.png");
+    expect(message.html).toContain(
+      `${CANONICAL_PRODUCTION_ORIGIN}/images/logo.png`,
+    );
   });
 
   it("omits non-http tracking URLs from HTML links", () => {
@@ -71,7 +74,9 @@ describe("buildRefundEmail", () => {
     expect(message.subject.toLowerCase()).toContain("refund");
     expect(message.text).toContain("$81.99");
     expect(message.text.toLowerCase()).toContain("full");
-    expect(message.html).toContain("https://example.com/images/logo.png");
+    expect(message.html).toContain(
+      `${CANONICAL_PRODUCTION_ORIGIN}/images/logo.png`,
+    );
   });
 
   it("describes a partial refund", () => {
@@ -92,6 +97,8 @@ describe("buildCancelledEmail", () => {
     expect(message.to).toBe("ada@example.com");
     expect(message.subject.toLowerCase()).toContain("cancelled");
     expect(message.text).toContain("EPH-SHIP-1");
-    expect(message.html).toContain("https://example.com/images/logo.png");
+    expect(message.html).toContain(
+      `${CANONICAL_PRODUCTION_ORIGIN}/images/logo.png`,
+    );
   });
 });

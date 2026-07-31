@@ -1,4 +1,5 @@
 import type { EmailMessage, EmailProvider } from "./types";
+import { getSupportEmail } from "./emailLayout";
 
 type ResendConfig = {
   apiKey: string;
@@ -21,6 +22,7 @@ export function createResendEmailProvider(): EmailProvider {
     name: "resend",
     async send(message: EmailMessage): Promise<void> {
       const config = readConfig();
+      const replyTo = getSupportEmail();
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",
         headers: {
@@ -30,6 +32,7 @@ export function createResendEmailProvider(): EmailProvider {
         body: JSON.stringify({
           from: config.from,
           to: message.to,
+          reply_to: replyTo,
           subject: message.subject,
           html: message.html,
           text: message.text,

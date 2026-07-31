@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { CANONICAL_PRODUCTION_ORIGIN } from "@/lib/seo/siteUrl";
 import type { OrderEmailData } from "./orderConfirmation";
 import {
   buildCustomerConfirmation,
@@ -33,15 +34,21 @@ const data: OrderEmailData = {
 
 describe("buildCustomerConfirmation", () => {
   it("addresses the customer and includes the order reference and total", () => {
-    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "http://localhost:3000");
     const message = buildCustomerConfirmation(data);
     expect(message.to).toBe("[email protected]");
     expect(message.subject).toContain("EPH-TEST-1");
     expect(message.text).toContain("EPH-TEST-1");
     expect(message.text).toContain("$151.98");
     expect(message.html).toContain("GLP-3");
-    expect(message.html).toContain("https://example.com/images/logo.png");
+    expect(message.html).toContain(
+      `${CANONICAL_PRODUCTION_ORIGIN}/images/logo.png`,
+    );
     expect(message.html).toContain('alt="Elevate Precision Health"');
+    expect(message.html).toContain("mailto:support@elevateprecisionhealth.com");
+    expect(message.text).toContain("support@elevateprecisionhealth.com");
+    expect(message.html).toContain("www.elevateprecisionhealth.com");
+    expect(message.html).not.toContain("localhost");
   });
 
   it("escapes HTML in customer-provided fields", () => {

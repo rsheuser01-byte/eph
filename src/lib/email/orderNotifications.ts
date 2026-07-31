@@ -2,6 +2,7 @@ import { formatUSD } from "@/lib/checkout/pricing";
 import type { EmailMessage } from "./types";
 import type { OrderEmailData } from "./orderConfirmation";
 import {
+  emailSupportFooterText,
   escapeEmailHtml,
   wrapTransactionalEmailHtml,
 } from "./emailLayout";
@@ -74,7 +75,7 @@ export function buildShippedEmail(
     "",
     ...trackingLines,
     "",
-    "Research use only. Not for human or veterinary use.",
+    emailSupportFooterText(),
   ].join("\n");
 
   const trackingHtml = `
@@ -136,7 +137,7 @@ export function buildRefundEmail(
     `Total refunded to date: ${formatUSD(refund.totalRefunded)}`,
     `Order total: ${formatUSD(data.total)}`,
     "",
-    "Research use only. Not for human or veterinary use.",
+    emailSupportFooterText(),
   ].join("\n");
 
   const detailsHtml = `
@@ -186,7 +187,7 @@ export function buildCancelledEmail(data: OrderEmailData): EmailMessage {
     "",
     `Order reference: ${data.orderId}`,
     "",
-    "Research use only. Not for human or veterinary use.",
+    emailSupportFooterText(),
   ].join("\n");
 
   return {
