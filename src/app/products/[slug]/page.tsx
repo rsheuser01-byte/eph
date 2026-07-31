@@ -7,14 +7,19 @@ import { ProductSpecs } from "@/components/ProductSpecs";
 import { getProductBySlug, products } from "@/data/products";
 import { researchDisclaimer } from "@/data/site";
 import { getAvailabilityMap } from "@/lib/inventory/availability";
-import { pageMetadata } from "@/lib/seo/pageMetadata";
+import { productPageMetadata } from "@/lib/seo/productPageMetadata";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 import {
   breadcrumbSchema,
   productSchema,
 } from "@/lib/seo/structuredData";
 
-export const dynamic = "force-dynamic";
+/**
+ * ISR — matches homepage/`/products` edge caching (audit Phase 2 #3).
+ * Keep this literal equal to PRODUCT_PAGE_REVALIDATE_SECONDS in
+ * `@/lib/inventory/productPageCache` (Next requires a statically analyzable value).
+ */
+export const revalidate = 300;
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -32,11 +37,7 @@ export async function generateMetadata({
   if (!product) {
     return { title: "Product not found", robots: { index: false } };
   }
-  return pageMetadata({
-    title: `${product.name} — Research ${product.category}`,
-    description: `${product.name} (${product.sku}), a research-use-only ${product.category.toLowerCase()} from Elevate Precision Health. Not for human or veterinary use.`,
-    path: `/products/${product.slug}`,
-  });
+  return productPageMetadata(product);
 }
 
 export default async function ProductDetailPage({ params }: ProductPageProps) {

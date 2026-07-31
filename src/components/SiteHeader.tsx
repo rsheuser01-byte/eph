@@ -91,7 +91,7 @@ export function SiteHeader() {
 
           <button
             type="button"
-            className="border border-white/25 px-3 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-on-dark transition hover:border-white/50 md:hidden"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center border border-white/25 px-3 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-on-dark transition hover:border-white/50 md:hidden"
             aria-expanded={open}
             aria-controls="mobile-nav"
             onClick={() => setOpen((value) => !value)}
@@ -144,7 +144,7 @@ function CartButton({
       type="button"
       onClick={onClick}
       aria-label={`Open cart, ${count} item${count === 1 ? "" : "s"}`}
-      className="relative border border-white/25 px-3 py-2 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-on-dark transition hover:border-white/50"
+      className="relative inline-flex min-h-11 min-w-11 items-center justify-center border border-white/25 px-3 text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-on-dark transition hover:border-white/50"
     >
       Cart
       {count > 0 ? (

@@ -436,6 +436,16 @@ export function productPrimaryImage(product: Product): string {
   return product.variants[0]?.image ?? "";
 }
 
+/** Descriptive alt for catalog/listing packshots (not empty decorative alt). */
+export function productImageAlt(product: Product): string {
+  const size = product.variants[0]?.size;
+  const kind = product.category.toLowerCase();
+  if (size) {
+    return `${product.name} ${size} research ${kind}`;
+  }
+  return `${product.name} research ${kind}`;
+}
+
 /** Ordered rows for the product detail specs table (skips unset optionals). */
 export function productSpecRows(product: Product): ProductSpecRow[] {
   const { specs } = product;

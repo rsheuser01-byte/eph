@@ -30,7 +30,7 @@ export const faqs = [
   {
     question: "Can I request assay paperwork?",
     answer:
-      "Yes. Ask for the lot you received (or want to reserve) and we will share available certificates.",
+      "Yes. Many product pages include a downloadable certificate when one is on file. For lots not listed yet, email the compound and lot and we will share what we have.",
   },
   {
     question: "Is volume pricing available?",
@@ -53,7 +53,7 @@ export const operatingNotes = [
   {
     step: "02",
     title: "Document the lot",
-    body: "Identity and purity paperwork stays with the lot — available on request, backed by our manufacturing and analytical partner BoHai Peptide.",
+    body: "Identity and purity paperwork stays with the lot — published certificates sit on the product page; anything not listed yet is available on request through our partners.",
   },
   {
     step: "03",

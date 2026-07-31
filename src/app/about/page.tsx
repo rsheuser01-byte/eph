@@ -65,8 +65,9 @@ export default function AboutPage() {
           </p>
           <p>
             Inventory stays intentionally short. Each listing is meant to be
-            clear at a glance — category, size range, and a path to request the
-            assay file for the lot you care about.
+            clear at a glance — category, size range, and a path to the assay
+            file for the lot you care about, either as a download on the product
+            page or by email when a certificate is not published yet.
           </p>
           <p>
             Planning a larger study or recurring cadence? Tell us the schedule.

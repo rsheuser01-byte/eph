@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import { products } from "@/data/products";
 import {
   adjustStock,
@@ -6,12 +7,13 @@ import {
   listInventory,
   seedInventoryFromCatalog,
 } from "@/lib/inventory";
+import { PRODUCT_PAGE_REVALIDATE_SECONDS } from "@/lib/inventory/productPageCache";
 
 /**
- * Pure helpers used by product pages / add-to-cart for availability display.
- * When inventory is disabled (no Supabase), treat all SKUs as available.
+ * Load availability for product pages / add-to-cart display.
+ * When inventory is disabled (no Supabase), treat all SKUs as available (null).
  */
-export async function getAvailabilityMap(
+async function loadAvailabilityMap(
   skus: string[],
 ): Promise<Record<string, number | null>> {
   const result: Record<string, number | null> = {};
@@ -28,6 +30,23 @@ export async function getAvailabilityMap(
     result[sku] = bySku.get(sku) ?? 0;
   }
   return result;
+}
+
+/**
+ * Cached for the product-page ISR window so Supabase reads do not force
+ * `dynamic = "force-dynamic"` / no-store on `/products/[slug]`.
+ */
+const getCachedAvailabilityMap = unstable_cache(
+  async (skus: string[]) => loadAvailabilityMap(skus),
+  ["product-availability"],
+  { revalidate: PRODUCT_PAGE_REVALIDATE_SECONDS },
+);
+
+export async function getAvailabilityMap(
+  skus: string[],
+): Promise<Record<string, number | null>> {
+  const sorted = [...skus].sort();
+  return getCachedAvailabilityMap(sorted);
 }
 
 export function productVariantSkus(slug: string): string[] {

@@ -4,7 +4,10 @@ import { ProductCard } from "@/components/ProductCard";
 import { products } from "@/data/products";
 import { pageMetadata } from "@/lib/seo/pageMetadata";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
-import { breadcrumbSchema } from "@/lib/seo/structuredData";
+import {
+  breadcrumbSchema,
+  catalogItemListSchema,
+} from "@/lib/seo/structuredData";
 
 export const metadata: Metadata = pageMetadata({
   title: "Research Peptides, Blends & Lab Supplies",
@@ -14,13 +17,18 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function ProductsPage() {
+  const siteUrl = getSiteUrl();
+
   return (
     <div className="site-shell py-20">
       <JsonLd
-        data={breadcrumbSchema(getSiteUrl(), [
-          { name: "Home", path: "/" },
-          { name: "Products", path: "/products" },
-        ])}
+        data={[
+          breadcrumbSchema(siteUrl, [
+            { name: "Home", path: "/" },
+            { name: "Products", path: "/products" },
+          ]),
+          catalogItemListSchema(siteUrl, products),
+        ]}
       />
       <div className="max-w-2xl">
         <p className="label">Products</p>
@@ -35,8 +43,12 @@ export default function ProductsPage() {
 
       <h2 className="sr-only">All products</h2>
       <div className="mt-14 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
-        {products.map((product) => (
-          <ProductCard key={product.slug} product={product} />
+        {products.map((product, index) => (
+          <ProductCard
+            key={product.slug}
+            product={product}
+            priority={index === 0}
+          />
         ))}
       </div>
     </div>

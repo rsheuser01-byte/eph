@@ -34,11 +34,11 @@ export default function CoaPage() {
         <div className="site-shell relative z-[2] py-20 sm:py-24">
           <p className="label label-on-dark">Assays</p>
           <h1 className="font-display mt-5 max-w-3xl text-4xl font-semibold leading-[1.05] tracking-tight text-on-dark sm:text-6xl">
-            Identity first. Purity next. File on request.
+            Identity first. Purity next. Files where they belong.
           </h1>
           <p className="mt-8 max-w-lg text-[0.95rem] leading-relaxed text-[color:var(--on-dark-muted)]">
-            Download certificates that are already on file, or email for a lot
-            that is not listed yet.
+            Download certificates already on file from product pages or below,
+            or email for a lot that is not listed yet.
           </p>
         </div>
       </section>

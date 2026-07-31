@@ -3,15 +3,18 @@ import Link from "next/link";
 import { ProductAssaySignals } from "@/components/ProductAssaySignals";
 import {
   formatPrice,
+  productImageAlt,
   productPrimaryImage,
   type Product,
 } from "@/data/products";
 
 type ProductCardProps = {
   product: Product;
+  /** Mark the LCP candidate (first above-the-fold card) for early fetch. */
+  priority?: boolean;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, priority = false }: ProductCardProps) {
   const image = productPrimaryImage(product);
   const showAssay = product.category !== "Supply";
 
@@ -25,8 +28,9 @@ export function ProductCard({ product }: ProductCardProps) {
           {image ? (
             <Image
               src={image}
-              alt=""
+              alt={productImageAlt(product)}
               fill
+              priority={priority}
               sizes="(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
               className="object-contain p-4 transition-transform duration-500 ease-out group-hover:scale-[1.03]"
             />

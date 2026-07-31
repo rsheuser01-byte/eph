@@ -3,6 +3,7 @@ import {
   formatPrice,
   getProductBySlug,
   getVariant,
+  productImageAlt,
   productPriceRange,
   productSpecRows,
   products,
@@ -187,5 +188,24 @@ describe("PT-141", () => {
     );
     expect(product!.specs.synonyms).toMatch(/Bremelanotide/);
     expect(product!.specs.molecularFormula).toBeUndefined();
+  });
+});
+
+describe("productImageAlt", () => {
+  it("builds descriptive alt text from name, size, and category for every SKU", () => {
+    for (const product of products) {
+      const alt = productImageAlt(product);
+      expect(alt.length).toBeGreaterThan(0);
+      expect(alt).toContain(product.name);
+      expect(alt).toMatch(/research/i);
+      expect(alt).toContain(product.category.toLowerCase());
+      expect(alt).toContain(product.variants[0]!.size);
+    }
+  });
+
+  it("matches the audit-style example for a featured peptide", () => {
+    expect(productImageAlt(getProductBySlug("glp-3")!)).toBe(
+      "GLP-3 10mg research peptide",
+    );
   });
 });

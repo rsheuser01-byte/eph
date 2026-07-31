@@ -91,6 +91,28 @@ export function breadcrumbSchema(
 }
 
 /**
+ * ItemList for the `/products` catalog — one ListItem per live catalog SKU.
+ */
+export function catalogItemListSchema(
+  baseUrl: string,
+  catalog: ReadonlyArray<Pick<Product, "name" | "slug">>,
+): JsonLdObject {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: `${site.name} Product Catalog`,
+    url: `${baseUrl}/products`,
+    numberOfItems: catalog.length,
+    itemListElement: catalog.map((product, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: product.name,
+      url: `${baseUrl}/products/${product.slug}`,
+    })),
+  };
+}
+
+/**
  * Product / Offer JSON-LD for a catalog detail page.
  *
  * Prices and SKUs come from the product catalog; availability comes from the

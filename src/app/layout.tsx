@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Sora, Syne } from "next/font/google";
+import Script from "next/script";
 import { AgeGate } from "@/components/AgeGate";
 import { CartDrawer } from "@/components/CartDrawer";
 import { JsonLd } from "@/components/JsonLd";
@@ -58,8 +59,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${sora.variable} ${syne.variable}`}>
+    <html
+      lang="en"
+      className={`${sora.variable} ${syne.variable}`}
+      suppressHydrationWarning
+    >
       <body className="flex min-h-screen flex-col antialiased">
+        <Script
+          id="js-ready"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `document.documentElement.classList.add('js');`,
+          }}
+        />
+        <noscript>
+          <style>{`.reveal{opacity:1!important;transform:none!important;}`}</style>
+        </noscript>
         <JsonLd
           data={[organizationSchema(siteUrl), websiteSchema(siteUrl)]}
         />

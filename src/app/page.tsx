@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
@@ -9,7 +10,7 @@ import { pageMetadata } from "@/lib/seo/pageMetadata";
 export const metadata: Metadata = pageMetadata({
   absoluteTitle: "Elevate Precision Health — Research Peptides & Lab Supplies",
   description:
-    "Elevate Precision Health offers a focused catalog of research-only peptides, blends, and laboratory supplies, with lot documentation available on request. Research use only.",
+    "Elevate Precision Health offers a focused catalog of research-only peptides, blends, and laboratory supplies, with lot certificates on product pages and by request. Research use only.",
   path: "/",
 });
 
@@ -19,7 +20,16 @@ export default function HomePage() {
   return (
     <>
       <section className="hero-banner relative min-h-[min(78vh,720px)] overflow-hidden">
-        <div className="hero-banner-media" aria-hidden />
+        <div className="hero-banner-media" aria-hidden>
+          <Image
+            src="/images/hero-banner.png"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        </div>
         <div className="hero-banner-scrim" aria-hidden />
 
         <div className="site-shell relative z-[2] flex min-h-[min(78vh,720px)] flex-col justify-center pb-16 pt-24 sm:pb-20 sm:pt-28">
@@ -85,8 +95,9 @@ export default function HomePage() {
             </h2>
           </div>
           <p className="mt-10 max-w-md text-[0.95rem] leading-relaxed text-ink-soft lg:mt-16">
-            Certificates stay attached to the lot. Request what you need, file
-            it with your protocol, and skip ornamental trust claims.
+            Where a certificate is on file, open it from the product page.
+            For lots still rolling out, email the compound and we send what we
+            have — no ornamental trust claims.
           </p>
         </Reveal>
         <Reveal delayMs={120}>
@@ -94,8 +105,10 @@ export default function HomePage() {
             <div className="relative z-[2]">
               <p className="label label-on-dark">Assays</p>
               <p className="mt-6 text-lg leading-relaxed text-[color:var(--on-dark-muted)]">
-                Public downloads expand SKU by SKU. Until then, name the
-                compound and lot — we send the file on record.
+                Public downloads are live for growing parts of the catalog.
+                Browse product pages or the certificates library; for SKUs not
+                listed yet, name the compound and lot and we send the file on
+                record.
               </p>
               <Link
                 href="/coa"

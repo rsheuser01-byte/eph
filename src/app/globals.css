@@ -238,10 +238,16 @@ a {
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-image: url("/images/hero-banner.png");
-  background-size: cover;
-  background-position: 78% 40%;
-  background-repeat: no-repeat;
+}
+
+.hero-banner-media img {
+  object-position: 70% 35%;
+}
+
+@media (min-width: 768px) {
+  .hero-banner-media img {
+    object-position: 78% 40%;
+  }
 }
 
 .hero-banner-scrim {
@@ -265,10 +271,6 @@ a {
 }
 
 @media (max-width: 767px) {
-  .hero-banner-media {
-    background-position: 70% 35%;
-  }
-
   .hero-banner-scrim {
     background: linear-gradient(
       180deg,
@@ -390,7 +392,16 @@ a {
   animation: slide-in-right 0.45s var(--ease-out) both;
 }
 
-.reveal {
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/**
+ * Progressive enhancement: content is visible without JS.
+ * Only hide pending reveals after `html.js` is set (beforeInteractive script).
+ */
+.js .reveal:not(.reveal-visible) {
   opacity: 0;
   transform: translateY(28px);
   transition:
@@ -399,7 +410,7 @@ a {
   transition-delay: var(--reveal-delay, 0ms);
 }
 
-.reveal-visible {
+.js .reveal.reveal-visible {
   opacity: 1;
   transform: translateY(0);
 }
@@ -491,11 +502,13 @@ a {
   .animate-fade,
   .age-gate-backdrop,
   .age-gate-panel,
-  .reveal {
-    animation: none;
-    opacity: 1;
-    transform: none;
-    transition: none;
+  .reveal,
+  .js .reveal:not(.reveal-visible),
+  .js .reveal.reveal-visible {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 
   .btn,
