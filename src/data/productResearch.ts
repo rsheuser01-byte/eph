@@ -57,8 +57,8 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
         href: "https://pubchem.ncbi.nlm.nih.gov/compound/171390338",
       },
       {
-        label: "CAS 2381089-83-2",
-        href: "https://commonchemistry.cas.org/detail?cas_rn=2381089-83-2",
+        label: "CAS 2381089-83-2 (PubChem)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/#query=2381089-83-2",
       },
     ],
   },
@@ -86,8 +86,8 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
         href: "https://pubchem.ncbi.nlm.nih.gov/compound/156588324",
       },
       {
-        label: "CAS 2023788-19-2",
-        href: "https://commonchemistry.cas.org/detail?cas_rn=2023788-19-2",
+        label: "CAS 2023788-19-2 (PubChem)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/#query=2023788-19-2",
       },
     ],
   },
@@ -140,8 +140,8 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
         href: "https://pubchem.ncbi.nlm.nih.gov/compound/16137828",
       },
       {
-        label: "CAS 218949-48-5",
-        href: "https://commonchemistry.cas.org/detail?cas_rn=218949-48-5",
+        label: "CAS 218949-48-5 (PubChem)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/#query=218949-48-5",
       },
     ],
   },
@@ -219,8 +219,8 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
         href: "https://pubchem.ncbi.nlm.nih.gov/compound/5892",
       },
       {
-        label: "CAS 53-84-9",
-        href: "https://commonchemistry.cas.org/detail?cas_rn=53-84-9",
+        label: "CAS 53-84-9 (PubChem)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/#query=53-84-9",
       },
     ],
   },
