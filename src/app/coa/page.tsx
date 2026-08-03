@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { JsonLd } from "@/components/JsonLd";
 import {
+  coaDownloadFiles,
   listPublishedCoas,
   productsWithoutPublishedCoa,
 } from "@/data/coa";
@@ -102,28 +103,42 @@ export default function CoaPage() {
             </h2>
             {published.length > 0 ? (
               <ul className="mt-6 space-y-4">
-                {published.map((doc) => (
-                  <li key={doc.productSlug}>
-                    <a
-                      href={doc.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="link-underline text-sm font-semibold text-ink"
-                    >
-                      {doc.productName} — view PDF
-                    </a>
-                    <p className="mt-1 text-xs text-ink-soft">
-                      {[
-                        doc.purity ? `${doc.purity} purity` : null,
-                        doc.testMethods,
-                        doc.testingLabName,
-                        doc.note,
-                      ]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                  </li>
-                ))}
+                {published.map((doc) => {
+                  const files = coaDownloadFiles(doc);
+                  return (
+                    <li key={doc.productSlug}>
+                      <p className="text-sm font-semibold text-ink">
+                        {doc.productName}
+                      </p>
+                      <div className="mt-2 flex flex-col gap-1.5">
+                        {files.map((file) => (
+                          <a
+                            key={file.href}
+                            href={file.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="link-underline text-sm text-ink"
+                          >
+                            {files.length === 1
+                              ? "View PDF"
+                              : file.label}{" "}
+                            →
+                          </a>
+                        ))}
+                      </div>
+                      <p className="mt-1 text-xs text-ink-soft">
+                        {[
+                          doc.purity ? `${doc.purity} purity` : null,
+                          doc.testMethods,
+                          doc.testingLabName,
+                          doc.note,
+                        ]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="mt-4 text-sm leading-relaxed text-ink-soft">

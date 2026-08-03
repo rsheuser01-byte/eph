@@ -6,7 +6,9 @@ import { InstitutionalCta } from "@/components/InstitutionalCta";
 import { ProductPurchase } from "@/components/ProductPurchase";
 import { ProductResearchContext } from "@/components/ProductResearchContext";
 import { ProductSpecs } from "@/components/ProductSpecs";
+import { RelatedProducts } from "@/components/RelatedProducts";
 import { getProductBySlug, products } from "@/data/products";
+import { getRelatedProducts } from "@/data/relatedProducts";
 import { researchDisclaimer } from "@/data/site";
 import { getAvailabilityMap } from "@/lib/inventory/availability";
 import { productPageMetadata } from "@/lib/seo/productPageMetadata";
@@ -50,9 +52,13 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
     notFound();
   }
 
-  const availability = await getAvailabilityMap(
-    product.variants.map((variant) => variant.sku),
-  );
+  const related = getRelatedProducts(product.slug);
+  const availability = await getAvailabilityMap([
+    ...product.variants.map((variant) => variant.sku),
+    ...related.flatMap((item) =>
+      item.product.variants.map((variant) => variant.sku),
+    ),
+  ]);
 
   return (
     <div className="site-shell py-20">
@@ -83,6 +89,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         productSlug={product.slug}
         productName={product.name}
       />
+      <RelatedProducts items={related} availability={availability} />
       <InstitutionalCta variant="compact" className="mt-16" />
     </div>
   );

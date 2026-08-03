@@ -9,6 +9,11 @@ export type CoaDocument = {
   /** Optional note shown next to the link (e.g. lot / size on the file). */
   note?: string;
   /**
+   * Extra download links for multi-component blends (e.g. BPC-157 + TB-500).
+   * Primary `href` remains the first / default link.
+   */
+  additionalFiles?: ReadonlyArray<{ href: string; label: string }>;
+  /**
    * Lot purity as stated on the published certificate (e.g. "99.85%").
    * Omit when the file does not report an overall purity figure.
    */
@@ -34,6 +39,8 @@ export type ProductAssaySignals = {
   testingLabUrl: string | null;
   coaHref: string | null;
   coaNote: string | null;
+  /** All customer-facing PDF links (primary + blend components). */
+  coaFiles: ReadonlyArray<{ href: string; label: string }>;
   hasPublishedCoa: boolean;
 };
 
@@ -92,10 +99,45 @@ export const coaDocuments: readonly CoaDocument[] = [
     testMethods: "HPLC",
     testingLabName: "SENOBIO",
   },
+  {
+    productSlug: "mots-c",
+    href: "/coa/mots-c.pdf",
+    note: "MOTS-c 10mg lot on file",
+    purity: "99.69%",
+    testingLabName: "North South Precision Testing",
+    testingLabUrl: "https://www.msds-ghs.cn",
+  },
+  {
+    productSlug: "wolverine-blend",
+    href: "/coa/bpc-157.pdf",
+    // Two component lots — no single blend purity %; figures live in the note.
+    note: "BPC-157: 99.8% · TB-500: 99.7%",
+    testMethods: "FTIR and HPLC",
+    testingLabName: "BT Lab Testing",
+    testingLabUrl: "https://btlabtesting.com",
+    additionalFiles: [
+      { href: "/coa/bpc-157.pdf", label: "BPC-157 COA" },
+      { href: "/coa/tb-500.pdf", label: "TB-500 COA" },
+    ],
+  },
 ] as const;
 
 export function getCoaForProduct(slug: string): CoaDocument | undefined {
   return coaDocuments.find((doc) => doc.productSlug === slug);
+}
+
+/**
+ * Download links for a published certificate (primary + optional blend parts).
+ * When `additionalFiles` lists every component, those labels are used instead
+ * of a generic primary link so customers see BPC-157 / TB-500 distinctly.
+ */
+export function coaDownloadFiles(
+  doc: CoaDocument,
+): ReadonlyArray<{ href: string; label: string }> {
+  if (doc.additionalFiles && doc.additionalFiles.length > 0) {
+    return doc.additionalFiles;
+  }
+  return [{ href: doc.href, label: "View certificate (PDF)" }];
 }
 
 /**
@@ -105,13 +147,15 @@ export function getCoaForProduct(slug: string): CoaDocument | undefined {
 export function getProductAssaySignals(slug: string): ProductAssaySignals {
   const coa = getCoaForProduct(slug);
   if (coa) {
+    const files = coaDownloadFiles(coa);
     return {
       purity: coa.purity ?? null,
       testMethods: coa.testMethods ?? null,
       testingLabName: coa.testingLabName ?? null,
       testingLabUrl: coa.testingLabUrl ?? null,
-      coaHref: coa.href,
+      coaHref: files[0]?.href ?? coa.href,
       coaNote: coa.note ?? null,
+      coaFiles: files,
       hasPublishedCoa: true,
     };
   }
@@ -123,6 +167,7 @@ export function getProductAssaySignals(slug: string): ProductAssaySignals {
     testingLabUrl: trustSignals.testingLabUrl,
     coaHref: null,
     coaNote: null,
+    coaFiles: [],
     hasPublishedCoa: false,
   };
 }

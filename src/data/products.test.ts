@@ -92,10 +92,11 @@ describe("getVariant", () => {
 });
 
 describe("NAD+", () => {
-  it("is listed with 100mg, 500mg, and 1000mg variants", () => {
+  it("is listed as a coenzyme with 100mg, 500mg, and 1000mg variants", () => {
     const product = getProductBySlug("nad");
     expect(product).toBeDefined();
     expect(product!.name).toBe("NAD+");
+    expect(product!.category).toBe("Coenzyme");
     expect(product!.variants.map((variant) => variant.size)).toEqual([
       "100mg",
       "500mg",

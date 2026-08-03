@@ -7,6 +7,7 @@ import { ProductAssaySignals } from "@/components/ProductAssaySignals";
 import { RestockNotifyForm } from "@/components/RestockNotifyForm";
 import { useCart } from "@/lib/cart/CartContext";
 import { formatUSD } from "@/lib/checkout/pricing";
+import { defaultInStockSize } from "@/lib/products/defaultInStockSize";
 
 type ProductPurchaseProps = {
   product: Product;
@@ -21,7 +22,9 @@ export function ProductPurchase({
   availability = {},
 }: ProductPurchaseProps) {
   const { add } = useCart();
-  const [size, setSize] = useState(product.variants[0]?.size ?? "");
+  const [size, setSize] = useState(() =>
+    defaultInStockSize(product.variants, availability),
+  );
   const [qty, setQty] = useState(1);
 
   const variant = product.variants.find((item) => item.size === size);
@@ -61,7 +64,7 @@ export function ProductPurchase({
 
       <div className="mt-10 grid gap-10 border-t border-line pt-10 sm:grid-cols-[minmax(0,1fr)_minmax(0,14rem)] sm:items-start lg:grid-cols-[minmax(0,1fr)_minmax(0,18rem)]">
         <div className="min-w-0 max-w-md">
-          {product.variants.length > 1 ? (
+          {product.variants.length > 0 ? (
             <div>
               <p className="label mb-3 !text-ink-soft">Vial size</p>
               <div className="flex flex-wrap gap-2">
@@ -108,7 +111,7 @@ export function ProductPurchase({
           {variant ? (
             <p
               className={`font-display text-3xl font-semibold tracking-tight text-ink ${
-                product.variants.length > 1 ? "mt-8" : ""
+                product.variants.length > 0 ? "mt-8" : ""
               }`}
             >
               {formatUSD(variant.price)}
@@ -183,7 +186,7 @@ export function ProductPurchase({
                   alt={`${product.name} ${item.size} research vial`}
                   fill
                   sizes="288px"
-                  priority={item.size === product.variants[0]?.size}
+                  priority={item.size === size}
                   className={`object-contain object-center p-3 transition-opacity duration-200 ${
                     item.size === size
                       ? "opacity-100"

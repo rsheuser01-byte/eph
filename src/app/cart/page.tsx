@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CartBacSuggest } from "@/components/CartBacSuggest";
 import { useCart } from "@/lib/cart/CartContext";
 import {
   FREE_SHIPPING_THRESHOLD,
@@ -89,6 +90,7 @@ export default function CartPage() {
                 </span>
               </div>
             ))}
+            <CartBacSuggest resolved={resolved} />
           </div>
 
           <aside className="h-fit border border-line bg-bg-elevated p-8">

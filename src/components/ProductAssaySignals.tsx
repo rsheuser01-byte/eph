@@ -100,20 +100,29 @@ export function ProductAssaySignals({
             : "flex flex-col gap-3 pt-1 sm:flex-row sm:items-center sm:gap-6"
         }
       >
-        {signals.coaHref ? (
-          <a
-            href={signals.coaHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={
-              isCard
-                ? "font-semibold uppercase tracking-[0.14em] text-accent underline decoration-line underline-offset-4 transition hover:text-ink hover:decoration-ink"
-                : "link-underline text-xs font-semibold uppercase tracking-[0.16em] text-ink"
-            }
-            onClick={(event) => event.stopPropagation()}
-          >
-            {isCard ? "COA PDF →" : "View certificate (PDF) →"}
-          </a>
+        {signals.coaFiles.length > 0 ? (
+          signals.coaFiles.map((file) => (
+            <a
+              key={file.href}
+              href={file.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={
+                isCard
+                  ? "font-semibold uppercase tracking-[0.14em] text-accent underline decoration-line underline-offset-4 transition hover:text-ink hover:decoration-ink"
+                  : "link-underline text-xs font-semibold uppercase tracking-[0.16em] text-ink"
+              }
+              onClick={(event) => event.stopPropagation()}
+            >
+              {isCard
+                ? signals.coaFiles.length === 1
+                  ? "COA PDF →"
+                  : `${file.label.replace(/ COA$/i, "")} PDF →`
+                : file.label.endsWith("→")
+                  ? file.label
+                  : `${file.label} →`}
+            </a>
+          ))
         ) : (
           <Link
             href="/coa"

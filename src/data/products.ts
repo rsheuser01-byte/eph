@@ -259,7 +259,7 @@ export const products: Product[] = [
     slug: "nad",
     name: "NAD+",
     sku: "NAD",
-    category: "Peptide",
+    category: "Coenzyme",
     shortDescription:
       "Nicotinamide adenine dinucleotide for cellular metabolism and redox pathway laboratory models.",
     featured: true,

@@ -13,7 +13,7 @@ import { PRODUCT_PAGE_REVALIDATE_SECONDS } from "@/lib/inventory/productPageCach
  * Load availability for product pages / add-to-cart display.
  * When inventory is disabled (no Supabase), treat all SKUs as available (null).
  */
-async function loadAvailabilityMap(
+export async function getLiveAvailabilityMap(
   skus: string[],
 ): Promise<Record<string, number | null>> {
   const result: Record<string, number | null> = {};
@@ -37,7 +37,7 @@ async function loadAvailabilityMap(
  * `dynamic = "force-dynamic"` / no-store on `/products/[slug]`.
  */
 const getCachedAvailabilityMap = unstable_cache(
-  async (skus: string[]) => loadAvailabilityMap(skus),
+  async (skus: string[]) => getLiveAvailabilityMap(skus),
   ["product-availability"],
   { revalidate: PRODUCT_PAGE_REVALIDATE_SECONDS },
 );
