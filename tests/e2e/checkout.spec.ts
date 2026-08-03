@@ -19,7 +19,8 @@ test.describe("checkout mock-hpp happy path", () => {
     await expect(
       page.getByRole("heading", { level: 1, name: "GLP-3", exact: true }),
     ).toBeVisible();
-    await page.getByRole("button", { name: "Add to cart" }).click();
+    // Primary CTA uses btn-arrow (accessible name "Add to cart →"); related products also expose "Add to cart".
+    await page.getByRole("button", { name: "Add to cart →" }).click();
 
     await page.goto("/cart");
     await expect(page.getByText(/GLP-3/i).first()).toBeVisible();
