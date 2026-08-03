@@ -1,8 +1,11 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { CartBacSuggest } from "@/components/CartBacSuggest";
+import { CartLineQtyControls } from "@/components/CartLineQtyControls";
 import { useCart } from "@/lib/cart/CartContext";
+import { useCartAvailability } from "@/lib/cart/useCartAvailability";
 import {
   FREE_SHIPPING_THRESHOLD,
   formatUSD,
@@ -10,9 +13,16 @@ import {
 } from "@/lib/checkout/pricing";
 
 export default function CartPage() {
-  const { resolved, subtotal, setQty, remove } = useCart();
+  const { resolved, subtotal, setQty, remove, clampToAvailability } = useCart();
+  const availability = useCartAvailability(resolved);
   const { shipping, total } = orderTotals(subtotal);
   const remaining = FREE_SHIPPING_THRESHOLD - subtotal;
+
+  useEffect(() => {
+    if (availability) {
+      clampToAvailability(availability);
+    }
+  }, [availability, clampToAvailability]);
 
   return (
     <div className="site-shell py-20">
@@ -51,31 +61,12 @@ export default function CartPage() {
                     {variant.sku}
                   </p>
                   <div className="mt-4 flex items-center gap-5">
-                    <div className="flex items-center border border-line">
-                      <button
-                        type="button"
-                        aria-label="Decrease quantity"
-                        onClick={() =>
-                          setQty(line.slug, line.size, line.qty - 1)
-                        }
-                        className="px-3 py-1.5 text-ink-soft transition hover:text-ink"
-                      >
-                        −
-                      </button>
-                      <span className="min-w-8 text-center text-sm font-semibold tabular-nums text-ink">
-                        {line.qty}
-                      </span>
-                      <button
-                        type="button"
-                        aria-label="Increase quantity"
-                        onClick={() =>
-                          setQty(line.slug, line.size, line.qty + 1)
-                        }
-                        className="px-3 py-1.5 text-ink-soft transition hover:text-ink"
-                      >
-                        +
-                      </button>
-                    </div>
+                    <CartLineQtyControls
+                      line={line}
+                      sku={variant.sku}
+                      availability={availability}
+                      setQty={setQty}
+                    />
                     <button
                       type="button"
                       onClick={() => remove(line.slug, line.size)}

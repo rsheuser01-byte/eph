@@ -3,11 +3,22 @@
 import Link from "next/link";
 import { useEffect } from "react";
 import { CartBacSuggest } from "@/components/CartBacSuggest";
+import { CartLineQtyControls } from "@/components/CartLineQtyControls";
 import { useCart } from "@/lib/cart/CartContext";
+import { useCartAvailability } from "@/lib/cart/useCartAvailability";
 import { formatUSD, orderTotals } from "@/lib/checkout/pricing";
 
 export function CartDrawer() {
-  const { isOpen, closeCart, resolved, subtotal, setQty, remove } = useCart();
+  const {
+    isOpen,
+    closeCart,
+    resolved,
+    subtotal,
+    setQty,
+    remove,
+    clampToAvailability,
+  } = useCart();
+  const availability = useCartAvailability(isOpen ? resolved : []);
   const { shipping, total } = orderTotals(subtotal);
 
   useEffect(() => {
@@ -27,6 +38,12 @@ export function CartDrawer() {
       window.removeEventListener("keydown", onKey);
     };
   }, [isOpen, closeCart]);
+
+  useEffect(() => {
+    if (isOpen && availability) {
+      clampToAvailability(availability);
+    }
+  }, [isOpen, availability, clampToAvailability]);
 
   if (!isOpen) {
     return null;
@@ -83,30 +100,13 @@ export function CartDrawer() {
                     <p className="mt-1 text-xs uppercase tracking-[0.16em] text-ink-soft">
                       {variant.size} · {formatUSD(variant.price)}
                     </p>
-                    <div className="mt-3 flex items-center border border-line">
-                      <button
-                        type="button"
-                        aria-label="Decrease quantity"
-                        onClick={() =>
-                          setQty(line.slug, line.size, line.qty - 1)
-                        }
-                        className="px-3 py-1.5 text-ink-soft transition hover:text-ink"
-                      >
-                        −
-                      </button>
-                      <span className="min-w-8 text-center text-sm font-semibold tabular-nums text-ink">
-                        {line.qty}
-                      </span>
-                      <button
-                        type="button"
-                        aria-label="Increase quantity"
-                        onClick={() =>
-                          setQty(line.slug, line.size, line.qty + 1)
-                        }
-                        className="px-3 py-1.5 text-ink-soft transition hover:text-ink"
-                      >
-                        +
-                      </button>
+                    <div className="mt-3">
+                      <CartLineQtyControls
+                        line={line}
+                        sku={variant.sku}
+                        availability={availability}
+                        setQty={setQty}
+                      />
                     </div>
                   </div>
                   <div className="flex flex-col items-end justify-between">

@@ -42,7 +42,7 @@ export function ProductPurchase({
     if (!variant || !inStock) {
       return;
     }
-    add(product.slug, variant.size, Math.min(qty, maxQty || 1));
+    add(product.slug, variant.size, Math.min(qty, maxQty || 1), maxQty);
   }
 
   return (

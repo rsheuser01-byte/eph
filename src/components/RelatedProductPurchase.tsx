@@ -37,13 +37,14 @@ export function RelatedProductPurchase({
       ? availability[variant.sku]
       : null;
   const inStock = stock === null || stock === undefined || stock > 0;
-  const canAdd = Boolean(variant) && inStock;
+  const maxQty = stock === null || stock === undefined ? 99 : Math.max(0, stock);
+  const canAdd = Boolean(variant) && inStock && maxQty > 0;
 
   function handleAdd() {
-    if (!variant || !inStock) {
+    if (!variant || !inStock || maxQty < 1) {
       return;
     }
-    add(product.slug, variant.size, 1);
+    add(product.slug, variant.size, 1, maxQty);
   }
 
   return (

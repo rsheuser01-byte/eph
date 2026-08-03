@@ -12,6 +12,7 @@ import {
   addLine,
   cartCount,
   cartSubtotal,
+  clampResolvedLinesToStock,
   removeLine,
   resolveLines,
   updateQty,
@@ -26,10 +27,13 @@ type CartContextValue = {
   count: number;
   subtotal: number;
   isOpen: boolean;
-  add: (slug: string, size: string, qty?: number) => void;
-  setQty: (slug: string, size: string, qty: number) => void;
+  add: (slug: string, size: string, qty?: number, maxQty?: number) => void;
+  setQty: (slug: string, size: string, qty: number, maxQty?: number) => void;
   remove: (slug: string, size: string) => void;
   clear: () => void;
+  clampToAvailability: (
+    availability: Record<string, number | null>,
+  ) => void;
   openCart: () => void;
   closeCart: () => void;
 };
@@ -78,18 +82,34 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [lines, hydrated]);
 
-  const add = useCallback((slug: string, size: string, qty = 1) => {
-    setLines((current) => addLine(current, slug, size, qty));
-    setIsOpen(true);
-  }, []);
+  const add = useCallback(
+    (slug: string, size: string, qty = 1, maxQty?: number) => {
+      setLines((current) => addLine(current, slug, size, qty, maxQty));
+      setIsOpen(true);
+    },
+    [],
+  );
 
-  const setQty = useCallback((slug: string, size: string, qty: number) => {
-    setLines((current) => updateQty(current, slug, size, qty));
-  }, []);
+  const setQty = useCallback(
+    (slug: string, size: string, qty: number, maxQty?: number) => {
+      setLines((current) => updateQty(current, slug, size, qty, maxQty));
+    },
+    [],
+  );
 
   const remove = useCallback((slug: string, size: string) => {
     setLines((current) => removeLine(current, slug, size));
   }, []);
+
+  const clampToAvailability = useCallback(
+    (availability: Record<string, number | null>) => {
+      setLines((current) => {
+        const resolved = resolveLines(current);
+        return clampResolvedLinesToStock(current, resolved, availability);
+      });
+    },
+    [],
+  );
 
   const clear = useCallback(() => setLines([]), []);
   const openCart = useCallback(() => setIsOpen(true), []);
@@ -106,10 +126,21 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       setQty,
       remove,
       clear,
+      clampToAvailability,
       openCart,
       closeCart,
     }),
-    [lines, isOpen, add, setQty, remove, clear, openCart, closeCart],
+    [
+      lines,
+      isOpen,
+      add,
+      setQty,
+      remove,
+      clear,
+      clampToAvailability,
+      openCart,
+      closeCart,
+    ],
   );
 
   return <CartContext value={value}>{children}</CartContext>;
