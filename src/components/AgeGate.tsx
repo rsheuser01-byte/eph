@@ -3,14 +3,17 @@
 import { useEffect, useState } from "react";
 import { site } from "@/data/site";
 
-const STORAGE_KEY = "eph-age-verified";
+/** Session-scoped — shows again on each new browser visit/session. */
+export const AGE_VERIFIED_KEY = "eph-age-verified";
 
 export function AgeGate() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     try {
-      if (window.localStorage.getItem(STORAGE_KEY) !== "true") {
+      // Drop legacy forever-localStorage flag so returning visitors see the gate.
+      window.localStorage.removeItem(AGE_VERIFIED_KEY);
+      if (window.sessionStorage.getItem(AGE_VERIFIED_KEY) !== "true") {
         setOpen(true);
       }
     } catch {
@@ -31,9 +34,10 @@ export function AgeGate() {
 
   function accept() {
     try {
-      window.localStorage.setItem(STORAGE_KEY, "true");
+      window.sessionStorage.setItem(AGE_VERIFIED_KEY, "true");
+      window.localStorage.removeItem(AGE_VERIFIED_KEY);
     } catch {
-      // Session-only entry if storage is blocked.
+      // Allow entry this load if storage is blocked.
     }
     setOpen(false);
   }

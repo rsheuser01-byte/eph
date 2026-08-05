@@ -13,8 +13,8 @@ import {
   WELCOME_PROMO_CODE,
   WELCOME_PROMO_DISCOUNT_LABEL,
 } from "@/lib/email/marketing/welcomeEmail";
+import { AGE_VERIFIED_KEY } from "@/components/AgeGate";
 
-const AGE_STORAGE_KEY = "eph-age-verified";
 export const NEWSLETTER_DISMISSED_KEY = "eph-newsletter-dismissed";
 export const NEWSLETTER_SUBSCRIBED_KEY = "eph-newsletter-subscribed";
 
@@ -24,7 +24,7 @@ const THANKS_HIDE_MS = 2_400;
 
 type FormStatus = "idle" | "submitting" | "done" | "error";
 
-function readFlag(key: string): boolean {
+function readLocalFlag(key: string): boolean {
   try {
     return window.localStorage.getItem(key) === "true";
   } catch {
@@ -32,7 +32,7 @@ function readFlag(key: string): boolean {
   }
 }
 
-function writeFlag(key: string): void {
+function writeLocalFlag(key: string): void {
   try {
     window.localStorage.setItem(key, "true");
   } catch {
@@ -40,9 +40,18 @@ function writeFlag(key: string): void {
   }
 }
 
+function isAgeVerified(): boolean {
+  try {
+    return window.sessionStorage.getItem(AGE_VERIFIED_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
 function shouldNeverShow(): boolean {
   return (
-    readFlag(NEWSLETTER_DISMISSED_KEY) || readFlag(NEWSLETTER_SUBSCRIBED_KEY)
+    readLocalFlag(NEWSLETTER_DISMISSED_KEY) ||
+    readLocalFlag(NEWSLETTER_SUBSCRIBED_KEY)
   );
 }
 
@@ -85,11 +94,11 @@ export function NewsletterSignupPopup() {
       startDelay();
     }
 
-    if (readFlag(AGE_STORAGE_KEY)) {
+    if (isAgeVerified()) {
       startDelay();
     } else {
       pollTimer = window.setInterval(() => {
-        if (readFlag(AGE_STORAGE_KEY)) {
+        if (isAgeVerified()) {
           onAgeReady();
         }
       }, AGE_POLL_MS);
@@ -107,7 +116,7 @@ export function NewsletterSignupPopup() {
   }, []);
 
   const dismiss = useCallback(() => {
-    writeFlag(NEWSLETTER_DISMISSED_KEY);
+    writeLocalFlag(NEWSLETTER_DISMISSED_KEY);
     setVisible(false);
   }, []);
 
@@ -135,7 +144,7 @@ export function NewsletterSignupPopup() {
   }, []);
 
   function markSubscribedAndHide() {
-    writeFlag(NEWSLETTER_SUBSCRIBED_KEY);
+    writeLocalFlag(NEWSLETTER_SUBSCRIBED_KEY);
     hideThanksTimer.current = window.setTimeout(() => {
       setVisible(false);
     }, THANKS_HIDE_MS);
