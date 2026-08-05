@@ -1,5 +1,7 @@
 export type NewsletterSubscribeRequest = {
   email: string;
+  /** Optional; empty string when not provided. */
+  firstName: string;
 };
 
 export type ParseNewsletterSubscribeResult =
@@ -15,7 +17,7 @@ function isValidEmail(email: string): boolean {
 }
 
 /**
- * Validates a homepage newsletter signup payload (email only).
+ * Validates a newsletter signup payload (email required, firstName optional).
  */
 export function parseNewsletterSubscribeRequest(
   input: unknown,
@@ -23,9 +25,12 @@ export function parseNewsletterSubscribeRequest(
   if (typeof input !== "object" || input === null) {
     return { ok: false, error: "Invalid request body." };
   }
-  const email = str((input as Record<string, unknown>).email).toLowerCase();
+  const record = input as Record<string, unknown>;
+  const email = str(record.email).toLowerCase();
+  const firstName = str(record.firstName);
+
   if (!email || !isValidEmail(email)) {
     return { ok: false, error: "A valid email address is required." };
   }
-  return { ok: true, value: { email } };
+  return { ok: true, value: { email, firstName } };
 }

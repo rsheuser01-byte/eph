@@ -20,7 +20,7 @@ export const NEWSLETTER_SUBSCRIBED_KEY = "eph-newsletter-subscribed";
 
 const SHOW_DELAY_MS = 12_000;
 const AGE_POLL_MS = 400;
-const THANKS_HIDE_MS = 2_400;
+const THANKS_HIDE_MS = 4_000;
 
 type FormStatus = "idle" | "submitting" | "done" | "error";
 
@@ -152,33 +152,31 @@ export function NewsletterSignupPopup() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (status === "submitting") {
+      return;
+    }
     setStatus("submitting");
     setError(null);
 
     try {
-      const response = await fetch("/api/newsletter/subscribe", {
+      const response = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, firstName: "" }),
       });
-      const payload = (await response.json().catch(() => null)) as {
-        error?: string;
-      } | null;
 
       if (!response.ok) {
         setStatus("error");
-        setError(
-          payload?.error ??
-            "Could not complete signup. Please try again.",
-        );
+        setError("We couldn't complete your signup. Please try again.");
         return;
       }
 
+      setEmail("");
       setStatus("done");
       markSubscribedAndHide();
     } catch {
       setStatus("error");
-      setError("Could not complete signup. Please try again.");
+      setError("We couldn't complete your signup. Please try again.");
     }
   }
 
@@ -216,7 +214,7 @@ export function NewsletterSignupPopup() {
 
         {status === "done" ? (
           <p className="mt-4 text-sm leading-relaxed text-ink-soft">
-            You&apos;re on the list. Check your inbox for a welcome note.
+            You&apos;re subscribed! Check your inbox for your welcome email.
           </p>
         ) : (
           <>

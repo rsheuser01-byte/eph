@@ -5,7 +5,19 @@ describe("parseNewsletterSubscribeRequest", () => {
   it("accepts a valid email and normalizes case", () => {
     expect(parseNewsletterSubscribeRequest({ email: " Lab@Example.COM " })).toEqual({
       ok: true,
-      value: { email: "lab@example.com" },
+      value: { email: "lab@example.com", firstName: "" },
+    });
+  });
+
+  it("accepts an optional firstName", () => {
+    expect(
+      parseNewsletterSubscribeRequest({
+        email: "lab@example.com",
+        firstName: "  Alex ",
+      }),
+    ).toEqual({
+      ok: true,
+      value: { email: "lab@example.com", firstName: "Alex" },
     });
   });
 

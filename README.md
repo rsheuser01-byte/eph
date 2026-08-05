@@ -111,12 +111,14 @@ READINESS_SECRET=
 MARKETING_AUTOMATION_ENABLED=false
 ACTIVEPIECES_WEBHOOK_URL=
 ACTIVEPIECES_WEBHOOK_SECRET=
+# Homepage newsletter popup → Activepieces (server-only webhook URL)
+ACTIVEPIECES_NEWSLETTER_WEBHOOK=
 ```
 
 ### Marketing / newsletter email
 
-- Homepage signup popup (after age gate + 12s): posts to `/api/newsletter/subscribe`, creates a Resend contact, and sends published template `eph-newsletter-welcome`.
-- Live signup requires `RESEND_API_KEY` + `MARKETING_EMAIL_FROM` (verified domain). Template must be published (dashboard or `npm run sync:resend-welcome`).
+- Homepage signup popup (after age gate + 12s): posts to `/api/newsletter`, which forwards `{ email, firstName, source: "website_newsletter" }` to `ACTIVEPIECES_NEWSLETTER_WEBHOOK` (server-only — never exposed to the browser).
+- Legacy Resend path still available at `/api/newsletter/subscribe` (contact + `eph-newsletter-welcome` template) if you need it for ops scripts.
 - Preview welcome email HTML: `npm run preview:welcome-email` → `tmp/sample-welcome-email.html`
 - Sync/publish Resend template `eph-newsletter-welcome`: `npm run sync:resend-welcome` (requires `RESEND_API_KEY` + `MARKETING_EMAIL_FROM`)
 - Export Resend-dashboard paste HTML: `npm run export:resend-welcome-paste` → `tmp/resend-welcome-template.html`
