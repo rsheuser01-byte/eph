@@ -8,12 +8,14 @@ test.describe("checkout mock-hpp happy path", () => {
   test("browse, add to cart, checkout, and land on approved success", async ({
     page,
   }) => {
-    await page.goto("/products/glp-3");
+    // AgeGate opens in useEffect after hydration — a one-shot isVisible() races and
+    // leaves the dialog blocking clicks. Seed session flags before any navigation.
+    await page.addInitScript(() => {
+      window.sessionStorage.setItem("eph-age-verified", "true");
+      window.sessionStorage.setItem("eph-newsletter-dismissed", "true");
+    });
 
-    const ageGate = page.getByRole("button", { name: "Enter" });
-    if (await ageGate.isVisible().catch(() => false)) {
-      await ageGate.click();
-    }
+    await page.goto("/products/glp-3");
 
     // Exact H1 — Phase 3 added several other headings that also contain "GLP-3".
     await expect(
