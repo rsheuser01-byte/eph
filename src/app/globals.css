@@ -455,6 +455,21 @@ a {
   }
 }
 
+@keyframes newsletter-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.newsletter-slide-up {
+  animation: newsletter-slide-up 0.45s var(--ease-out) both;
+}
+
 .animate-rise {
   animation: rise-in 0.9s var(--ease-out) both;
 }
@@ -500,6 +515,7 @@ a {
   .animate-rise-delay-2,
   .animate-line,
   .animate-fade,
+  .newsletter-slide-up,
   .age-gate-backdrop,
   .age-gate-panel,
   .reveal,

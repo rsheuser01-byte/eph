@@ -9,6 +9,7 @@ import {
   useState,
   type FormEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import {
   WELCOME_PROMO_CODE,
   WELCOME_PROMO_DISCOUNT_LABEL,
@@ -74,16 +75,21 @@ function shouldNeverShow(): boolean {
 }
 
 /**
- * Discrete homepage-only newsletter card. Shows after age gate clears + 12s.
- * Does not lock scroll or use a full-screen overlay.
+ * Sitewide newsletter card: fixed to the viewport (portaled to body),
+ * centered at the bottom, slides up after age gate + delay.
  */
 export function NewsletterSignupPopup() {
   const titleId = useId();
+  const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const hideThanksTimer = useRef<number | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     // Clear legacy forever-dismiss from earlier builds.
@@ -211,95 +217,103 @@ export function NewsletterSignupPopup() {
     }
   }
 
-  if (!visible) {
+  if (!mounted || !visible) {
     return null;
   }
 
-  return (
+  return createPortal(
     <div
-      className="animate-rise fixed bottom-4 end-4 z-[80] w-[min(100%-2rem,22rem)] border border-line bg-bg-elevated p-5 shadow-[0_18px_48px_rgba(0,0,0,0.45)] surface-grain"
-      role="dialog"
-      aria-modal="false"
-      aria-labelledby={titleId}
+      className="pointer-events-none fixed inset-x-0 bottom-0 z-[80] flex justify-center px-4 pb-4 sm:pb-6"
+      role="presentation"
     >
-      <div className="relative z-[2]">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="label">Newsletter</p>
-            <h2
-              id={titleId}
-              className="font-display mt-2 text-xl font-semibold tracking-tight text-ink"
+      <div
+        className="newsletter-slide-up pointer-events-auto w-full max-w-md border border-line bg-bg-elevated p-5 shadow-[0_18px_48px_rgba(0,0,0,0.45)] surface-grain"
+        role="dialog"
+        aria-modal="false"
+        aria-labelledby={titleId}
+      >
+        <div className="relative z-[2]">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <p className="label">Newsletter</p>
+              <h2
+                id={titleId}
+                className="font-display mt-2 text-xl font-semibold tracking-tight text-ink"
+              >
+                Lab updates
+              </h2>
+            </div>
+            <button
+              type="button"
+              onClick={dismiss}
+              className="shrink-0 px-1 text-lg leading-none text-ink-soft transition hover:text-ink"
+              aria-label="Dismiss newsletter signup"
             >
-              Lab updates
-            </h2>
+              ×
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={dismiss}
-            className="shrink-0 px-1 text-lg leading-none text-ink-soft transition hover:text-ink"
-            aria-label="Dismiss newsletter signup"
-          >
-            ×
-          </button>
-        </div>
 
-        {status === "done" ? (
-          <p className="mt-4 text-sm leading-relaxed text-ink-soft">
-            You&apos;re subscribed! Check your inbox for your welcome email.
-          </p>
-        ) : (
-          <>
-            <p className="mt-3 text-sm leading-relaxed text-ink-soft">
-              Occasional product availability and research notes — subscribers
-              get {WELCOME_PROMO_DISCOUNT_LABEL} with {WELCOME_PROMO_CODE}.
+          {status === "done" ? (
+            <p className="mt-4 text-sm leading-relaxed text-ink-soft">
+              You&apos;re subscribed! Check your inbox for your welcome email.
             </p>
-            <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-              <label className="block">
-                <span className="sr-only">Email</span>
-                <input
-                  type="email"
-                  name="email"
-                  required
-                  autoComplete="email"
-                  placeholder="you@lab.org"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  disabled={status === "submitting"}
-                  className="w-full border-0 border-b border-line bg-transparent px-0 py-2 text-sm text-ink outline-none transition placeholder:text-ink-soft/60 focus:border-ink disabled:opacity-50"
-                />
-              </label>
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  type="submit"
-                  disabled={status === "submitting" || email.trim().length === 0}
-                  className="btn btn-primary disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {status === "submitting" ? "Joining…" : "Subscribe"}
-                </button>
-                <button
-                  type="button"
-                  onClick={dismiss}
-                  className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft transition hover:text-ink"
-                >
-                  No thanks
-                </button>
-              </div>
-              <p className="text-[0.7rem] leading-relaxed text-ink-soft">
-                By subscribing you agree to receive marketing email. See our{" "}
-                <Link href="/privacy" className="link-underline">
-                  Privacy
-                </Link>{" "}
-                policy. Unsubscribe anytime.
+          ) : (
+            <>
+              <p className="mt-3 text-sm leading-relaxed text-ink-soft">
+                Occasional product availability and research notes — subscribers
+                get {WELCOME_PROMO_DISCOUNT_LABEL} with {WELCOME_PROMO_CODE}.
               </p>
-              {error ? (
-                <p className="text-xs text-ink-soft" role="alert">
-                  {error}
+              <form onSubmit={handleSubmit} className="mt-4 space-y-3">
+                <label className="block">
+                  <span className="sr-only">Email</span>
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    autoComplete="email"
+                    placeholder="you@lab.org"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    disabled={status === "submitting"}
+                    className="w-full border-0 border-b border-line bg-transparent px-0 py-2 text-sm text-ink outline-none transition placeholder:text-ink-soft/60 focus:border-ink disabled:opacity-50"
+                  />
+                </label>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="submit"
+                    disabled={
+                      status === "submitting" || email.trim().length === 0
+                    }
+                    className="btn btn-primary disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {status === "submitting" ? "Joining…" : "Subscribe"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={dismiss}
+                    className="text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft transition hover:text-ink"
+                  >
+                    No thanks
+                  </button>
+                </div>
+                <p className="text-[0.7rem] leading-relaxed text-ink-soft">
+                  By subscribing you agree to receive marketing email. See our{" "}
+                  <Link href="/privacy" className="link-underline">
+                    Privacy
+                  </Link>{" "}
+                  policy. Unsubscribe anytime.
                 </p>
-              ) : null}
-            </form>
-          </>
-        )}
+                {error ? (
+                  <p className="text-xs text-ink-soft" role="alert">
+                    {error}
+                  </p>
+                ) : null}
+              </form>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

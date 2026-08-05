@@ -117,7 +117,7 @@ ACTIVEPIECES_NEWSLETTER_WEBHOOK=
 
 ### Marketing / newsletter email
 
-- Homepage signup popup (after age gate + 12s): posts to `/api/newsletter`, which forwards `{ email, firstName, source: "website_newsletter" }` to `ACTIVEPIECES_NEWSLETTER_WEBHOOK` (server-only — never exposed to the browser).
+- Homepage newsletter popup (after age gate + 5s): sitewide, viewport-centered at the bottom; posts to `/api/newsletter`, which forwards `{ email, firstName, source: "website_newsletter" }` to `ACTIVEPIECES_NEWSLETTER_WEBHOOK` (server-only — never exposed to the browser).
 - Legacy Resend path still available at `/api/newsletter/subscribe` (contact + `eph-newsletter-welcome` template) if you need it for ops scripts.
 - Preview welcome email HTML: `npm run preview:welcome-email` → `tmp/sample-welcome-email.html`
 - Sync/publish Resend template `eph-newsletter-welcome`: `npm run sync:resend-welcome` (requires `RESEND_API_KEY` + `MARKETING_EMAIL_FROM`)

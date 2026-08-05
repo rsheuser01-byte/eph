@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { NewsletterSignupPopup } from "@/components/NewsletterSignupPopup";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
 import { InstitutionalCta } from "@/components/InstitutionalCta";
@@ -157,8 +156,6 @@ export default function HomePage() {
       <Reveal>
         <InstitutionalCta />
       </Reveal>
-
-      <NewsletterSignupPopup />
     </>
   );
 }

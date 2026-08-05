@@ -3,6 +3,7 @@ import { Sora, Syne } from "next/font/google";
 import Script from "next/script";
 import { AgeGate } from "@/components/AgeGate";
 import { CartDrawer } from "@/components/CartDrawer";
+import { NewsletterSignupPopup } from "@/components/NewsletterSignupPopup";
 import { JsonLd } from "@/components/JsonLd";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
@@ -95,6 +96,7 @@ export default function RootLayout({
           <main className="flex-1">{children}</main>
           <SiteFooter />
           <CartDrawer />
+          <NewsletterSignupPopup />
         </CartProvider>
       </body>
     </html>
