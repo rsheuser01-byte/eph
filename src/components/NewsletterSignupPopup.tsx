@@ -18,7 +18,8 @@ import { AGE_VERIFIED_KEY } from "@/components/AgeGate";
 export const NEWSLETTER_DISMISSED_KEY = "eph-newsletter-dismissed";
 export const NEWSLETTER_SUBSCRIBED_KEY = "eph-newsletter-subscribed";
 
-const SHOW_DELAY_MS = 12_000;
+/** After age gate — short enough to notice, long enough to not feel pushy. */
+const SHOW_DELAY_MS = 5_000;
 const AGE_POLL_MS = 400;
 const THANKS_HIDE_MS = 4_000;
 
@@ -40,6 +41,22 @@ function writeLocalFlag(key: string): void {
   }
 }
 
+function readSessionFlag(key: string): boolean {
+  try {
+    return window.sessionStorage.getItem(key) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function writeSessionFlag(key: string): void {
+  try {
+    window.sessionStorage.setItem(key, "true");
+  } catch {
+    // Ignore if storage is blocked.
+  }
+}
+
 function isAgeVerified(): boolean {
   try {
     return window.sessionStorage.getItem(AGE_VERIFIED_KEY) === "true";
@@ -49,9 +66,10 @@ function isAgeVerified(): boolean {
 }
 
 function shouldNeverShow(): boolean {
+  // Subscribed = forever. Dismissed = this browser session only.
   return (
-    readLocalFlag(NEWSLETTER_DISMISSED_KEY) ||
-    readLocalFlag(NEWSLETTER_SUBSCRIBED_KEY)
+    readLocalFlag(NEWSLETTER_SUBSCRIBED_KEY) ||
+    readSessionFlag(NEWSLETTER_DISMISSED_KEY)
   );
 }
 
@@ -68,6 +86,13 @@ export function NewsletterSignupPopup() {
   const hideThanksTimer = useRef<number | null>(null);
 
   useEffect(() => {
+    // Clear legacy forever-dismiss from earlier builds.
+    try {
+      window.localStorage.removeItem(NEWSLETTER_DISMISSED_KEY);
+    } catch {
+      // Ignore.
+    }
+
     if (shouldNeverShow()) {
       return;
     }
@@ -116,7 +141,13 @@ export function NewsletterSignupPopup() {
   }, []);
 
   const dismiss = useCallback(() => {
-    writeLocalFlag(NEWSLETTER_DISMISSED_KEY);
+    writeSessionFlag(NEWSLETTER_DISMISSED_KEY);
+    // Clear legacy forever-dismiss so older visits don't block the popup.
+    try {
+      window.localStorage.removeItem(NEWSLETTER_DISMISSED_KEY);
+    } catch {
+      // Ignore.
+    }
     setVisible(false);
   }, []);
 
