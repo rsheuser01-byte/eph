@@ -9,6 +9,8 @@ export type ResearchSection = {
 };
 
 export type ProductResearchContext = {
+  /** Up to three short, scannable research-interest bullets for the product page. */
+  interestPoints: string[];
   sections: ResearchSection[];
   citations: ResearchCitation[];
 };
@@ -35,6 +37,11 @@ export function getProductResearch(
  */
 export const productResearchBySlug: Record<string, ProductResearchContext> = {
   "glp-3": {
+    interestPoints: [
+      "Researchers are studying simultaneous activity at GIP, GLP-1 and glucagon receptors.",
+      "Common research areas include reporter assays and comparative agonist pharmacology.",
+      "Of interest in studies that place single-, dual- and triple-agonist signaling side by side.",
+    ],
     sections: [
       {
         heading: "What is GLP-3 (retatrutide) in research?",
@@ -64,6 +71,11 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
   },
 
   "glp-2": {
+    interestPoints: [
+      "Researchers are studying dual agonist activity at GIP and GLP-1 receptors.",
+      "Common research areas include dual-receptor functional assays and potency comparisons.",
+      "Of interest in studies involving second-messenger panels such as cAMP readouts.",
+    ],
     sections: [
       {
         heading: "What is GLP-2 (tirzepatide) in research?",
@@ -93,6 +105,11 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
   },
 
   "mots-c": {
+    interestPoints: [
+      "Researchers are studying MOTS-c for mitochondrial signaling and metabolic stress pathways.",
+      "Common research areas include cellular energy markers and stress-response assays.",
+      "Of interest in studies involving mitochondrial-derived peptide identity and handling.",
+    ],
     sections: [
       {
         heading: "What is MOTS-c in research?",
@@ -118,6 +135,11 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
   },
 
   tesamorelin: {
+    interestPoints: [
+      "Researchers are studying this GHRH analog for growth hormone-releasing hormone receptor signaling.",
+      "Common research areas include GHRHR binding assays and comparative analog work.",
+      "Of interest in studies involving long peptide handling and reconstitution on the bench.",
+    ],
     sections: [
       {
         heading: "What is tesamorelin in research?",
@@ -147,6 +169,11 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
   },
 
   "mt-2": {
+    interestPoints: [
+      "Researchers are studying Melanotan II for melanocortin receptor and pigment pathway models.",
+      "Common research areas include receptor binding and cAMP reporter panels.",
+      "Of interest in structure–activity comparisons with related cyclic melanocortin analogs.",
+    ],
     sections: [
       {
         heading: "What is MT-2 (Melanotan II) in research?",
@@ -172,6 +199,11 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
   },
 
   "pt-141": {
+    interestPoints: [
+      "Researchers are studying bremelanotide for melanocortin receptor signaling on the bench.",
+      "Common research areas include MC3R/MC4R functional assays and near-analog comparisons.",
+      "Of interest in studies that contrast free-acid versus amide-terminated cyclic scaffolds.",
+    ],
     sections: [
       {
         heading: "What is PT-141 (bremelanotide) in research?",
@@ -197,6 +229,11 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
   },
 
   nad: {
+    interestPoints: [
+      "Researchers are studying NAD+ as a cofactor in cellular energy and redox pathways.",
+      "Common research areas include dehydrogenase assays and NAD+-dependent enzyme systems.",
+      "Of interest in studies involving defined NAD+/NADH pools in metabolic flux work.",
+    ],
     sections: [
       {
         heading: "What is NAD+ in research?",
@@ -226,6 +263,11 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
   },
 
   "wolverine-blend": {
+    interestPoints: [
+      "Research interest centers on preparing BPC-157 and TB-500 from one shared lyophilized stock.",
+      "Common research areas include multi-marker panels and co-formulated handling studies.",
+      "Of interest when protocols need coordinated sample prep rather than separate reconstitutions.",
+    ],
     sections: [
       {
         heading: "What is Wolverine Blend in research?",
@@ -255,6 +297,11 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
   },
 
   "glow-blend": {
+    interestPoints: [
+      "Research interest centers on BPC-157, GHK-Cu and TB-500 in one multi-peptide stock.",
+      "Common research areas include multi-marker protocols and copper-complex analytical checks.",
+      "Of interest when a single preparation must feed several pathway or marker readouts.",
+    ],
     sections: [
       {
         heading: "What is GLOW Blend in research?",
@@ -284,6 +331,11 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
   },
 
   "klow-blend": {
+    interestPoints: [
+      "Research interest centers on a four-peptide stock that adds KPV to the GLOW-style format.",
+      "Common research areas include broader marker panels and multi-analyte method checks.",
+      "Of interest in comparisons of three- versus four-peptide co-formulations on the bench.",
+    ],
     sections: [
       {
         heading: "What is KLOW Blend in research?",
@@ -313,6 +365,11 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
   },
 
   bac: {
+    interestPoints: [
+      "Research interest centers on bacteriostatic water as a diluent for lyophilized lab materials.",
+      "Common research areas include controlled dissolution before serial dilution on the bench.",
+      "Of interest when a protocol specifies a preservative-containing aqueous diluent.",
+    ],
     sections: [
       {
         heading: "What is bacteriostatic water in research?",

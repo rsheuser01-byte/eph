@@ -18,6 +18,8 @@ type OrderRow = {
   subtotal: number | string;
   shipping: number | string;
   tax: number | string | null;
+  discount: number | string | null;
+  promo_code: string | null;
   total: number | string;
   currency: string;
   customer: BillingInfo;
@@ -61,6 +63,8 @@ function mapRow(row: OrderRow, items: OrderItem[]): OrderRecord {
     subtotal: asNumber(row.subtotal),
     shipping: asNumber(row.shipping),
     tax: asNumber(row.tax ?? 0),
+    discount: asNumber(row.discount ?? 0),
+    promoCode: row.promo_code ?? undefined,
     total: asNumber(row.total),
     currency: row.currency,
     customer: row.customer,
@@ -107,6 +111,8 @@ export function createSupabaseOrderStore(
           subtotal: record.subtotal,
           shipping: record.shipping,
           tax: record.tax,
+          discount: record.discount,
+          promo_code: record.promoCode ?? null,
           total: record.total,
           currency: record.currency,
           customer: record.customer,
@@ -217,6 +223,26 @@ export function createSupabaseOrderStore(
       }
 
       return mapRow(order as OrderRow, mapItems((items ?? []) as OrderItemRow[]));
+    },
+
+    async hasApprovedOrderForEmail(email: string): Promise<boolean> {
+      const normalized = email.trim().toLowerCase();
+      if (!normalized) {
+        return false;
+      }
+      const { data, error } = await client
+        .from("orders")
+        .select("id")
+        .eq("payment_status", "approved")
+        .filter("customer->>email", "ilike", normalized)
+        .limit(1);
+
+      if (error) {
+        throw new Error(
+          `Failed to check prior orders for email: ${error.message}`,
+        );
+      }
+      return (data?.length ?? 0) > 0;
     },
 
     async updateStatus(

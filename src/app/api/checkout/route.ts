@@ -25,6 +25,12 @@ import {
 } from "@/lib/config/productionReadiness";
 import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
 import { generateLookupToken } from "@/lib/orders/publicStatus";
+import {
+  getPromoStore,
+  proportionallyDiscountedUnitPrices,
+  resolvePromo,
+} from "@/lib/promo";
+import { hasApprovedOrderForEmail } from "@/lib/promo/orderEligibility";
 import { TaxCalculationError, quoteTax } from "@/lib/tax";
 import { researchUseAckError } from "@/lib/checkout/researchAck";
 import {
@@ -157,6 +163,31 @@ export async function POST(request: Request) {
     );
   }
 
+  let discount = 0;
+  let appliedPromoCode: string | undefined;
+  const promoCode = str(body.promoCode);
+  if (promoCode) {
+    const orderStoreForPromo = getOrderStore();
+    const resolved = await resolvePromo({
+      promoCode,
+      email: billing.email,
+      subtotal: order.subtotal,
+      promoStore: getPromoStore(),
+      hasApprovedOrderForEmail: (e) =>
+        hasApprovedOrderForEmail(orderStoreForPromo, e),
+    });
+    if (!resolved.ok) {
+      return NextResponse.json({ error: resolved.error }, { status: 400 });
+    }
+    discount = resolved.discount;
+    appliedPromoCode = resolved.promo.code;
+  }
+
+  const discountedUnitPrices = proportionallyDiscountedUnitPrices(
+    order.items,
+    discount,
+  );
+
   let taxQuote;
   try {
     taxQuote = await quoteTax({
@@ -167,10 +198,10 @@ export async function POST(request: Request) {
         zip: billing.zip,
         address1: billing.address1,
       },
-      items: order.items.map((item) => ({
+      items: order.items.map((item, index) => ({
         sku: item.sku,
         quantity: item.qty,
-        unitPrice: item.unitPrice,
+        unitPrice: discountedUnitPrices[index] ?? item.unitPrice,
       })),
       shipping: order.shipping,
     });
@@ -184,7 +215,7 @@ export async function POST(request: Request) {
     throw error;
   }
 
-  const totals = orderTotals(order.subtotal, taxQuote.amount);
+  const totals = orderTotals(order.subtotal, taxQuote.amount, discount);
   const orderId = generateOrderId();
   const lookupToken = generateLookupToken();
   const provider = getPaymentProvider();
@@ -215,6 +246,8 @@ export async function POST(request: Request) {
         subtotal: totals.subtotal,
         shipping: totals.shipping,
         tax: totals.tax,
+        discount: totals.discount,
+        promoCode: appliedPromoCode,
         total: totals.total,
         currency: "USD",
         customer: billing,

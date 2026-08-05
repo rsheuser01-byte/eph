@@ -56,6 +56,10 @@ RESEND_API_KEY=
 EMAIL_FROM="Elevate Precision Health <[email protected]>"
 # Optional override for store/ops alerts (defaults to site contact email)
 STORE_NOTIFICATION_EMAIL=
+# Reply-To for customer-facing and marketing messages (defaults to site.email)
+EMAIL_REPLY_TO=support@elevateprecisionhealth.com
+# Marketing / newsletter sender (Resend templates — server-only, verified domain)
+MARKETING_EMAIL_FROM="Elevate Precision Health <updates@YOUR_VERIFIED_DOMAIN>"
 
 # Sales tax: "mock" (local only, $0) or "taxjar" (required in production)
 TAX_PROVIDER=mock
@@ -99,7 +103,23 @@ CRON_SECRET=
 # Optional dedicated secret for detailed /api/readiness diagnostics
 # (falls back to CRON_SECRET when unset)
 READINESS_SECRET=
+
+# Activepieces marketing automation (optional — not wired to orders yet)
+# Leave MARKETING_AUTOMATION_ENABLED unset/false until ready. When "true",
+# ACTIVEPIECES_WEBHOOK_URL and ACTIVEPIECES_WEBHOOK_SECRET are required.
+# Test locally: npm run test:activepieces
+MARKETING_AUTOMATION_ENABLED=false
+ACTIVEPIECES_WEBHOOK_URL=
+ACTIVEPIECES_WEBHOOK_SECRET=
 ```
+
+### Marketing / newsletter email
+
+- Homepage signup popup (after age gate + 12s): posts to `/api/newsletter/subscribe`, creates a Resend contact, and sends published template `eph-newsletter-welcome`.
+- Live signup requires `RESEND_API_KEY` + `MARKETING_EMAIL_FROM` (verified domain). Template must be published (dashboard or `npm run sync:resend-welcome`).
+- Preview welcome email HTML: `npm run preview:welcome-email` → `tmp/sample-welcome-email.html`
+- Sync/publish Resend template `eph-newsletter-welcome`: `npm run sync:resend-welcome` (requires `RESEND_API_KEY` + `MARKETING_EMAIL_FROM`)
+- Export Resend-dashboard paste HTML: `npm run export:resend-welcome-paste` → `tmp/resend-welcome-template.html`
 
 ### Orders & inventory
 

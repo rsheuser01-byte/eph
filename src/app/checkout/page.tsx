@@ -58,7 +58,17 @@ function CheckoutForm() {
   const [tax, setTax] = useState(0);
   const [taxLoading, setTaxLoading] = useState(false);
   const [taxError, setTaxError] = useState<string | null>(null);
-  const displayTotal = orderTotals(subtotal, tax).total;
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    label: string;
+    discount: number;
+  } | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoApplying, setPromoApplying] = useState(false);
+  const discount = appliedPromo?.discount ?? 0;
+  const displayTotals = orderTotals(subtotal, tax, discount);
+  const displayTotal = displayTotals.total;
 
   useEffect(() => {
     const fromQuery = checkoutErrorMessage(searchParams.get("error"));
@@ -91,17 +101,23 @@ function CheckoutForm() {
           signal: controller.signal,
           body: JSON.stringify({
             items: lines,
+            email: form.email,
+            ...(appliedPromo ? { promoCode: appliedPromo.code } : {}),
             customer: {
               address1: form.address1,
               city: form.city,
               state: form.state,
               zip: form.zip,
               country: form.country || "US",
+              email: form.email,
             },
           }),
         });
         const data = (await response.json()) as {
           tax?: number;
+          discount?: number;
+          promoCode?: string | null;
+          label?: string | null;
           error?: string;
         };
         if (!response.ok) {
@@ -110,6 +126,17 @@ function CheckoutForm() {
           return;
         }
         setTax(typeof data.tax === "number" ? data.tax : 0);
+        if (
+          appliedPromo &&
+          typeof data.discount === "number" &&
+          data.promoCode
+        ) {
+          setAppliedPromo({
+            code: data.promoCode,
+            label: data.label ?? appliedPromo.label,
+            discount: data.discount,
+          });
+        }
       } catch (err) {
         if ((err as Error).name === "AbortError") {
           return;
@@ -131,11 +158,61 @@ function CheckoutForm() {
     form.state,
     form.zip,
     form.country,
+    form.email,
     lines,
+    appliedPromo?.code,
   ]);
 
   function update(field: keyof typeof initialForm, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
+  }
+
+  async function applyPromo() {
+    const code = promoInput.trim();
+    if (!code) {
+      setPromoError("Enter a promo code.");
+      return;
+    }
+    setPromoApplying(true);
+    setPromoError(null);
+    try {
+      const response = await fetch("/api/promo/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          promoCode: code,
+          email: form.email,
+          items: lines,
+        }),
+      });
+      const data = (await response.json()) as {
+        promoCode?: string;
+        label?: string;
+        discount?: number;
+        error?: string;
+      };
+      if (!response.ok || typeof data.discount !== "number" || !data.promoCode) {
+        setAppliedPromo(null);
+        setPromoError(data.error ?? "Invalid promo code.");
+        return;
+      }
+      setAppliedPromo({
+        code: data.promoCode,
+        label: data.label ?? data.promoCode,
+        discount: data.discount,
+      });
+      setPromoInput(data.promoCode);
+    } catch {
+      setPromoError("Unable to validate promo code. Please try again.");
+    } finally {
+      setPromoApplying(false);
+    }
+  }
+
+  function clearPromo() {
+    setAppliedPromo(null);
+    setPromoInput("");
+    setPromoError(null);
   }
 
   async function handleSubmit(event: React.FormEvent) {
@@ -156,6 +233,7 @@ function CheckoutForm() {
         body: JSON.stringify({
           items: lines,
           researchUseAcknowledged: researchAck,
+          ...(appliedPromo ? { promoCode: appliedPromo.code } : {}),
           customer: {
             firstName: form.firstName,
             lastName: form.lastName,
@@ -422,10 +500,71 @@ function CheckoutForm() {
               </div>
             ))}
           </div>
+          <div className="mt-6 border-t border-line pt-5">
+            <label className="text-sm text-ink-soft" htmlFor="promo-code">
+              Promo code
+            </label>
+            <div className="mt-2 flex gap-2">
+              <input
+                id="promo-code"
+                type="text"
+                autoComplete="off"
+                value={promoInput}
+                disabled={Boolean(appliedPromo) || promoApplying}
+                onChange={(event) => {
+                  setPromoInput(event.target.value);
+                  setPromoError(null);
+                }}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    if (!appliedPromo) {
+                      void applyPromo();
+                    }
+                  }
+                }}
+                className={inputClass}
+                placeholder="Enter code"
+              />
+              {appliedPromo ? (
+                <button
+                  type="button"
+                  onClick={clearPromo}
+                  className="btn shrink-0 border border-line px-4 text-sm text-ink"
+                >
+                  Clear
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => void applyPromo()}
+                  disabled={promoApplying || !promoInput.trim()}
+                  className="btn btn-primary shrink-0 px-4 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {promoApplying ? "…" : "Apply"}
+                </button>
+              )}
+            </div>
+            {promoError ? (
+              <p className="mt-2 text-[0.7rem] text-red-600">{promoError}</p>
+            ) : appliedPromo ? (
+              <p className="mt-2 text-[0.7rem] text-ink-soft">
+                {appliedPromo.label} applied
+              </p>
+            ) : null}
+          </div>
           <div className="mt-6 flex items-center justify-between border-t border-line pt-5 text-sm text-ink-soft">
             <span>Subtotal</span>
             <span className="tabular-nums text-ink">{formatUSD(subtotal)}</span>
           </div>
+          {appliedPromo ? (
+            <div className="mt-2 flex items-center justify-between text-sm text-ink-soft">
+              <span>Discount ({appliedPromo.code})</span>
+              <span className="tabular-nums text-ink">
+                −{formatUSD(discount)}
+              </span>
+            </div>
+          ) : null}
           <div className="mt-2 flex items-center justify-between text-sm text-ink-soft">
             <span>Shipping</span>
             <span className="tabular-nums text-ink">

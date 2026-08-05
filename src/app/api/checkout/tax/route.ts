@@ -6,6 +6,13 @@ import {
   assertProductionCheckoutReady,
   publicCheckoutUnavailableMessage,
 } from "@/lib/config/productionReadiness";
+import { getOrderStore } from "@/lib/orders";
+import {
+  getPromoStore,
+  proportionallyDiscountedUnitPrices,
+  resolvePromo,
+} from "@/lib/promo";
+import { hasApprovedOrderForEmail } from "@/lib/promo/orderEligibility";
 import { TaxCalculationError, quoteTax } from "@/lib/tax";
 
 export const runtime = "nodejs";
@@ -17,7 +24,7 @@ function str(value: unknown): string {
 
 /**
  * Server-side tax quote for checkout UI.
- * Never accepts a client tax amount — only destination + cart.
+ * Never accepts a client tax or discount amount — only destination + cart + optional code.
  */
 export async function POST(request: Request) {
   try {
@@ -60,21 +67,51 @@ export async function POST(request: Request) {
     );
   }
 
+  let discount = 0;
+  let appliedPromoCode: string | undefined;
+  let promoLabel: string | undefined;
+  const promoCode = str(body.promoCode);
+  if (promoCode) {
+    const email = str(body.email) || str(customer?.email);
+    const orderStore = getOrderStore();
+    const resolved = await resolvePromo({
+      promoCode,
+      email,
+      subtotal: order.subtotal,
+      promoStore: getPromoStore(),
+      hasApprovedOrderForEmail: (e) => hasApprovedOrderForEmail(orderStore, e),
+    });
+    if (!resolved.ok) {
+      return NextResponse.json({ error: resolved.error }, { status: 400 });
+    }
+    discount = resolved.discount;
+    appliedPromoCode = resolved.promo.code;
+    promoLabel = resolved.promo.label;
+  }
+
+  const discountedUnitPrices = proportionallyDiscountedUnitPrices(
+    order.items,
+    discount,
+  );
+
   try {
     const quote = await quoteTax({
       customer: { country, state, city, zip, address1 },
-      items: order.items.map((item) => ({
+      items: order.items.map((item, index) => ({
         sku: item.sku,
         quantity: item.qty,
-        unitPrice: item.unitPrice,
+        unitPrice: discountedUnitPrices[index] ?? item.unitPrice,
       })),
       shipping: order.shipping,
     });
-    const totals = orderTotals(order.subtotal, quote.amount);
+    const totals = orderTotals(order.subtotal, quote.amount, discount);
     return NextResponse.json({
       tax: totals.tax,
       shipping: totals.shipping,
       subtotal: totals.subtotal,
+      discount: totals.discount,
+      promoCode: appliedPromoCode ?? null,
+      label: promoLabel ?? null,
       total: totals.total,
       provider: quote.provider,
       jurisdiction: quote.jurisdiction ?? null,

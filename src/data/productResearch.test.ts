@@ -72,6 +72,7 @@ describe("product research context (Phase 3 #1)", () => {
     for (const product of products) {
       const research = getProductResearch(product.slug)!;
       const text = [
+        ...research.interestPoints,
         ...research.sections.flatMap((section) => [
           section.heading,
           ...section.paragraphs,
@@ -80,6 +81,18 @@ describe("product research context (Phase 3 #1)", () => {
       ].join(" ");
       expect(text).toMatch(/research|laborator|in vitro|assay|bench/i);
       expect(text).not.toMatch(THERAPEUTIC_CLAIM_PATTERN);
+    }
+  });
+
+  it("provides one to three scannable interest points per SKU", () => {
+    for (const product of products) {
+      const research = getProductResearch(product.slug)!;
+      expect(research.interestPoints.length).toBeGreaterThanOrEqual(1);
+      expect(research.interestPoints.length).toBeLessThanOrEqual(3);
+      for (const point of research.interestPoints) {
+        expect(point.trim().split(/\s+/).length).toBeGreaterThanOrEqual(6);
+        expect(point.trim().split(/\s+/).length).toBeLessThanOrEqual(28);
+      }
     }
   });
 

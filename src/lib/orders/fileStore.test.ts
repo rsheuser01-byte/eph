@@ -20,12 +20,13 @@ function makeOrder(orderId: string, createdAt: string): OrderRecord {
     subtotal: 69.99,
     shipping: 12,
     tax: 0,
+    discount: 0,
     total: 81.99,
     currency: "USD",
     customer: {
       firstName: "Ada",
       lastName: "Lovelace",
-      email: "[email protected]",
+      email: "ada@example.com",
       address1: "1 Lab St",
       city: "Denver",
       state: "CO",
@@ -75,5 +76,15 @@ describe("file order store", () => {
     await store.save(record);
     const saved = await store.get("EPH-1");
     expect(saved).not.toHaveProperty("card");
+  });
+
+  it("detects a prior approved order by email", async () => {
+    const store = createFileOrderStore(filePath);
+    await store.save(makeOrder("o1", "2026-01-01T00:00:00.000Z"));
+    expect(store.hasApprovedOrderForEmail).toBeTypeOf("function");
+    expect(await store.hasApprovedOrderForEmail!("Ada@Example.com")).toBe(true);
+    expect(await store.hasApprovedOrderForEmail!("other@example.com")).toBe(
+      false,
+    );
   });
 });

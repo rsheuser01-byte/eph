@@ -172,10 +172,10 @@ export const resourcePages: ResourcePage[] = [
         ],
       },
       {
-        heading: "Aliquots and freeze–thaw",
+        heading: "After reconstitution",
         paragraphs: [
-          "Once reconstituted, portion working aliquots so the main stock is not thawed for every plate. Freeze aliquots promptly if the protocol calls for frozen storage of solutions. Minimize freeze–thaw cycles; many peptides lose integrity after repeated cycling even when the lyophilized solid was stable.",
-          "Protect aromatic-rich peptides from strong light during open-bench work. Record solvent, concentration, aliquot date, and lot number in the notebook so later anomalies can be traced.",
+          "Once reconstituted, store solutions at 2–8°C unless a product certificate or protocol specifies otherwise. Portion working aliquots so the main stock is not opened for every plate, and protect aromatic-rich peptides from strong light during open-bench work.",
+          "Record solvent, concentration, aliquot date, and lot number in the notebook so later anomalies can be traced. Follow your institution’s discard timeline for reconstituted research stocks.",
         ],
       },
       {

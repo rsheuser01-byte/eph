@@ -15,19 +15,23 @@ export function roundMoney(amount: number): number {
 export function orderTotals(
   subtotal: number,
   tax = 0,
+  discount = 0,
 ): {
   subtotal: number;
   shipping: number;
   tax: number;
+  discount: number;
   total: number;
 } {
   const shipping = shippingFor(subtotal);
   const taxAmount = roundMoney(tax);
+  const discountAmount = Math.min(roundMoney(Math.max(0, discount)), roundMoney(subtotal));
   return {
     subtotal,
     shipping,
     tax: taxAmount,
-    total: roundMoney(subtotal + shipping + taxAmount),
+    discount: discountAmount,
+    total: roundMoney(subtotal - discountAmount + shipping + taxAmount),
   };
 }
 

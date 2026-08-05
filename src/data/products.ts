@@ -44,7 +44,7 @@ export type ProductSpecRow = {
 const LYOPHILIZED = "Lyophilized powder";
 const POWDER_APPEARANCE = "White to off-white powder";
 const LYOPHILIZED_STORAGE =
-  "Store lyophilized powder at −20°C. Protect from light and moisture. Keep tightly sealed until use.";
+  "Store lyophilized powder at −20°C. Protect from light and moisture. Keep tightly sealed until use. After reconstitution, store at 2–8°C.";
 
 // List prices come from pricing-guide.json (edit that file to change prices).
 // BAC Water is not in the guide and keeps local supply pricing.
@@ -55,7 +55,7 @@ export const products: Product[] = [
     sku: "GLP-3",
     category: "Peptide",
     shortDescription:
-      "Retatrutide research peptide supplied in multiple vial sizes for laboratory protocols.",
+      "Triple-receptor agonist studied in laboratory models involving GIP, GLP-1 and glucagon signaling pathways.",
     featured: true,
     variants: [
       {
@@ -100,7 +100,7 @@ export const products: Product[] = [
     sku: "GLP-2",
     category: "Peptide",
     shortDescription:
-      "Tirzepatide research peptide suited to early screening and repeat assay work.",
+      "Dual incretin agonist studied in laboratory models involving GIP and GLP-1 receptor signaling.",
     featured: true,
     variants: [
       {
@@ -139,7 +139,7 @@ export const products: Product[] = [
     sku: "MOTS",
     category: "Peptide",
     shortDescription:
-      "Mitochondrial peptide used in metabolic pathway laboratory models.",
+      "Mitochondrial-derived peptide studied for its role in cellular energy signaling and metabolic stress pathways.",
     featured: true,
     variants: [
       {
@@ -173,7 +173,7 @@ export const products: Product[] = [
     sku: "TESA",
     category: "Peptide",
     shortDescription:
-      "GHRH analog stocked for controlled in-vitro and research bench use.",
+      "Synthetic GHRH analog studied in laboratory models of growth hormone-releasing hormone receptor signaling.",
     featured: false,
     variants: [
       {
@@ -206,7 +206,7 @@ export const products: Product[] = [
     sku: "MT2",
     category: "Peptide",
     shortDescription:
-      "Melanotan II research peptide for receptor and pigment pathway studies.",
+      "Cyclic melanocortin analog studied in laboratory models of pigment pathway and melanocortin receptor signaling.",
     featured: false,
     variants: [
       {
@@ -234,7 +234,7 @@ export const products: Product[] = [
     sku: "PT141",
     category: "Peptide",
     shortDescription:
-      "Bremelanotide research peptide for melanocortin receptor pathway studies.",
+      "Cyclic melanocortin peptide studied for receptor signaling comparisons across melanocortin pathway models.",
     featured: false,
     variants: [
       {
@@ -261,7 +261,7 @@ export const products: Product[] = [
     sku: "NAD",
     category: "Coenzyme",
     shortDescription:
-      "Nicotinamide adenine dinucleotide for cellular metabolism and redox pathway laboratory models.",
+      "Cellular cofactor studied in laboratory models involving energy metabolism, redox activity and enzyme function.",
     featured: true,
     variants: [
       {
@@ -300,7 +300,7 @@ export const products: Product[] = [
     sku: "WOLV",
     category: "Blend",
     shortDescription:
-      "BPC-157 with TB-500 in one research blend for combined study designs.",
+      "Combined BPC-157 and TB-500 preparation studied in multi-marker laboratory protocols from a single stock.",
     featured: true,
     variants: [
       {
@@ -325,7 +325,7 @@ export const products: Product[] = [
     sku: "GLOW",
     category: "Blend",
     shortDescription:
-      "BPC-157, GHK-Cu, and TB-500 combined for multi-marker lab protocols.",
+      "Three-peptide blend with BPC-157, GHK-Cu and TB-500 studied in coordinated multi-marker laboratory designs.",
     featured: true,
     variants: [
       {
@@ -350,7 +350,7 @@ export const products: Product[] = [
     sku: "KLOW",
     category: "Blend",
     shortDescription:
-      "BPC-157, GHK-Cu, TB-500, and KPV combined for multi-marker lab protocols.",
+      "Four-peptide blend adding KPV alongside BPC-157, GHK-Cu and TB-500 for broader marker-panel study designs.",
     featured: false,
     variants: [
       {
@@ -375,7 +375,7 @@ export const products: Product[] = [
     sku: "BAC",
     category: "Supply",
     shortDescription:
-      "Bacteriostatic water for reconstitution steps on the research bench.",
+      "Sterile bacteriostatic diluent for dissolving lyophilized research materials under controlled laboratory conditions.",
     featured: false,
     variants: [
       {

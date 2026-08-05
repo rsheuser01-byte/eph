@@ -16,6 +16,7 @@ function normalize(record: OrderRecord): OrderRecord {
     fulfillmentStatus: record.fulfillmentStatus ?? "unfulfilled",
     refundedAmount: record.refundedAmount ?? 0,
     tax: record.tax ?? 0,
+    discount: record.discount ?? 0,
     status: paymentStatus,
   };
 }
@@ -66,6 +67,18 @@ export function createFileOrderStore(filePath = defaultPath()): OrderStore {
     async get(orderId: string): Promise<OrderRecord | null> {
       const orders = await readAll(filePath);
       return orders.find((order) => order.orderId === orderId) ?? null;
+    },
+    async hasApprovedOrderForEmail(email: string): Promise<boolean> {
+      const normalized = email.trim().toLowerCase();
+      if (!normalized) {
+        return false;
+      }
+      const orders = await readAll(filePath);
+      return orders.some(
+        (order) =>
+          order.paymentStatus === "approved" &&
+          order.customer.email.trim().toLowerCase() === normalized,
+      );
     },
     async updateStatus(
       orderId: string,

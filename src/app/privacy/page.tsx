@@ -11,7 +11,7 @@ import { breadcrumbSchema } from "@/lib/seo/structuredData";
 export const metadata: Metadata = pageMetadata({
   title: "Privacy policy",
   description:
-    "Privacy policy for Elevate Precision Health, covering the information collected when you browse or contact the site and how it is used.",
+    "Privacy policy for Elevate Precision Health, covering contact details, order and restock notices, email and SMS preferences, and how information is used.",
   path: "/privacy",
 });
 
@@ -30,13 +30,33 @@ export default function PrivacyPage() {
       </p>
       <h2>Information we collect</h2>
       <p>
-        We may collect contact details you submit through forms or email, as
-        well as basic technical data such as browser type and pages visited.
+        We may collect contact details you submit through forms or email —
+        including name, email address, phone number, shipping address, and
+        messages you send us — as well as basic technical data such as browser
+        type and pages visited. Checkout and restock-notification forms may
+        collect the product and size you are asking about.
       </p>
       <h2>How we use information</h2>
       <p>
         Information is used to respond to inquiries, fulfill research orders,
-        improve the website, and meet legal obligations.
+        send transactional notices (such as order, shipping, or restock
+        emails), improve the website, and meet legal obligations. If you
+        provide a mobile number and expressly consent to SMS/text messages, we
+        may use that number for the message types described in our{" "}
+        <a href="/terms#electronic-communications">Terms</a> (for example order
+        updates or requested alerts). We do not require SMS consent as a
+        condition of purchase.
+      </p>
+      <h2>Email and text preferences</h2>
+      <p>
+        You may unsubscribe from promotional email using the link in those
+        messages or by contacting{" "}
+        <a href={`mailto:${site.email}`}>{site.email}</a>. For marketing SMS,
+        you may reply STOP or email us with your number and a stop request.
+        Transactional messages about orders or requests you initiated may still
+        be sent by email when needed to complete the transaction or support
+        request. See the Terms section on electronic communications for more
+        detail.
       </p>
       <h2>Contact</h2>
       <p>

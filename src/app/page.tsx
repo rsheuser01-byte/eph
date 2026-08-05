@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { NewsletterSignupPopup } from "@/components/NewsletterSignupPopup";
 import { ProductCard } from "@/components/ProductCard";
 import { Reveal } from "@/components/Reveal";
 import { InstitutionalCta } from "@/components/InstitutionalCta";
@@ -45,7 +46,7 @@ export default function HomePage() {
           <div className="mt-10 grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
             <div>
               <p className="animate-rise-delay max-w-md text-xl font-medium leading-snug text-on-dark sm:text-2xl">
-                Precision peptide science for personalized wellness research.
+                Precision peptide science for disciplined laboratory research.
               </p>
               <p className="animate-rise-delay-2 mt-5 max-w-md text-[0.95rem] leading-relaxed text-[color:var(--on-dark-muted)]">
                 A disciplined catalog. Lot-aware documentation. Support that
@@ -156,6 +157,8 @@ export default function HomePage() {
       <Reveal>
         <InstitutionalCta />
       </Reveal>
+
+      <NewsletterSignupPopup />
     </>
   );
 }

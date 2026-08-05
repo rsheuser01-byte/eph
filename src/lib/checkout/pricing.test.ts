@@ -28,6 +28,7 @@ describe("orderTotals", () => {
       subtotal: 50,
       shipping: FLAT_SHIPPING,
       tax: 0,
+      discount: 0,
       total: 62,
     });
   });
@@ -41,5 +42,18 @@ describe("orderTotals", () => {
   it("keeps totals equal to subtotal when shipping is free", () => {
     const totals = orderTotals(200);
     expect(totals.total).toBe(200);
+  });
+
+  it("subtracts discount from the charged total without changing shipping", () => {
+    const totals = orderTotals(50, 0, 10);
+    expect(totals.discount).toBe(10);
+    expect(totals.shipping).toBe(FLAT_SHIPPING);
+    expect(totals.total).toBe(52);
+  });
+
+  it("still grants free shipping from the pre-discount subtotal", () => {
+    const totals = orderTotals(FREE_SHIPPING_THRESHOLD, 0, 50);
+    expect(totals.shipping).toBe(0);
+    expect(totals.total).toBe(FREE_SHIPPING_THRESHOLD - 50);
   });
 });

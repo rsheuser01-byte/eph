@@ -8,6 +8,10 @@ import {
   productSpecRows,
   products,
 } from "./products";
+import { productSchema } from "@/lib/seo/structuredData";
+import { productMetaDescription } from "@/lib/seo/productPageMetadata";
+
+const BASE = "https://www.elevateprecisionhealth.com";
 
 describe("catalog integrity", () => {
   it("has unique slugs", () => {
@@ -54,6 +58,52 @@ describe("catalog integrity", () => {
       expect.arrayContaining(["nad", "glow-blend"]),
     );
     expect(featured).toHaveLength(6);
+  });
+});
+
+/** Obvious human-benefit / dosing claims — keep narrow to avoid chemistry false positives. */
+const PROHIBITED_CLAIM_PATTERN =
+  /\b(treat(?:s|ment|ing)?|cure[sd]?|prevent(?:s|ion|ing)?|diagnos(?:e|is|ing)|prescribed|dosage|inject(?:ion|ing|s)?(?:\s+instructions)?|for weight loss|burns? fat|builds? muscle|heals? injuries|improves? libido|safe for|effective for|guaranteed results)\b/i;
+
+describe("product short descriptions", () => {
+  it("gives every product a nonempty unique short description", () => {
+    const descriptions = products.map((product) => product.shortDescription.trim());
+    for (const description of descriptions) {
+      expect(description.length).toBeGreaterThan(0);
+    }
+    expect(new Set(descriptions).size).toBe(products.length);
+  });
+
+  it("keeps short descriptions concise and research-framed", () => {
+    for (const product of products) {
+      const words = product.shortDescription.trim().split(/\s+/);
+      expect(words.length).toBeGreaterThanOrEqual(10);
+      expect(words.length).toBeLessThanOrEqual(32);
+      expect(product.shortDescription).toMatch(
+        /stud(?:y|ied|ies)|laboratory|research|diluent|blend|pathway|model/i,
+      );
+      expect(product.shortDescription).not.toMatch(PROHIBITED_CLAIM_PATTERN);
+      expect(product.shortDescription).not.toMatch(/\bundefined\b/i);
+    }
+  });
+
+  it("keeps Product JSON-LD description aligned with visible short copy", () => {
+    for (const product of products) {
+      const schema = productSchema(BASE, product, {});
+      expect(schema.description).toBe(product.shortDescription);
+    }
+  });
+
+  it("keeps metadata descriptions unique, framed, and free of prohibited claims", () => {
+    const metas = products.map((product) => productMetaDescription(product));
+    expect(new Set(metas).size).toBe(products.length);
+    for (const meta of metas) {
+      expect(meta.length).toBeLessThanOrEqual(320);
+      expect(meta).toMatch(/Research use only/i);
+      expect(meta).not.toMatch(PROHIBITED_CLAIM_PATTERN);
+      expect(meta).not.toMatch(/\bundefined\b/i);
+      expect(meta).not.toMatch(/\s{2,}/);
+    }
   });
 });
 

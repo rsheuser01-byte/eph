@@ -64,6 +64,7 @@ function makeOrder(overrides: Partial<OrderRecord> = {}): OrderRecord {
     subtotal: 50,
     shipping: 0,
     tax: 0,
+    discount: 0,
     total: 50,
     currency: "USD",
     customer: {

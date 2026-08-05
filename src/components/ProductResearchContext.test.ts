@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
-describe("ProductResearchContext wiring (Phase 3 #1)", () => {
+describe("ProductResearchContext wiring", () => {
   const page = readFileSync(
     path.join(process.cwd(), "src/app/products/[slug]/page.tsx"),
     "utf8",
@@ -12,22 +12,26 @@ describe("ProductResearchContext wiring (Phase 3 #1)", () => {
     "utf8",
   );
 
-  it("renders research context after purchase and specs on the product page", () => {
+  it("renders research interest after purchase and before specs", () => {
     expect(page).toMatch(/ProductPurchase/);
     expect(page).toMatch(/ProductSpecs/);
     expect(page).toMatch(/ProductResearchContext/);
 
     const purchaseIdx = page.indexOf("<ProductPurchase");
-    const specsIdx = page.indexOf("<ProductSpecs");
     const researchIdx = page.indexOf("<ProductResearchContext");
+    const specsIdx = page.indexOf("<ProductSpecs");
     expect(purchaseIdx).toBeGreaterThan(-1);
-    expect(specsIdx).toBeGreaterThan(purchaseIdx);
-    expect(researchIdx).toBeGreaterThan(specsIdx);
+    expect(researchIdx).toBeGreaterThan(purchaseIdx);
+    expect(specsIdx).toBeGreaterThan(researchIdx);
   });
 
-  it("uses scannable section headings and external citation links", () => {
-    expect(component).toMatch(/aria-labelledby=["']product-research["']/);
-    expect(component).toMatch(/sections\.map/);
+  it("shows scannable interest points and a collapsed details accordion", () => {
+    expect(component).toMatch(/Why researchers are interested/);
+    expect(component).toMatch(/interestPoints/);
+    expect(component).toMatch(/aria-expanded/);
+    expect(component).toMatch(/aria-controls/);
+    expect(component).toMatch(/Research details and references/);
+    expect(component).toMatch(/useState\(false\)/);
     expect(component).toMatch(/citations/);
     expect(component).toMatch(/rel=["']noopener noreferrer["']/);
     expect(component).toMatch(/target=["']_blank["']/);

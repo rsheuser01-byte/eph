@@ -32,6 +32,10 @@ export type OrderRecord = {
   shipping: number;
   /** Sales tax collected at checkout (server-quoted). */
   tax: number;
+  /** Merchandise discount from an applied promo code. */
+  discount: number;
+  /** Normalized promo code when a discount was applied. */
+  promoCode?: string;
   total: number;
   currency: string;
   customer: BillingInfo;
@@ -71,17 +75,25 @@ export interface OrderStore {
   list(): Promise<OrderRecord[]>;
   get(orderId: string): Promise<OrderRecord | null>;
   updateStatus?(orderId: string, patch: OrderStatusUpdate): Promise<OrderRecord | null>;
+  /** Used for first-order promo eligibility. */
+  hasApprovedOrderForEmail?(email: string): Promise<boolean>;
 }
 
 export function approvedOrderDefaults(
   partial: Omit<
     OrderRecord,
-    "paymentStatus" | "fulfillmentStatus" | "refundedAmount" | "status" | "tax"
+    | "paymentStatus"
+    | "fulfillmentStatus"
+    | "refundedAmount"
+    | "status"
+    | "tax"
+    | "discount"
   > & {
     paymentStatus?: PaymentStatus;
     fulfillmentStatus?: FulfillmentStatus;
     refundedAmount?: number;
     tax?: number;
+    discount?: number;
     status?: OrderRecord["status"];
   },
 ): OrderRecord {
@@ -93,5 +105,6 @@ export function approvedOrderDefaults(
     fulfillmentStatus: partial.fulfillmentStatus ?? "unfulfilled",
     refundedAmount: partial.refundedAmount ?? 0,
     tax: partial.tax ?? 0,
+    discount: partial.discount ?? 0,
   };
 }

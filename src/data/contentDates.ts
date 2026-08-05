@@ -6,8 +6,8 @@ import type { Product } from "@/data/products";
  * never stamp "today" on every deploy.
  */
 export const legalPagesUpdatedOn = {
-  privacy: "2026-07-31",
-  terms: "2026-07-31",
+  privacy: "2026-08-05",
+  terms: "2026-08-05",
   refunds: "2026-07-31",
 } as const;
 
@@ -18,7 +18,7 @@ export type LegalPageKey = keyof typeof legalPagesUpdatedOn;
  * Bump individual slugs in `productContentUpdatedOnBySlug` when specs or
  * research-context copy for that SKU changes.
  */
-export const DEFAULT_PRODUCT_CONTENT_UPDATED_ON = "2026-07-31";
+export const DEFAULT_PRODUCT_CONTENT_UPDATED_ON = "2026-08-05";
 
 export const productContentUpdatedOnBySlug: Partial<
   Record<string, string>

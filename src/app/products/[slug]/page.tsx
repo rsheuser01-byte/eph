@@ -84,11 +84,11 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
         disclaimer={researchDisclaimer}
         availability={availability}
       />
-      <ProductSpecs product={product} />
       <ProductResearchContext
         productSlug={product.slug}
         productName={product.name}
       />
+      <ProductSpecs product={product} />
       <RelatedProducts items={related} availability={availability} />
       <InstitutionalCta variant="compact" className="mt-16" />
     </div>
