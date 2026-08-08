@@ -76,19 +76,20 @@ export default function HomePage() {
             </Link>
           </Reveal>
 
-          <Reveal
-            delayMs={80}
-            className="mt-8 grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 sm:gap-y-9 lg:grid-cols-3"
-          >
+          {/* No Reveal wrapper: scroll-triggered opacity was delaying when
+              tiles became visible, and lazy images waited for the same scroll. */}
+          <div className="mt-8 grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 sm:gap-y-9 lg:grid-cols-3">
             {products.map((product, index) => (
               <ProductCard
                 key={product.slug}
                 product={product}
                 compact
-                priority={index < 4}
+                eager
+                priority={index < 2}
+                fadeDelayMs={Math.floor(index / 2) * 90}
               />
             ))}
-          </Reveal>
+          </div>
         </div>
       </section>
 

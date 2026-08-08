@@ -1,9 +1,8 @@
-import Image from "next/image";
 import Link from "next/link";
 import { ProductAssaySignals } from "@/components/ProductAssaySignals";
+import { ProductCardImage } from "@/components/ProductCardImage";
 import {
   formatPrice,
-  productCatalogImage,
   productImageAlt,
   productPrimaryImage,
   type Product,
@@ -13,18 +12,22 @@ type ProductCardProps = {
   product: Product;
   /** Mark the LCP candidate (first above-the-fold card) for early fetch. */
   priority?: boolean;
+  /** Fetch immediately even when below the fold (homepage catalog). */
+  eager?: boolean;
   /** Denser tile for homepage grids — drops description and assay chrome. */
   compact?: boolean;
+  /** Stagger image fade-in (homepage catalog phases). */
+  fadeDelayMs?: number;
 };
 
 export function ProductCard({
   product,
   priority = false,
+  eager = false,
   compact = false,
+  fadeDelayMs = 0,
 }: ProductCardProps) {
-  const image = compact
-    ? productCatalogImage(product)
-    : productPrimaryImage(product);
+  const image = productPrimaryImage(product);
   const showAssay = !compact && product.category !== "Supply";
 
   return (
@@ -41,20 +44,18 @@ export function ProductCard({
           }`}
         >
           {image ? (
-            <Image
+            <ProductCardImage
               src={image}
               alt={productImageAlt(product)}
-              fill
               priority={priority}
-              quality={compact ? 65 : 75}
+              eager={eager}
+              compact={compact}
+              fadeDelayMs={fadeDelayMs}
               sizes={
                 compact
                   ? "(max-width: 639px) 42vw, (max-width: 1023px) 30vw, 280px"
                   : "(max-width: 639px) 100vw, (max-width: 1023px) 50vw, 33vw"
               }
-              className={`object-contain transition-transform duration-500 ease-out group-hover:scale-[1.03] ${
-                compact ? "p-2 sm:p-3" : "p-4"
-              }`}
             />
           ) : null}
         </div>

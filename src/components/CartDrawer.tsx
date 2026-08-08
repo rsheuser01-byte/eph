@@ -155,6 +155,13 @@ export function CartDrawer() {
                 Checkout
               </Link>
               <Link
+                href="/products"
+                onClick={closeCart}
+                className="mt-3 block text-center text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft transition hover:text-ink"
+              >
+                Keep shopping
+              </Link>
+              <Link
                 href="/cart"
                 onClick={closeCart}
                 className="mt-3 block text-center text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft transition hover:text-ink"

@@ -30,6 +30,19 @@ describe("homepage catalog (all SKUs, dense, below hero)", () => {
   });
 
   it("eager-loads the first row of catalog images under the hero", () => {
-    expect(home).toMatch(/priority=\{index < 4\}/);
+    expect(home).toMatch(/priority=\{index < 2\}/);
+    expect(home).toMatch(/\beager\b/);
+  });
+
+  it("staggers catalog image fade-in by row", () => {
+    expect(home).toMatch(/fadeDelayMs=\{Math\.floor\(index \/ 2\) \* 90\}/);
+  });
+
+  it("does not wrap the product grid in Reveal (avoids scroll-gated loading)", () => {
+    const catalogHeading = home.indexOf("Research catalog");
+    const gridStart = home.indexOf("grid grid-cols-2", catalogHeading);
+    const slice = home.slice(catalogHeading, gridStart + 80);
+    expect(slice).toMatch(/<div className="mt-8 grid grid-cols-2/);
+    expect(slice).not.toMatch(/<Reveal[\s\S]*grid grid-cols-2/);
   });
 });

@@ -18,7 +18,9 @@ describe("ProductCard compact variant", () => {
     expect(source).toMatch(/shortDescription/);
   });
 
-  it("uses catalog WebP thumbs when compact", () => {
-    expect(source).toMatch(/productCatalogImage/);
+  it("uses full-quality primary packshots via ProductCardImage", () => {
+    expect(source).toMatch(/productPrimaryImage/);
+    expect(source).toMatch(/ProductCardImage/);
+    expect(source).not.toMatch(/productCatalogImage/);
   });
 });

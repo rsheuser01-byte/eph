@@ -114,6 +114,12 @@ export default function CartPage() {
             <Link href="/checkout" className="btn btn-primary btn-arrow mt-7 w-full">
               Proceed to checkout
             </Link>
+            <Link
+              href="/products"
+              className="mt-4 block text-center text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft transition hover:text-ink"
+            >
+              Keep shopping
+            </Link>
           </aside>
         </div>
       )}
