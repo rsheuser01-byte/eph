@@ -41,6 +41,18 @@ export function ResourceArticle({ page }: ResourceArticleProps) {
             </ul>
           </div>
           <div>
+            <p className="label">Catalog</p>
+            <ul className="mt-4 space-y-3 text-sm text-ink-soft">
+              {page.catalogLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="transition hover:text-ink">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
             <p className="label">More resources</p>
             <ul className="mt-4 space-y-3 text-sm text-ink-soft">
               <li>

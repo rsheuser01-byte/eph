@@ -17,8 +17,6 @@ export const metadata: Metadata = pageMetadata({
 });
 
 export default function HomePage() {
-  const spotlight = products.filter((product) => product.featured);
-
   return (
     <>
       <section className="hero-banner relative min-h-[min(78vh,720px)] overflow-hidden">
@@ -58,6 +56,39 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="border-b border-line bg-bg-elevated py-14 sm:py-16">
+        <div className="site-shell">
+          <Reveal className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-xl">
+              <p className="label">Catalog</p>
+              <h2 className="font-display mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+                Research catalog
+              </h2>
+            </div>
+            <Link
+              href="/products"
+              className="link-underline text-xs font-semibold uppercase tracking-[0.18em] text-ink-soft"
+            >
+              Full product pages →
+            </Link>
+          </Reveal>
+
+          <Reveal
+            delayMs={80}
+            className="mt-8 grid grid-cols-2 gap-x-3 gap-y-7 sm:gap-x-5 sm:gap-y-9 lg:grid-cols-3"
+          >
+            {products.map((product, index) => (
+              <ProductCard
+                key={product.slug}
+                product={product}
+                compact
+                priority={index < 4}
+              />
+            ))}
+          </Reveal>
         </div>
       </section>
 
@@ -121,34 +152,6 @@ export default function HomePage() {
             </div>
           </div>
         </Reveal>
-      </section>
-
-      <section className="border-y border-line bg-bg-elevated py-24">
-        <div className="site-shell">
-          <Reveal className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
-            <div className="max-w-xl">
-              <p className="label">Catalog</p>
-              <h2 className="font-display mt-4 text-4xl font-semibold tracking-tight text-ink sm:text-5xl">
-                Featured products
-              </h2>
-            </div>
-            <Link
-              href="/products"
-              className="link-underline text-xs font-semibold uppercase tracking-[0.18em] text-ink-soft"
-            >
-              Browse products →
-            </Link>
-          </Reveal>
-
-          <Reveal
-            delayMs={100}
-            className="mt-14 grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {spotlight.map((product) => (
-              <ProductCard key={product.slug} product={product} />
-            ))}
-          </Reveal>
-        </div>
       </section>
 
       <TestimonialsSection />

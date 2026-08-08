@@ -1,8 +1,11 @@
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   formatPrice,
   getProductBySlug,
   getVariant,
+  productCatalogImage,
   productImageAlt,
   productPriceRange,
   productSpecRows,
@@ -12,6 +15,17 @@ import { productSchema } from "@/lib/seo/structuredData";
 import { productMetaDescription } from "@/lib/seo/productPageMetadata";
 
 const BASE = "https://www.elevateprecisionhealth.com";
+
+describe("productCatalogImage", () => {
+  it("points at a committed WebP thumb for every SKU", () => {
+    for (const product of products) {
+      const href = productCatalogImage(product);
+      expect(href).toBe(`/products/catalog/${product.slug}.webp`);
+      const file = path.join(process.cwd(), "public", href.replace(/^\//, ""));
+      expect(existsSync(file), `missing ${href}`).toBe(true);
+    }
+  });
+});
 
 describe("catalog integrity", () => {
   it("has unique slugs", () => {

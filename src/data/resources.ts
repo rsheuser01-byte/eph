@@ -8,6 +8,11 @@ export type ResourceSection = {
   paragraphs: string[];
 };
 
+export type ResourceCatalogLink = {
+  href: string;
+  label: string;
+};
+
 export type ResourcePage = {
   slug: string;
   title: string;
@@ -19,6 +24,8 @@ export type ResourcePage = {
   lede: string;
   sections: ResourceSection[];
   citations: ResourceCitation[];
+  /** Internal links into the storefront catalog (crawl + reader paths). */
+  catalogLinks: ResourceCatalogLink[];
 };
 
 export function resourceWordCount(page: ResourcePage): number {
@@ -93,6 +100,7 @@ export const resourcePages: ResourcePage[] = [
         href: "https://www.fda.gov/medical-devices/ivd-regulatory-assistance/overview-ivd-regulation",
       },
     ],
+    catalogLinks: [{ href: "/products", label: "Browse products" }],
   },
   {
     slug: "identity-and-purity",
@@ -146,6 +154,10 @@ export const resourcePages: ResourcePage[] = [
         href: "https://www.elevateprecisionhealth.com/coa",
       },
     ],
+    catalogLinks: [
+      { href: "/coa", label: "Certificates of analysis" },
+      { href: "/products", label: "Browse products" },
+    ],
   },
   {
     slug: "reconstitution-and-storage",
@@ -198,6 +210,10 @@ export const resourcePages: ResourcePage[] = [
         label: "PubChem compound database",
         href: "https://pubchem.ncbi.nlm.nih.gov/",
       },
+    ],
+    catalogLinks: [
+      { href: "/products/bac", label: "BAC Water" },
+      { href: "/products", label: "Browse products" },
     ],
   },
 ];

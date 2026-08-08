@@ -14,7 +14,8 @@
     "export:resend-welcome-paste": "tsx scripts/export-resend-welcome-paste.ts",
     "sync:resend-welcome": "tsx scripts/sync-resend-welcome-template.ts",
     "normalize:packshots": "node scripts/normalize-packshots.mjs",
-    "derive:packshots": "node scripts/derive-packshots-from-masters.mjs"
+    "derive:packshots": "node scripts/derive-packshots-from-masters.mjs",
+    "generate:catalog-thumbs": "node scripts/generate-catalog-thumbs.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.110.9",
