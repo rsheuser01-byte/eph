@@ -3,6 +3,7 @@ import { InstitutionalCta } from "@/components/InstitutionalCta";
 import { JsonLd } from "@/components/JsonLd";
 import { ProductCard } from "@/components/ProductCard";
 import { products } from "@/data/products";
+import { getAvailabilityMap } from "@/lib/inventory/availability";
 import { pageMetadata } from "@/lib/seo/pageMetadata";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 import {
@@ -17,8 +18,13 @@ export const metadata: Metadata = pageMetadata({
   path: "/products",
 });
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
   const siteUrl = getSiteUrl();
+  const availability = await getAvailabilityMap(
+    products.flatMap((product) =>
+      product.variants.map((variant) => variant.sku),
+    ),
+  );
 
   return (
     <div className="site-shell py-20">
@@ -49,6 +55,7 @@ export default function ProductsPage() {
             key={product.slug}
             product={product}
             priority={index === 0}
+            availability={availability}
           />
         ))}
       </div>

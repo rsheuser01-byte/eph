@@ -63,15 +63,15 @@ export function CartDrawer() {
         onClick={closeCart}
       />
       <div className="age-gate-panel flex h-full w-full max-w-md flex-col bg-bg-elevated">
-        <div className="flex items-center justify-between border-b border-line px-6 py-5">
+        <div className="flex items-center justify-between gap-4 border-b border-line px-6 py-5">
           <p className="label !text-ink">Your cart</p>
-          <button
-            type="button"
+          <Link
+            href="/products"
             onClick={closeCart}
-            className="text-xs font-semibold uppercase tracking-[0.18em] text-ink-soft transition hover:text-ink"
+            className="btn border-accent bg-accent/15 px-3 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-ink shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--accent)_55%,transparent)] transition hover:bg-accent hover:text-[#04070f]"
           >
-            Close
-          </button>
+            ← Keep shopping
+          </Link>
         </div>
 
         {resolved.length === 0 ? (
@@ -153,13 +153,6 @@ export function CartDrawer() {
                 className="btn btn-primary btn-arrow mt-6 w-full"
               >
                 Checkout
-              </Link>
-              <Link
-                href="/products"
-                onClick={closeCart}
-                className="mt-3 block text-center text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft transition hover:text-ink"
-              >
-                Keep shopping
               </Link>
               <Link
                 href="/cart"

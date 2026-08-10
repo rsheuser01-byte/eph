@@ -12,15 +12,23 @@ describe("Keep shopping cart escape hatch", () => {
     "utf8",
   );
 
-  it("links to the catalog from the filled cart drawer", () => {
-    expect(drawer).toMatch(/Keep shopping/);
+  it("puts Keep shopping in the drawer header as the primary escape hatch", () => {
+    expect(drawer).toMatch(/← Keep shopping/);
     expect(drawer).toMatch(/href="\/products"/);
-    // Filled-state link should close the drawer when continuing.
-    expect(drawer).toMatch(/Keep shopping[\s\S]*onClick=\{closeCart\}|onClick=\{closeCart\}[\s\S]*Keep shopping/);
+    expect(drawer).toMatch(/onClick=\{closeCart\}/);
+    // Visible Close label is gone; backdrop still closes via aria-label.
+    expect(drawer).not.toMatch(/>\s*Close\s*</);
+    expect(drawer.indexOf("Keep shopping")).toBeLessThan(
+      drawer.indexOf("Checkout"),
+    );
   });
 
-  it("links to the catalog from the cart page summary", () => {
-    expect(cartPage).toMatch(/Keep shopping/);
+  it("puts Keep shopping beside the cart page title", () => {
+    expect(cartPage).toMatch(/← Keep shopping/);
     expect(cartPage).toMatch(/href="\/products"/);
+    expect(cartPage).toMatch(/bg-accent\/15/);
+    expect(cartPage.indexOf("Keep shopping")).toBeLessThan(
+      cartPage.indexOf("Proceed to checkout"),
+    );
   });
 });

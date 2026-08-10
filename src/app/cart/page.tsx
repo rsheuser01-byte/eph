@@ -26,10 +26,20 @@ export default function CartPage() {
 
   return (
     <div className="site-shell py-20">
-      <p className="label">Cart</p>
-      <h1 className="font-display mt-4 text-4xl font-semibold tracking-tight text-ink sm:text-6xl">
-        Your cart
-      </h1>
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="label">Cart</p>
+          <h1 className="font-display mt-4 text-4xl font-semibold tracking-tight text-ink sm:text-6xl">
+            Your cart
+          </h1>
+        </div>
+        <Link
+          href="/products"
+          className="btn border-accent bg-accent/15 px-3 py-2 text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-ink shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--accent)_55%,transparent)] transition hover:bg-accent hover:text-[#04070f] self-start sm:self-auto"
+        >
+          ← Keep shopping
+        </Link>
+      </div>
 
       {resolved.length === 0 ? (
         <div className="mt-14 border-t border-line pt-14">
@@ -113,12 +123,6 @@ export default function CartPage() {
             </div>
             <Link href="/checkout" className="btn btn-primary btn-arrow mt-7 w-full">
               Proceed to checkout
-            </Link>
-            <Link
-              href="/products"
-              className="mt-4 block text-center text-xs font-semibold uppercase tracking-[0.16em] text-ink-soft transition hover:text-ink"
-            >
-              Keep shopping
             </Link>
           </aside>
         </div>

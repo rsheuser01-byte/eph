@@ -7,6 +7,7 @@ import { InstitutionalCta } from "@/components/InstitutionalCta";
 import { TestimonialsSection } from "@/components/TestimonialsSection";
 import { products } from "@/data/products";
 import { operatingNotes } from "@/data/site";
+import { getAvailabilityMap } from "@/lib/inventory/availability";
 import { pageMetadata } from "@/lib/seo/pageMetadata";
 
 export const metadata: Metadata = pageMetadata({
@@ -16,7 +17,13 @@ export const metadata: Metadata = pageMetadata({
   path: "/",
 });
 
-export default function HomePage() {
+export default async function HomePage() {
+  const availability = await getAvailabilityMap(
+    products.flatMap((product) =>
+      product.variants.map((variant) => variant.sku),
+    ),
+  );
+
   return (
     <>
       <section className="hero-banner relative min-h-[min(78vh,720px)] overflow-hidden">
@@ -87,6 +94,7 @@ export default function HomePage() {
                 eager
                 priority={index < 2}
                 fadeDelayMs={Math.floor(index / 2) * 90}
+                availability={availability}
               />
             ))}
           </div>

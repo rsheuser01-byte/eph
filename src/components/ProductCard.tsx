@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ProductAssaySignals } from "@/components/ProductAssaySignals";
 import { ProductCardImage } from "@/components/ProductCardImage";
+import { RelatedProductPurchase } from "@/components/RelatedProductPurchase";
 import {
   formatPrice,
   productImageAlt,
@@ -18,6 +19,8 @@ type ProductCardProps = {
   compact?: boolean;
   /** Stagger image fade-in (homepage catalog phases). */
   fadeDelayMs?: number;
+  /** sku -> qty on hand for quick-add. */
+  availability?: Record<string, number | null>;
 };
 
 export function ProductCard({
@@ -26,6 +29,7 @@ export function ProductCard({
   eager = false,
   compact = false,
   fadeDelayMs = 0,
+  availability = {},
 }: ProductCardProps) {
   const image = productPrimaryImage(product);
   const showAssay = !compact && product.category !== "Supply";
@@ -94,11 +98,16 @@ export function ProductCard({
               {formatPrice(product)}
             </span>
             <span className="product-open text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-accent group-hover:text-ink">
-              Open →
+              Details →
             </span>
           </div>
         </div>
       </Link>
+      <RelatedProductPurchase
+        product={product}
+        availability={availability}
+        dense={compact}
+      />
       {showAssay ? (
         <ProductAssaySignals productSlug={product.slug} variant="card" />
       ) : null}

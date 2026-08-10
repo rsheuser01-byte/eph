@@ -13,11 +13,14 @@ type RelatedProductPurchaseProps = {
   product: Product;
   /** sku -> qty on hand. null means inventory not configured (treat as available). */
   availability?: Record<string, number | null>;
+  /** Tighter controls for compact catalog tiles. */
+  dense?: boolean;
 };
 
 export function RelatedProductPurchase({
   product,
   availability = {},
+  dense = false,
 }: RelatedProductPurchaseProps) {
   const { add } = useCart();
   const [size, setSize] = useState(() =>
@@ -48,9 +51,9 @@ export function RelatedProductPurchase({
   }
 
   return (
-    <div className="mt-3 space-y-3">
+    <div className={dense ? "mt-2 space-y-2" : "mt-3 space-y-3"}>
       {showSizes ? (
-        <div className="flex flex-wrap gap-1.5">
+        <div className={`flex flex-wrap ${dense ? "gap-1" : "gap-1.5"}`}>
           {product.variants.map((item) => {
             const active = item.size === activeSize;
             const itemStock = Object.prototype.hasOwnProperty.call(
@@ -69,7 +72,11 @@ export function RelatedProductPurchase({
                 type="button"
                 onClick={() => setSize(item.size)}
                 data-active={active}
-                className={`border px-2.5 py-1.5 text-xs font-semibold tabular-nums transition ${
+                className={`border font-semibold tabular-nums transition ${
+                  dense
+                    ? "px-2 py-1 text-[0.65rem]"
+                    : "px-2.5 py-1.5 text-xs"
+                } ${
                   active
                     ? "border-accent bg-accent/10 text-ink"
                     : "border-line text-ink-soft hover:border-ink/40 hover:text-ink"
@@ -87,9 +94,13 @@ export function RelatedProductPurchase({
         </div>
       ) : null}
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className={`flex flex-wrap items-center ${dense ? "gap-2" : "gap-3"}`}>
         {variant ? (
-          <span className="text-sm font-semibold tabular-nums text-ink">
+          <span
+            className={`font-semibold tabular-nums text-ink ${
+              dense ? "text-xs" : "text-sm"
+            }`}
+          >
             {formatUSD(variant.price)}
           </span>
         ) : null}
@@ -97,7 +108,9 @@ export function RelatedProductPurchase({
           type="button"
           onClick={handleAdd}
           disabled={!canAdd}
-          className="btn btn-primary px-3 py-2 text-xs disabled:cursor-not-allowed disabled:opacity-50"
+          className={`btn btn-primary disabled:cursor-not-allowed disabled:opacity-50 ${
+            dense ? "px-2.5 py-1.5 text-[0.65rem]" : "px-3 py-2 text-xs"
+          }`}
         >
           {canAdd ? "Add to cart" : "Out of stock"}
         </button>

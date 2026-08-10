@@ -23,4 +23,10 @@ describe("ProductCard compact variant", () => {
     expect(source).toMatch(/ProductCardImage/);
     expect(source).not.toMatch(/productCatalogImage/);
   });
+
+  it("exposes quick-add outside the product link", () => {
+    expect(source).toMatch(/RelatedProductPurchase/);
+    expect(source).toMatch(/availability/);
+    expect(source).toMatch(/dense=\{compact\}/);
+  });
 });
