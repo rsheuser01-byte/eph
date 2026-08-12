@@ -6,6 +6,9 @@ export const NAD_SLUG = "nad";
 /** Preferred blend upsells when NAD+ is already in the cart. */
 export const BLEND_SUGGEST_SLUGS = ["glow-blend", "klow-blend"] as const;
 
+/** Never suggest diluents / removed supply SKUs beside peptide carts. */
+const BLOCKED_SUGGEST_SLUGS = new Set(["bac"]);
+
 const SUGGEST_REASONS: Record<string, string> = {
   nad: "Cellular cofactor for metabolic and redox assay panels",
   "glow-blend": "Multi-peptide blend for coordinated marker studies",
@@ -24,10 +27,10 @@ export function getCartSuggestCandidates(
     return [];
   }
   const inCart = new Set(resolved.map((item) => item.product.slug));
-  if (!inCart.has(NAD_SLUG)) {
-    return [NAD_SLUG];
-  }
-  return BLEND_SUGGEST_SLUGS.filter((slug) => !inCart.has(slug));
+  const candidates = !inCart.has(NAD_SLUG)
+    ? [NAD_SLUG]
+    : BLEND_SUGGEST_SLUGS.filter((slug) => !inCart.has(slug));
+  return candidates.filter((slug) => !BLOCKED_SUGGEST_SLUGS.has(slug));
 }
 
 export function cartSuggestReason(slug: string): string {

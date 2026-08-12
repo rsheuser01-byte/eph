@@ -44,7 +44,7 @@ export type ProductSpecRow = {
 const LYOPHILIZED = "Lyophilized powder";
 const POWDER_APPEARANCE = "White to off-white powder";
 const LYOPHILIZED_STORAGE =
-  "Store lyophilized powder at −20°C. Protect from light and moisture. Keep tightly sealed until use. After reconstitution, store at 2–8°C.";
+  "Store lyophilized powder at −20°C. Protect from light and moisture. Keep tightly sealed until use. After preparing a laboratory stock solution, store at 2–8°C.";
 
 // List prices come from pricing-guide.json (edit that file to change prices).
 export const products: Product[] = [

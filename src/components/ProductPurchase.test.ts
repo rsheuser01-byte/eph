@@ -16,4 +16,8 @@ describe("ProductPurchase default size selection", () => {
       /useState\(\(\) =>\s*defaultInStockSize\(product\.variants, availability\)/,
     );
   });
+
+  it("shows a product-level research-use notice near the title", () => {
+    expect(source).toMatch(/ProductResearchUseNotice/);
+  });
 });

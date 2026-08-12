@@ -57,6 +57,7 @@ function parseBilling(input: unknown): BillingInfo | null {
     lastName: str(record.lastName),
     email: str(record.email),
     phone: str(record.phone),
+    organization: str(record.organization) || undefined,
     address1: str(record.address1),
     address2: str(record.address2),
     city: str(record.city),

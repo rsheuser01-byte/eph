@@ -11,9 +11,38 @@ export type RelatedProduct = {
   reason: string;
 };
 
+export type RelatedResourceLink = {
+  href: string;
+  label: string;
+  reason: string;
+};
+
+/**
+ * Research documentation links shown with related materials.
+ * Prefer guidance / COA paths over administration-kit style combinations.
+ */
+export const RELATED_RESOURCE_LINKS: RelatedResourceLink[] = [
+  {
+    href: "/resources/research-use-only",
+    label: "Research use only",
+    reason: "Intended-use framing for laboratory purchasers",
+  },
+  {
+    href: "/coa",
+    label: "Certificates of analysis",
+    reason: "Lot identity and purity documentation",
+  },
+  {
+    href: "/resources/reconstitution-and-storage",
+    label: "Stock preparation and storage",
+    reason: "Laboratory stock and cold-chain guidance",
+  },
+];
+
 /**
  * Curated meaningful pairs — not category dumps.
  * Keep 2–4 entries per product; prefer near-analogs and related blends.
+ * Never pair peptides with diluents, syringes, or administration supplies.
  */
 export const RELATED_PRODUCT_MAP: Record<string, RelatedProductEntry[]> = {
   "glp-3": [
@@ -58,17 +87,19 @@ export const RELATED_PRODUCT_MAP: Record<string, RelatedProductEntry[]> = {
   ],
 };
 
-/** Resolve curated pairs for a product page; skips missing catalog entries. */
+const BLOCKED_RELATED_SLUGS = new Set(["bac"]);
+
+/** Resolve curated pairs for a product page; skips missing or blocked entries. */
 export function getRelatedProducts(slug: string): RelatedProduct[] {
   const entries = RELATED_PRODUCT_MAP[slug] ?? [];
   const related: RelatedProduct[] = [];
 
   for (const entry of entries) {
-    if (entry.slug === slug) {
+    if (entry.slug === slug || BLOCKED_RELATED_SLUGS.has(entry.slug)) {
       continue;
     }
     const product = getProductBySlug(entry.slug);
-    if (!product) {
+    if (!product || product.category === "Supply") {
       continue;
     }
     related.push({ product, reason: entry.reason });

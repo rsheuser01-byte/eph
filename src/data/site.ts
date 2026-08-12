@@ -20,12 +20,12 @@ export const faqs = [
   {
     question: "Are these products for human use?",
     answer:
-      "No. Everything we sell is for laboratory research only — not for human or veterinary use, diagnosis, treatment, or consumption. See our Research use only resource for the full framing.",
+      "No. These products are sold and intended solely as laboratory research materials. They are not offered, labeled, or intended for use as human or veterinary drugs, foods, cosmetics, or dietary supplements, and they are not approved by the FDA for human or veterinary use. See our Research use only resource for the full framing.",
   },
   {
     question: "Can I share lab feedback for the site?",
     answer:
-      "Yes. Email a short note about ordering, documentation, or support for your research protocol. We only publish manually vetted notes — never invented reviews — and we can attribute by institution type if you prefer not to use a personal name.",
+      "Yes. Email a short note about ordering, documentation, or support for your research protocol. We only publish manually vetted notes — never invented reviews — and we can attribute by institution type if you prefer not to use a personal name. Notes that imply human or veterinary use, dosing, or personal results are not published.",
   },
   {
     question: "How quickly do packages leave?",
@@ -45,7 +45,7 @@ export const faqs = [
   {
     question: "Is volume pricing available?",
     answer:
-      "Institutional and multi-lot requests are welcome. Email quantities and preferred SKUs and we will outline options.",
+      "Bulk and multi-lot research orders are welcome. Email quantities and preferred SKUs and we will outline options.",
   },
   {
     question: "What happens if a parcel is delayed or damaged?",
@@ -72,4 +72,18 @@ export const operatingNotes = [
   },
 ] as const;
 
-export const researchDisclaimer = `Elevate Precision Health sells products strictly for laboratory research. Nothing on this site is offered for human or animal use, diagnosis, treatment, or consumption. These products are not drugs, foods, cosmetics, or supplements, and the FDA has not evaluated them for any therapeutic claim. Only qualified researchers and institutions acting within applicable law should purchase or handle these products.`;
+/**
+ * Site-wide research-use framing (footer, terms, product purchase footer).
+ * Prefer intended-use language over categorical “is/is not a drug” determinations.
+ */
+export const researchDisclaimer = `Elevate Precision Health sells products strictly for laboratory research. Nothing on this site is offered for human or animal use, diagnosis, treatment, or consumption. These products are sold and intended solely as laboratory research materials. They are not offered, labeled, or intended for use as human or veterinary drugs, foods, cosmetics, or dietary supplements. These products are not approved by the FDA for human or veterinary use. Only qualified researchers and institutions acting within applicable law should purchase or handle these products.`;
+
+/** Compact RUO lines shown near product title / purchase controls. */
+export const productRuoHeadline = "FOR LABORATORY RESEARCH USE ONLY";
+export const productRuoNotForUse = "Not for human or veterinary use.";
+export const productRuoNotIntended =
+  "Not intended for diagnosis, treatment, cure, prevention, or personal consumption.";
+
+/** Required checkout attestation copy (client checkbox + shared reference). */
+export const researchUseAttestationText =
+  "I certify that I am purchasing these materials solely for legitimate laboratory research. I understand that these products are not intended for human or veterinary administration, diagnosis, treatment, prevention, or personal consumption. I will not administer these materials to humans or animals.";

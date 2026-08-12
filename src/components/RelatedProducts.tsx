@@ -5,7 +5,10 @@ import {
   productImageAlt,
   productPrimaryImage,
 } from "@/data/products";
-import type { RelatedProduct } from "@/data/relatedProducts";
+import {
+  RELATED_RESOURCE_LINKS,
+  type RelatedProduct,
+} from "@/data/relatedProducts";
 
 type RelatedProductsProps = {
   items: RelatedProduct[];
@@ -77,6 +80,25 @@ export function RelatedProducts({
           );
         })}
       </ul>
+
+      <div className="mt-12 border-t border-line pt-8">
+        <p className="label">Research documentation</p>
+        <ul className="mt-4 grid gap-4 sm:grid-cols-3">
+          {RELATED_RESOURCE_LINKS.map((link) => (
+            <li key={link.href}>
+              <Link
+                href={link.href}
+                className="block text-sm font-semibold text-ink transition hover:text-ink-soft"
+              >
+                {link.label}
+              </Link>
+              <p className="mt-1 text-xs leading-relaxed text-ink-soft">
+                {link.reason}
+              </p>
+            </li>
+          ))}
+        </ul>
+      </div>
     </section>
   );
 }

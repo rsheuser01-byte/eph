@@ -42,5 +42,19 @@ describe("resource pages (Phase 3 #2)", () => {
       .join(" ");
     expect(text).toMatch(/research use only|laboratory research/i);
     expect(text).toMatch(/not for human/i);
+    expect(text).toMatch(/intended solely as (?:a )?laboratory research materials?/i);
+  });
+
+  it("frames reconstitution guidance as laboratory research only", () => {
+    const page = getResourceBySlug("reconstitution-and-storage")!;
+    expect(page.notice?.title).toMatch(/Laboratory Research Guidance Only/i);
+    expect(page.notice?.body).toMatch(/not intended as guidance for human/i);
+    const text = [
+      page.lede,
+      ...page.sections.flatMap((section) => section.paragraphs),
+    ].join(" ");
+    expect(text).toMatch(/laboratory stock/i);
+    expect(text).not.toMatch(/\binjection\b/i);
+    expect(text).not.toMatch(/\bdosing\b/i);
   });
 });

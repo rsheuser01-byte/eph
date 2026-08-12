@@ -37,6 +37,22 @@ describe("relatedProducts map", () => {
     expect(RELATED_PRODUCT_MAP["glp-3"]!.map((e) => e.slug)).toContain("glp-2");
     expect(RELATED_PRODUCT_MAP["glp-2"]!.map((e) => e.slug)).toContain("glp-3");
   });
+
+  it("never cross-sells BAC Water or other supply diluents", () => {
+    for (const entries of Object.values(RELATED_PRODUCT_MAP)) {
+      expect(entries.map((entry) => entry.slug)).not.toContain("bac");
+    }
+    for (const product of products) {
+      expect(
+        getRelatedProducts(product.slug).map((item) => item.product.slug),
+      ).not.toContain("bac");
+      expect(
+        getRelatedProducts(product.slug).every(
+          (item) => item.product.category !== "Supply",
+        ),
+      ).toBe(true);
+    }
+  });
 });
 
 describe("getRelatedProducts", () => {

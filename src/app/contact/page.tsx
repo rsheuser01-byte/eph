@@ -153,7 +153,7 @@ export default function ContactPage() {
                 href="/resources/reconstitution-and-storage"
                 className="text-ink underline decoration-line underline-offset-4"
               >
-                reconstitution and storage
+                stock preparation and storage
               </Link>
               .
             </p>

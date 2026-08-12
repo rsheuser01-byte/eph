@@ -22,6 +22,11 @@ export type ResourcePage = {
   eyebrow: string;
   headline: string;
   lede: string;
+  /** Optional compliance banner shown under the lede. */
+  notice?: {
+    title: string;
+    body: string;
+  };
   sections: ResourceSection[];
   citations: ResourceCitation[];
   /** Internal links into the storefront catalog (crawl + reader paths). */
@@ -56,7 +61,7 @@ export const resourcePages: ResourcePage[] = [
     title: "Research use only: what it means",
     navLabel: "Research use only",
     description:
-      "What “research use only” means for Elevate Precision Health products, who may purchase them, and how RUO differs from drugs, foods, cosmetics, and supplements.",
+      "What “research use only” means for Elevate Precision Health products, who may purchase them, and how intended laboratory use differs from human or veterinary applications.",
     eyebrow: "Compliance",
     headline: "Research use only — what it means and why it matters",
     lede: "Every product on this site is sold for laboratory research. That label is not marketing language; it defines who the buyer is, how the material may be handled, and what claims we do not make.",
@@ -64,14 +69,14 @@ export const resourcePages: ResourcePage[] = [
       {
         heading: "What “research use only” means here",
         paragraphs: [
-          "Research use only (RUO) means the material is intended for laboratory investigation by qualified researchers and institutions — for example assay development, receptor pharmacology, analytical method work, or other controlled bench protocols. It is not offered as a drug, food, cosmetic, dietary supplement, or veterinary product.",
-          "Elevate Precision Health does not claim that these products diagnose, treat, cure, or prevent any disease. The FDA has not evaluated them for therapeutic use. Nothing on this site is instructions for human or animal administration — these products are not for human or veterinary use.",
+          "Research use only (RUO) means the material is sold and intended solely as a laboratory research material for qualified researchers and institutions — for example assay development, receptor pharmacology, analytical method work, or other controlled bench protocols. These products are not offered, labeled, or intended for use as human or veterinary drugs, foods, cosmetics, or dietary supplements.",
+          "Elevate Precision Health does not claim that these products diagnose, treat, cure, or prevent any disease. These products are not approved by the FDA for human or veterinary use. Nothing on this site is instructions for human or animal administration — these products are not for human or veterinary use.",
         ],
       },
       {
         heading: "Who should purchase",
         paragraphs: [
-          "Purchasers should be researchers, laboratories, or institutions that understand applicable law for their jurisdiction and that have the facilities and procedures to handle lyophilized research materials safely. Age verification on this site (21+) is an access control for the storefront; it does not replace institutional compliance requirements.",
+          "Purchasers should be researchers, laboratories, or institutions that understand applicable law for their jurisdiction and that have the facilities and procedures to handle lyophilized research materials safely. Age verification on this site (21+) is an access control for the storefront; it does not replace institutional compliance requirements. By ordering, purchasers represent that materials are acquired solely for legitimate laboratory research and will not be administered to humans or animals.",
           "If your use case is clinical care, compounding for patients, or consumer wellness, this catalog is the wrong channel. Contact your licensed medical or regulatory pathway instead.",
         ],
       },
@@ -79,13 +84,13 @@ export const resourcePages: ResourcePage[] = [
         heading: "How RUO relates to FDA framing",
         paragraphs: [
           "FDA guidance for in vitro diagnostic products labeled “For Research Use Only” explains that RUO labeling is meant for products in the laboratory research phase — not for clinical diagnostic use on patient samples without appropriate clearance or approval. While that guidance addresses IVDs specifically, the same honesty principle applies to research chemicals and peptides sold under RUO: the label must match the intended laboratory context.",
-          "We keep RUO language visible on product pages, in the site footer, and in the terms of sale so buyers are not left guessing. Assay files and certificates speak to identity and purity for research lots — they are not marketing claims of clinical fitness.",
+          "We keep RUO language visible on product pages, in the site footer, and in the terms of sale so buyers are not left guessing. Assay files and certificates speak to identity and purity for research lots — they are not marketing claims of clinical fitness. Site disclaimers do not guarantee regulatory compliance for every buyer’s specific protocol.",
         ],
       },
       {
         heading: "Practical implications for your protocol",
         paragraphs: [
-          "Plan storage, reconstitution, and disposal under your institution’s SOPs. Document lot numbers and certificates with the study file. Do not redistribute research materials into channels that imply human use. If you need multi-lot planning or institutional purchasing terms, email support with quantities and timelines.",
+          "Plan storage, laboratory stock preparation, and disposal under your institution’s SOPs. Document lot numbers and certificates with the study file. Do not redistribute research materials into channels that imply human use. If you need multi-lot planning or institutional purchasing terms, email support with quantities and timelines.",
         ],
       },
     ],
@@ -161,39 +166,43 @@ export const resourcePages: ResourcePage[] = [
   },
   {
     slug: "reconstitution-and-storage",
-    title: "Reconstitution and storage best practices",
-    navLabel: "Reconstitution and storage",
+    title: "Laboratory stock preparation and storage",
+    navLabel: "Stock preparation and storage",
     description:
-      "Laboratory best practices for storing lyophilized research peptides and reconstituting them on the bench — cold chain, diluent choice, aliquoting, and light protection.",
+      "Laboratory guidance for storing lyophilized research peptides and preparing laboratory stock solutions for assay and analytical workflows — cold chain, diluent choice, aliquoting, and light protection.",
     eyebrow: "Handling",
-    headline: "Reconstitution and storage for lyophilized research peptides",
-    lede: "Most of our peptides ship as lyophilized powders. How you store the closed vial and how you reconstitute it on the bench has more effect on day-to-day assay consistency than almost any other handling step.",
+    headline: "Laboratory stock preparation and storage for lyophilized research peptides",
+    lede: "Most of our peptides ship as lyophilized powders. How you store the closed vial and how you prepare laboratory stock solutions for experimental workflows has more effect on day-to-day assay consistency than almost any other handling step.",
+    notice: {
+      title: "Laboratory Research Guidance Only",
+      body: "This information concerns preparation of research materials for controlled laboratory experiments only. It is not intended as guidance for human or veterinary administration.",
+    },
     sections: [
       {
         heading: "Storing lyophilized material",
         paragraphs: [
-          "Keep unopened lyophilized vials cold, dry, and protected from light. A common research-bench practice is −20 °C storage for lyophilized peptides, with tighter control (−80 °C) when a protocol or certificate specifies it. Avoid repeated warm–cold cycling of the stock vial; condensation introduces moisture that accelerates degradation.",
+          "Keep unopened lyophilized vials cold, dry, and protected from light. A common research-bench practice is −20 °C storage for lyophilized peptides, with tighter control (−80 °C) when a study-specific protocol or certificate specifies it. Avoid repeated warm–cold cycling of the stock vial; condensation introduces moisture that accelerates degradation.",
           "After opening, reseal promptly. Label the open date. Do not assume a powder that has sat warm on a bench for hours is still equivalent to a freshly received cold vial — document deviations when they happen.",
         ],
       },
       {
-        heading: "Choosing a diluent",
+        heading: "Choosing a laboratory diluent",
         paragraphs: [
-          "Reconstitution diluent should match the protocol: sterile water, bacteriostatic water (water with a preservative such as benzyl alcohol), dilute acetic acid, or another solvent specified by the method. Bacteriostatic water can help multi-use reconstituted stocks when the preservative is compatible with the assay; switch to preservative-free sterile water when the readout is known to be sensitive to benzyl alcohol.",
-          "Calculate volume from the vial’s labeled mass and the target stock concentration before you puncture the stopper. Add diluent slowly, allow the cake to wet, and swirl gently — aggressive foaming can denature some sequences and make concentration less reproducible.",
+          "Diluent selection for laboratory stock solutions should match the study-specific protocol and validated assay requirements: sterile water, bacteriostatic water (water with a preservative such as benzyl alcohol), dilute acetic acid, or another solvent specified by the method. Bacteriostatic water can support multi-use reconstituted laboratory stocks when the preservative is compatible with the assay readout; switch to preservative-free sterile water when the analytical workflow is known to be sensitive to benzyl alcohol.",
+          "Calculate volume from the vial’s labeled mass and the target experimental concentration before opening the vial under sterile laboratory technique. Add diluent slowly, allow the lyophilized cake to wet, and swirl gently — aggressive foaming can denature some sequences and make assay preparation less reproducible.",
         ],
       },
       {
-        heading: "After reconstitution",
+        heading: "After preparing a laboratory stock",
         paragraphs: [
-          "Once reconstituted, store solutions at 2–8°C unless a product certificate or protocol specifies otherwise. Portion working aliquots so the main stock is not opened for every plate, and protect aromatic-rich peptides from strong light during open-bench work.",
-          "Record solvent, concentration, aliquot date, and lot number in the notebook so later anomalies can be traced. Follow your institution’s discard timeline for reconstituted research stocks.",
+          "Once a laboratory stock solution is prepared, store it at 2–8°C unless a product certificate or study-specific protocol specifies otherwise. Portion working aliquots so the main stock is not opened for every plate, and protect aromatic-rich peptides from strong light during open-bench work.",
+          "Record solvent, experimental concentration, aliquot date, and lot number in the notebook so later anomalies can be traced. Follow your institution’s discard timeline for reconstituted research stocks.",
         ],
       },
       {
         heading: "What this page is not",
         paragraphs: [
-          "This is laboratory handling guidance for research materials — not dosing instructions for humans or animals. Follow your institution’s chemical hygiene plan, PPE rules, and waste disposal procedures. For product-specific storage lines, see each product’s research details table.",
+          "This is laboratory handling guidance for research materials — not instructions for human or veterinary administration, personal use, or clinical preparation. Follow your institution’s chemical hygiene plan, PPE rules, and waste disposal procedures. For product-specific storage lines, see each product’s research details table.",
         ],
       },
     ],

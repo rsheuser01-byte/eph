@@ -3,6 +3,8 @@ export type BillingInfo = {
   lastName: string;
   email: string;
   phone?: string;
+  /** Optional research organization / laboratory / company. */
+  organization?: string;
   address1: string;
   address2?: string;
   city: string;

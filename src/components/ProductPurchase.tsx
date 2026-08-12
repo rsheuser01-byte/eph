@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useState } from "react";
 import type { Product } from "@/data/products";
 import { ProductAssaySignals } from "@/components/ProductAssaySignals";
+import { ProductResearchUseNotice } from "@/components/ProductResearchUseNotice";
 import { RestockNotifyForm } from "@/components/RestockNotifyForm";
 import { useCart } from "@/lib/cart/CartContext";
 import { formatUSD } from "@/lib/checkout/pricing";
@@ -51,6 +52,7 @@ export function ProductPurchase({
       <h1 className="font-display mt-4 text-5xl font-semibold tracking-tight text-ink sm:text-7xl">
         {product.name}
       </h1>
+      <ProductResearchUseNotice className="mt-6 max-w-xl" />
       <p className="mt-5 text-xs uppercase tracking-[0.18em] text-ink-soft">
         SKU {product.sku}
       </p>

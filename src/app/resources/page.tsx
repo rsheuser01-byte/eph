@@ -9,7 +9,7 @@ import { breadcrumbSchema } from "@/lib/seo/structuredData";
 export const metadata: Metadata = pageMetadata({
   title: "Resources",
   description:
-    "Research-use guidance from Elevate Precision Health: RUO meaning, identity and purity verification, and reconstitution/storage practices for laboratory buyers.",
+    "Research-use guidance from Elevate Precision Health: RUO meaning, identity and purity verification, and laboratory stock preparation/storage practices for research buyers.",
   path: "/resources",
 });
 

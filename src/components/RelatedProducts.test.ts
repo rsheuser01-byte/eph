@@ -45,6 +45,20 @@ describe("RelatedProducts wiring", () => {
     expect(component).not.toMatch(/ProductCard/);
   });
 
+  it("surfaces research documentation links instead of administration kits", () => {
+    expect(component).toMatch(/RELATED_RESOURCE_LINKS/);
+    expect(component).toMatch(/Research documentation/);
+    expect(component).not.toMatch(/\bbac\b/i);
+    expect(component).not.toMatch(/syringe/i);
+
+    const relatedData = readFileSync(
+      path.join(process.cwd(), "src/data/relatedProducts.ts"),
+      "utf8",
+    );
+    expect(relatedData).toMatch(/research-use-only/);
+    expect(relatedData).toMatch(/RELATED_RESOURCE_LINKS/);
+  });
+
   it("offers size selection when needed and an add-to-cart action", () => {
     expect(purchase).toMatch(/"use client"/);
     expect(purchase).toMatch(/defaultInStockSize/);

@@ -38,7 +38,7 @@ export function buildLlmsTxt(baseUrl: string): string {
     `- [Certificates of Analysis](${root}/coa): Lot documentation policy and published COA downloads.`,
     `- [About](${root}/about): Company approach and contact posture.`,
     `- [Contact](${root}/contact): Email support, FAQ, and institutional / multi-lot planning.`,
-    `- [Resources](${root}/resources): Research-use, identity/purity, and reconstitution guides.`,
+    `- [Resources](${root}/resources): Research-use, identity/purity, and laboratory stock-preparation guides.`,
   );
 
   for (const page of resourcePages) {

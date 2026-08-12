@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useCart } from "@/lib/cart/CartContext";
 import { formatUSD, orderTotals } from "@/lib/checkout/pricing";
+import { researchUseAttestationText } from "@/data/site";
 
 const inputClass =
   "w-full border border-line bg-panel px-4 py-3 text-sm text-ink placeholder:text-ink-soft/60 focus:border-accent focus:outline-none";
@@ -14,6 +15,7 @@ const initialForm = {
   lastName: "",
   email: "",
   phone: "",
+  organization: "",
   address1: "",
   address2: "",
   city: "",
@@ -243,18 +245,19 @@ function CheckoutForm() {
           items: catalogItems,
           researchUseAcknowledged: researchAck,
           ...(appliedPromo ? { promoCode: appliedPromo.code } : {}),
-          customer: {
-            firstName: form.firstName,
-            lastName: form.lastName,
-            email: form.email,
-            phone: form.phone,
-            address1: form.address1,
-            address2: form.address2,
-            city: form.city,
-            state: form.state,
-            zip: form.zip,
-            country: form.country,
-          },
+            customer: {
+              firstName: form.firstName,
+              lastName: form.lastName,
+              email: form.email,
+              phone: form.phone,
+              organization: form.organization,
+              address1: form.address1,
+              address2: form.address2,
+              city: form.city,
+              state: form.state,
+              zip: form.zip,
+              country: form.country,
+            },
           ...(requiresCard
             ? {
                 card: {
@@ -364,6 +367,13 @@ function CheckoutForm() {
                 autoComplete="tel"
                 value={form.phone}
                 onChange={(e) => update("phone", e.target.value)}
+              />
+              <input
+                className={`${inputClass} sm:col-span-2`}
+                placeholder="Research Organization / Laboratory / Company (optional)"
+                autoComplete="organization"
+                value={form.organization}
+                onChange={(e) => update("organization", e.target.value)}
               />
               <input
                 className={`${inputClass} sm:col-span-2`}
@@ -480,8 +490,14 @@ function CheckoutForm() {
               required
             />
             <span>
-              I confirm this purchase is for research use only by a qualified
-              researcher for laboratory use, not for human or veterinary use.
+              {researchUseAttestationText}{" "}
+              <Link
+                href="/resources/research-use-only"
+                className="underline decoration-line underline-offset-4 transition hover:text-ink"
+              >
+                Research Use Only policy
+              </Link>
+              .
             </span>
           </label>
 
@@ -620,8 +636,9 @@ function CheckoutForm() {
             </p>
           ) : (
             <p className="mt-4 text-[0.7rem] leading-relaxed text-ink-soft/80">
-              Research use only. By ordering you confirm you are a qualified
-              researcher purchasing for laboratory use.
+              Research use only. By ordering you certify these materials are for
+              legitimate laboratory research and will not be administered to
+              humans or animals.
             </p>
           )}
         </aside>

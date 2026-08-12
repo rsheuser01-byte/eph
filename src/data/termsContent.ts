@@ -76,7 +76,7 @@ export const termsSections: TermsSection[] = [
         `You must be at least ${site.ageMinimum} years of age to access the site or purchase products. By using the site, you confirm that you meet this age requirement and have legal capacity to enter a contract.`,
       ],
       [
-        "Purchases are intended for qualified researchers, laboratories, and institutions acting within applicable law. We may request information reasonably needed to assess eligibility or research-use compliance and may decline orders that we cannot verify.",
+        "Purchases are intended for qualified researchers, laboratories, and institutions acting within applicable law. By placing an order, the purchaser represents and warrants that the products are being acquired solely for legitimate laboratory research purposes and will not be administered to humans or animals. We may request information reasonably needed to assess eligibility or research-use compliance and may decline orders that we cannot verify. We do not claim to independently verify every purchaser’s professional credentials unless such verification is separately stated for a given order.",
       ],
     ],
   },
@@ -86,10 +86,10 @@ export const termsSections: TermsSection[] = [
     paragraphs: [
       [researchDisclaimer],
       [
-        "Without limiting the foregoing, products are not sold for human or veterinary use, diagnosis, treatment, prevention, or cure of any condition; personal consumption; compounding for patient use; cosmetic or dietary supplement use; or any application that would treat the materials as drugs, devices, or approved therapeutics.",
+        "Without limiting the foregoing, products are sold and intended solely as laboratory research materials. They are not offered, labeled, or intended for human or veterinary administration, diagnosis, treatment, prevention, or cure of any condition; personal consumption; compounding for patient use; cosmetic or dietary-supplement use; or any other non-research application.",
       ],
       [
-        "You are solely responsible for ensuring that your acquisition, possession, storage, handling, and use of products comply with all applicable laws, institutional policies, and laboratory safety rules. Certificates of analysis and assay information, when provided, speak to identity and purity context for research lots — not clinical fitness or therapeutic performance.",
+        "You are solely responsible for ensuring that your acquisition, possession, storage, handling, and use of products comply with all applicable laws, institutional policies, and laboratory safety rules. Certificates of analysis and assay information, when provided, speak to identity and purity context for research lots — not clinical fitness or therapeutic performance. These Terms and site disclaimers do not guarantee regulatory compliance for your specific use case.",
       ],
     ],
     bullets: [
@@ -107,10 +107,10 @@ export const termsSections: TermsSection[] = [
       ],
     ],
     bullets: [
-      "You (or the institution you represent) are purchasing solely for laboratory research use by qualified personnel.",
-      "You will not use, or permit others to use, products for human or veterinary administration, diagnosis, treatment, or consumption.",
+      "You (or the institution you represent) are purchasing solely for legitimate laboratory research use by qualified personnel.",
+      "You will not use, or permit others to use, products for human or veterinary administration, diagnosis, treatment, prevention, or consumption.",
       "Shipping, billing, and contact information you provide are accurate and complete.",
-      "You will follow your institution’s standard operating procedures for storage, reconstitution (where applicable), handling, and disposal.",
+      "You will follow your institution’s standard operating procedures for storage, laboratory stock preparation (where applicable), handling, and disposal.",
       "Your purchase and intended laboratory use do not violate applicable law or export/sanctions rules.",
     ],
   },

@@ -20,6 +20,19 @@ export function ResourceArticle({ page }: ResourceArticleProps) {
           <p className="mt-8 max-w-2xl text-[0.95rem] leading-relaxed text-ink-soft">
             {page.lede}
           </p>
+          {page.notice ? (
+            <aside
+              className="mt-8 max-w-2xl border border-line bg-bg px-5 py-4"
+              aria-label={page.notice.title}
+            >
+              <p className="text-[0.7rem] font-semibold uppercase tracking-[0.16em] text-ink">
+                {page.notice.title}
+              </p>
+              <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                {page.notice.body}
+              </p>
+            </aside>
+          ) : null}
         </div>
       </section>
 
