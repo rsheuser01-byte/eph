@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { CartBacSuggest } from "@/components/CartBacSuggest";
 import { CartLineQtyControls } from "@/components/CartLineQtyControls";
+import { CartSuggest } from "@/components/CartSuggest";
 import { useCart } from "@/lib/cart/CartContext";
 import { useCartAvailability } from "@/lib/cart/useCartAvailability";
 import { formatUSD, orderTotals } from "@/lib/checkout/pricing";
@@ -123,7 +123,7 @@ export function CartDrawer() {
                   </div>
                 </div>
               ))}
-              <CartBacSuggest resolved={resolved} compact />
+              <CartSuggest resolved={resolved} compact />
             </div>
 
             <div className="border-t border-line px-6 py-6">

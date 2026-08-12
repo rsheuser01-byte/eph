@@ -56,13 +56,6 @@ const jobs = [
       { file: "nad-1000mg.png", size: "1000mg" },
     ],
   },
-  {
-    master: "bac-10ml.png",
-    variants: [
-      { file: "bac-10ml.png", size: "10ml" },
-      { file: "bac-30ml.png", size: "30ml" },
-    ],
-  },
 ];
 
 for (const job of jobs) {

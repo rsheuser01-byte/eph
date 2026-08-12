@@ -193,7 +193,7 @@ export const resourcePages: ResourcePage[] = [
       {
         heading: "What this page is not",
         paragraphs: [
-          "This is laboratory handling guidance for research materials — not dosing instructions for humans or animals. Follow your institution’s chemical hygiene plan, PPE rules, and waste disposal procedures. For product-specific storage lines, see each product’s research details table; for diluent supply, see bacteriostatic water in the catalog.",
+          "This is laboratory handling guidance for research materials — not dosing instructions for humans or animals. Follow your institution’s chemical hygiene plan, PPE rules, and waste disposal procedures. For product-specific storage lines, see each product’s research details table.",
         ],
       },
     ],
@@ -211,9 +211,6 @@ export const resourcePages: ResourcePage[] = [
         href: "https://pubchem.ncbi.nlm.nih.gov/",
       },
     ],
-    catalogLinks: [
-      { href: "/products/bac", label: "BAC Water" },
-      { href: "/products", label: "Browse products" },
-    ],
+    catalogLinks: [{ href: "/products", label: "Browse products" }],
   },
 ];

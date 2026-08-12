@@ -1,36 +1,45 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { RelatedProductPurchase } from "@/components/RelatedProductPurchase";
 import {
   getProductBySlug,
   productImageAlt,
   productPrimaryImage,
+  type Product,
 } from "@/data/products";
 import {
   allVariantsOutOfStock,
-  shouldSuggestBac,
+  cartSuggestReason,
+  getCartSuggestCandidates,
 } from "@/lib/cart/cartSuggest";
 import type { ResolvedCartLine } from "@/lib/cart/types";
 
-type CartBacSuggestProps = {
+type CartSuggestProps = {
   resolved: ResolvedCartLine[];
   /** Tighter spacing for the cart drawer. */
   compact?: boolean;
 };
 
-export function CartBacSuggest({
-  resolved,
-  compact = false,
-}: CartBacSuggestProps) {
-  const product = getProductBySlug("bac");
+export function CartSuggest({ resolved, compact = false }: CartSuggestProps) {
+  const candidates = useMemo(
+    () =>
+      getCartSuggestCandidates(resolved)
+        .map((slug) => getProductBySlug(slug))
+        .filter((product): product is Product => Boolean(product)),
+    [resolved],
+  );
   const [availability, setAvailability] = useState<
     Record<string, number | null> | null
   >(null);
 
   useEffect(() => {
-    if (!product || !shouldSuggestBac(resolved)) {
+    const nextCandidates = getCartSuggestCandidates(resolved)
+      .map((slug) => getProductBySlug(slug))
+      .filter((product): product is Product => Boolean(product));
+
+    if (nextCandidates.length === 0) {
       setAvailability(null);
       return;
     }
@@ -38,7 +47,9 @@ export function CartBacSuggest({
     // Drop prior stock before refetch so a stale in-stock map cannot enable Add.
     setAvailability(null);
 
-    const skus = product.variants.map((variant) => variant.sku);
+    const skus = nextCandidates.flatMap((product) =>
+      product.variants.map((variant) => variant.sku),
+    );
     let cancelled = false;
 
     async function load() {
@@ -67,14 +78,17 @@ export function CartBacSuggest({
     return () => {
       cancelled = true;
     };
-  }, [product, resolved]);
+  }, [resolved]);
 
-  if (!shouldSuggestBac(resolved) || !product) {
-    return null;
-  }
+  const product =
+    availability == null
+      ? null
+      : (candidates.find(
+          (candidate) =>
+            !allVariantsOutOfStock(candidate.variants, availability),
+        ) ?? null);
 
-  // Wait for stock before rendering — avoids flashing BAC then vanishing when OOS.
-  if (!availability || allVariantsOutOfStock(product.variants, availability)) {
+  if (candidates.length === 0 || !product || !availability) {
     return null;
   }
 
@@ -83,7 +97,7 @@ export function CartBacSuggest({
   return (
     <aside
       className={`border-t border-line ${compact ? "mt-2 pt-4" : "mt-8 pt-8"}`}
-      aria-label="Suggested supply"
+      aria-label="Suggested product"
     >
       <p className="label !text-ink-soft">Also useful</p>
       <div className={`flex gap-4 ${compact ? "mt-3" : "mt-4"}`}>
@@ -107,7 +121,7 @@ export function CartBacSuggest({
             {product.name}
           </p>
           <p className="mt-1 text-sm leading-relaxed text-ink-soft">
-            Reconstitution diluent for lyophilized stocks in your cart
+            {cartSuggestReason(product.slug)}
           </p>
           <RelatedProductPurchase
             product={product}

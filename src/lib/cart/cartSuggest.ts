@@ -1,25 +1,37 @@
 import type { ProductVariant } from "@/data/products";
 import type { ResolvedCartLine } from "./types";
 
-export const BAC_SLUG = "bac";
+export const NAD_SLUG = "nad";
+
+/** Preferred blend upsells when NAD+ is already in the cart. */
+export const BLEND_SUGGEST_SLUGS = ["glow-blend", "klow-blend"] as const;
+
+const SUGGEST_REASONS: Record<string, string> = {
+  nad: "Cellular cofactor for metabolic and redox assay panels",
+  "glow-blend": "Multi-peptide blend for coordinated marker studies",
+  "klow-blend": "Expanded multi-peptide blend including KPV",
+};
 
 /**
- * Show a single BAC Water nudge when the cart has peptides/blends
- * and BAC is not already included.
+ * Cart upsell candidates in priority order.
+ * Prefer NAD+; if NAD+ is already in the cart, offer GLOW then KLOW
+ * when those blends are not already included.
  */
-export function shouldSuggestBac(resolved: ResolvedCartLine[]): boolean {
+export function getCartSuggestCandidates(
+  resolved: ResolvedCartLine[],
+): string[] {
   if (resolved.length === 0) {
-    return false;
+    return [];
   }
-  if (resolved.some((item) => item.product.slug === BAC_SLUG)) {
-    return false;
+  const inCart = new Set(resolved.map((item) => item.product.slug));
+  if (!inCart.has(NAD_SLUG)) {
+    return [NAD_SLUG];
   }
-  return resolved.some(
-    (item) =>
-      item.product.category === "Peptide" ||
-      item.product.category === "Blend" ||
-      item.product.category === "Coenzyme",
-  );
+  return BLEND_SUGGEST_SLUGS.filter((slug) => !inCart.has(slug));
+}
+
+export function cartSuggestReason(slug: string): string {
+  return SUGGEST_REASONS[slug] ?? "Also useful with items in your cart";
 }
 
 /**

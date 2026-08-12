@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useCart } from "@/lib/cart/CartContext";
 import { formatUSD, orderTotals } from "@/lib/checkout/pricing";
 
@@ -45,7 +45,16 @@ function checkoutErrorMessage(code: string | null): string | null {
 function CheckoutForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { lines, resolved, subtotal, clear } = useCart();
+  const { resolved, subtotal, clear } = useCart();
+  const catalogItems = useMemo(
+    () =>
+      resolved.map(({ line }) => ({
+        slug: line.slug,
+        size: line.size,
+        qty: line.qty,
+      })),
+    [resolved],
+  );
   const baseTotals = orderTotals(subtotal);
   const provider = (process.env.NEXT_PUBLIC_PAYMENT_PROVIDER ?? "mock").toLowerCase();
   const requiresCard = provider !== "bankful-hpp" && provider !== "mock-hpp";
@@ -83,7 +92,7 @@ function CheckoutForm() {
       form.city.trim() &&
       form.state.trim() &&
       form.zip.trim() &&
-      lines.length > 0;
+      catalogItems.length > 0;
     if (!addressReady) {
       setTax(0);
       setTaxError(null);
@@ -100,7 +109,7 @@ function CheckoutForm() {
           headers: { "Content-Type": "application/json" },
           signal: controller.signal,
           body: JSON.stringify({
-            items: lines,
+            items: catalogItems,
             email: form.email,
             ...(appliedPromo ? { promoCode: appliedPromo.code } : {}),
             customer: {
@@ -159,7 +168,7 @@ function CheckoutForm() {
     form.zip,
     form.country,
     form.email,
-    lines,
+    catalogItems,
     appliedPromo?.code,
   ]);
 
@@ -182,7 +191,7 @@ function CheckoutForm() {
         body: JSON.stringify({
           promoCode: code,
           email: form.email,
-          items: lines,
+          items: catalogItems,
         }),
       });
       const data = (await response.json()) as {
@@ -231,7 +240,7 @@ function CheckoutForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          items: lines,
+          items: catalogItems,
           researchUseAcknowledged: researchAck,
           ...(appliedPromo ? { promoCode: appliedPromo.code } : {}),
           customer: {

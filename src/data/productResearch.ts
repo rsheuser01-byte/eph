@@ -363,38 +363,4 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
       },
     ],
   },
-
-  bac: {
-    interestPoints: [
-      "Research interest centers on bacteriostatic water as a diluent for lyophilized lab materials.",
-      "Common research areas include controlled dissolution before serial dilution on the bench.",
-      "Of interest when a protocol specifies a preservative-containing aqueous diluent.",
-    ],
-    sections: [
-      {
-        heading: "What is bacteriostatic water in research?",
-        paragraphs: [
-          "BAC Water is sterile water containing a bacteriostatic preservative (typically benzyl alcohol) used as a reconstitution diluent for lyophilized research materials on the laboratory bench. It is a supply reagent, not an active peptide, and exists to support aseptic handling workflows when protocols call for multi-use reconstituted stocks under controlled conditions.",
-          "Always follow your institution’s SOPs for sterile technique, container integrity, and discard timelines after first puncture. Label open-date and puncture count so notebooks can reconstruct diluent history.",
-        ],
-      },
-      {
-        heading: "Typical laboratory applications",
-        paragraphs: [
-          "Common bench uses include dissolving lyophilized peptides into a defined volume before serial dilution, rinsing reconstitution vials, and preparing small working aliquots. Researchers choose bacteriostatic water when a preservative is specified by the protocol; use preservative-free sterile water instead when the assay is known to be sensitive to benzyl alcohol.",
-          "If peptide recovery looks unexpectedly low, test whether the preservative or vial plastic is contributing before attributing the loss to the lyophilized solid alone.",
-        ],
-      },
-    ],
-    citations: [
-      {
-        label: "PubChem CID 244 (benzyl alcohol preservative)",
-        href: "https://pubchem.ncbi.nlm.nih.gov/compound/244",
-      },
-      {
-        label: "PubChem CID 962 (water)",
-        href: "https://pubchem.ncbi.nlm.nih.gov/compound/962",
-      },
-    ],
-  },
 };

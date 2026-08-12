@@ -131,10 +131,18 @@ export function resolveLines(lines: CartLine[]): ResolvedCartLine[] {
   return resolved;
 }
 
+/**
+ * Drop lines that no longer match the catalog (removed products / sizes).
+ * Keeps persisted carts from breaking checkout after catalog changes.
+ */
+export function sanitizeLines(lines: CartLine[]): CartLine[] {
+  return resolveLines(lines).map((item) => item.line);
+}
+
 export function cartSubtotal(lines: CartLine[]): number {
   return resolveLines(lines).reduce((sum, item) => sum + item.lineTotal, 0);
 }
 
 export function cartCount(lines: CartLine[]): number {
-  return lines.reduce((sum, line) => sum + line.qty, 0);
+  return resolveLines(lines).reduce((sum, item) => sum + item.line.qty, 0);
 }

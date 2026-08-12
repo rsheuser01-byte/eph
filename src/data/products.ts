@@ -47,7 +47,6 @@ const LYOPHILIZED_STORAGE =
   "Store lyophilized powder at −20°C. Protect from light and moisture. Keep tightly sealed until use. After reconstitution, store at 2–8°C.";
 
 // List prices come from pricing-guide.json (edit that file to change prices).
-// BAC Water is not in the guide and keeps local supply pricing.
 export const products: Product[] = [
   {
     slug: "glp-3",
@@ -367,39 +366,6 @@ export const products: Product[] = [
       composition: "BPC-157, GHK-Cu, TB-500, and KPV",
       appearance: POWDER_APPEARANCE,
       storage: LYOPHILIZED_STORAGE,
-    },
-  },
-  {
-    slug: "bac",
-    name: "BAC Water",
-    sku: "BAC",
-    category: "Supply",
-    shortDescription:
-      "Sterile bacteriostatic diluent for dissolving lyophilized research materials under controlled laboratory conditions.",
-    featured: false,
-    variants: [
-      {
-        size: "10ml",
-        price: 4.99,
-        sku: "BAC-10ML",
-        image: "/products/bac-10ml.png",
-      }, // PLACEHOLDER size/price
-      {
-        size: "30ml",
-        price: 7.99,
-        sku: "BAC-30ML",
-        image: "/products/bac-30ml.png",
-      }, // PLACEHOLDER size/price
-    ],
-    specs: {
-      form: "Sterile aqueous solution with bacteriostatic preservative",
-      researchApplication:
-        "Reconstitution diluent for lyophilized research materials on the laboratory bench.",
-      molecularFormula: "H2O (with benzyl alcohol preservative)",
-      appearance: "Clear, colorless liquid",
-      storage:
-        "Store at controlled room temperature. Protect from light. Do not freeze.",
-      synonyms: "Bacteriostatic water",
     },
   },
 ];

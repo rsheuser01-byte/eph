@@ -16,15 +16,6 @@ describe("resource pages link into the catalog", () => {
     }
   });
 
-  it("points reconstitution guidance at BAC Water", () => {
-    const page = resourcePages.find(
-      (entry) => entry.slug === "reconstitution-and-storage",
-    );
-    expect(page?.catalogLinks?.some((link) => link.href === "/products/bac")).toBe(
-      true,
-    );
-  });
-
   it("renders catalog links in ResourceArticle", () => {
     const article = readFileSync(
       path.join(process.cwd(), "src/components/ResourceArticle.tsx"),

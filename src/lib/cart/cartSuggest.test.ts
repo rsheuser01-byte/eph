@@ -2,14 +2,11 @@ import { describe, expect, it } from "vitest";
 import { getProductBySlug } from "@/data/products";
 import {
   allVariantsOutOfStock,
-  shouldSuggestBac,
+  getCartSuggestCandidates,
 } from "./cartSuggest";
 import type { ResolvedCartLine } from "./types";
 
-function resolvedLine(
-  slug: string,
-  size: string,
-): ResolvedCartLine {
+function resolvedLine(slug: string, size: string): ResolvedCartLine {
   const product = getProductBySlug(slug)!;
   const variant = product.variants.find((item) => item.size === size)!;
   return {
@@ -20,64 +17,78 @@ function resolvedLine(
   };
 }
 
-describe("shouldSuggestBac", () => {
-  it("suggests BAC when the cart has a peptide and no BAC", () => {
-    expect(shouldSuggestBac([resolvedLine("glp-3", "10mg")])).toBe(true);
+describe("getCartSuggestCandidates", () => {
+  it("suggests NAD+ when the cart has other products and no NAD+", () => {
+    expect(getCartSuggestCandidates([resolvedLine("glp-3", "10mg")])).toEqual([
+      "nad",
+    ]);
   });
 
-  it("suggests BAC when the cart has a coenzyme and no BAC", () => {
-    expect(shouldSuggestBac([resolvedLine("nad", "100mg")])).toBe(true);
-  });
-
-  it("suggests BAC when the cart has a blend and no BAC", () => {
-    expect(shouldSuggestBac([resolvedLine("wolverine-blend", "20mg")])).toBe(
-      true,
-    );
-  });
-
-  it("does not suggest BAC when BAC is already in the cart", () => {
+  it("suggests NAD+ when the cart has a blend and no NAD+", () => {
     expect(
-      shouldSuggestBac([
-        resolvedLine("glp-3", "10mg"),
-        resolvedLine("bac", "10ml"),
+      getCartSuggestCandidates([resolvedLine("wolverine-blend", "20mg")]),
+    ).toEqual(["nad"]);
+  });
+
+  it("suggests GLOW then KLOW when NAD+ is already in the cart", () => {
+    expect(getCartSuggestCandidates([resolvedLine("nad", "100mg")])).toEqual([
+      "glow-blend",
+      "klow-blend",
+    ]);
+  });
+
+  it("skips blends already in the cart", () => {
+    expect(
+      getCartSuggestCandidates([
+        resolvedLine("nad", "100mg"),
+        resolvedLine("glow-blend", "70mg"),
       ]),
-    ).toBe(false);
+    ).toEqual(["klow-blend"]);
   });
 
-  it("does not suggest BAC for an empty cart", () => {
-    expect(shouldSuggestBac([])).toBe(false);
+  it("suggests nothing when NAD+ and both blends are already in the cart", () => {
+    expect(
+      getCartSuggestCandidates([
+        resolvedLine("nad", "100mg"),
+        resolvedLine("glow-blend", "70mg"),
+        resolvedLine("klow-blend", "80mg"),
+      ]),
+    ).toEqual([]);
   });
 
-  it("does not suggest BAC when the cart is only BAC", () => {
-    expect(shouldSuggestBac([resolvedLine("bac", "30ml")])).toBe(false);
+  it("suggests nothing for an empty cart", () => {
+    expect(getCartSuggestCandidates([])).toEqual([]);
   });
 });
 
 describe("allVariantsOutOfStock", () => {
-  const bac = getProductBySlug("bac")!;
+  const nad = getProductBySlug("nad")!;
 
   it("is true when every variant qty is zero", () => {
     expect(
-      allVariantsOutOfStock(bac.variants, {
-        "BAC-10ML": 0,
-        "BAC-30ML": 0,
+      allVariantsOutOfStock(nad.variants, {
+        "NAD-100MG": 0,
+        "NAD-500MG": 0,
+        "NAD-1000MG": 0,
       }),
     ).toBe(true);
   });
 
   it("is false when any variant is in stock or inventory is unknown", () => {
     expect(
-      allVariantsOutOfStock(bac.variants, {
-        "BAC-10ML": 0,
-        "BAC-30ML": 2,
+      allVariantsOutOfStock(nad.variants, {
+        "NAD-100MG": 0,
+        "NAD-500MG": 2,
+        "NAD-1000MG": 0,
       }),
     ).toBe(false);
     expect(
-      allVariantsOutOfStock(bac.variants, {
-        "BAC-10ML": null,
-        "BAC-30ML": 0,
+      allVariantsOutOfStock(nad.variants, {
+        "NAD-100MG": null,
+        "NAD-500MG": 0,
+        "NAD-1000MG": 0,
       }),
     ).toBe(false);
-    expect(allVariantsOutOfStock(bac.variants, {})).toBe(false);
+    expect(allVariantsOutOfStock(nad.variants, {})).toBe(false);
   });
 });

@@ -12,7 +12,7 @@ Scope: repository map before Phase 1 (Bankful callback authentication and reconc
 **Phase 7 status: complete**  
 **Phase 8 status: complete**  
 **Phase 9 status: complete**  
-**Phase 10 status: complete** (launch readiness sign-off doc + research-use server ack + refund route tests). Go-live still requires clearing **BLOCKED**/**OPS** items in `LAUNCH_READINESS.md` (BAC placeholders, Bankful/Resend/TaxJar/stock, live txn).
+**Phase 10 status: complete** (launch readiness sign-off doc + research-use server ack + refund route tests). Go-live still requires clearing **BLOCKED**/**OPS** items in `LAUNCH_READINESS.md` (Bankful/Resend/TaxJar/stock, live txn).
 
 ## Existing relevant files
 

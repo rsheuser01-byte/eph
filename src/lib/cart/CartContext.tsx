@@ -15,6 +15,7 @@ import {
   clampResolvedLinesToStock,
   removeLine,
   resolveLines,
+  sanitizeLines,
   updateQty,
 } from "./cart";
 import type { CartLine, ResolvedCartLine } from "./types";
@@ -50,11 +51,13 @@ function readStored(): CartLine[] {
     if (!Array.isArray(parsed)) {
       return [];
     }
-    return parsed.filter(
-      (item): item is CartLine =>
-        typeof item?.slug === "string" &&
-        typeof item?.size === "string" &&
-        typeof item?.qty === "number",
+    return sanitizeLines(
+      parsed.filter(
+        (item): item is CartLine =>
+          typeof item?.slug === "string" &&
+          typeof item?.size === "string" &&
+          typeof item?.qty === "number",
+      ),
     );
   } catch {
     return [];

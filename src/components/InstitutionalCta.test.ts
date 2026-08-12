@@ -20,7 +20,7 @@ describe("InstitutionalCta wiring (Phase 3 #5)", () => {
     "utf8",
   );
 
-  it("keeps the multi-lot CTA on the homepage", () => {
+  it("keeps the bulk-orders CTA on the homepage", () => {
     expect(home).toMatch(/InstitutionalCta/);
   });
 
@@ -29,8 +29,8 @@ describe("InstitutionalCta wiring (Phase 3 #5)", () => {
     expect(detail).toMatch(/InstitutionalCta/);
   });
 
-  it("links to contact and mentions multi-lot planning", () => {
+  it("links to contact and mentions bulk orders", () => {
     expect(component).toMatch(/\/contact/);
-    expect(component).toMatch(/multi-lot/i);
+    expect(component).toMatch(/bulk orders/i);
   });
 });

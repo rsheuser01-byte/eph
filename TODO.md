@@ -49,7 +49,7 @@ Ordered roughly by priority.
       `POST /api/checkout` (`researchUseAcknowledged: true`). Keep disclaimers
       on product pages (underwriting).
 - [ ] Review refund/terms/privacy pages against the live payment flow.
-- [ ] Confirm BAC Water size/price (still marked PLACEHOLDER in `products.ts`).
+- [x] BAC Water removed from catalog (FDA compliance).
 
 ## Infra / QA
 - [ ] Set all env vars in Vercel (payment + email + Supabase + admin + TaxJar +

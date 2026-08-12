@@ -21,7 +21,7 @@ describe("homepage catalog (all SKUs, dense, below hero)", () => {
   it("renders every catalog product, not a featured subset", () => {
     expect(home).not.toMatch(/product\.featured/);
     expect(home).toMatch(/products\.map/);
-    expect(products.length).toBeGreaterThanOrEqual(11);
+    expect(products.length).toBeGreaterThanOrEqual(10);
   });
 
   it("uses a two-column dense grid on small screens", () => {

@@ -31,18 +31,11 @@ describe("relatedProducts map", () => {
     }
   });
 
-  it("pairs near-analogs and BAC on peptide pages", () => {
+  it("pairs near-analogs on peptide pages", () => {
     expect(RELATED_PRODUCT_MAP["mt-2"]!.map((e) => e.slug)).toContain("pt-141");
     expect(RELATED_PRODUCT_MAP["pt-141"]!.map((e) => e.slug)).toContain("mt-2");
     expect(RELATED_PRODUCT_MAP["glp-3"]!.map((e) => e.slug)).toContain("glp-2");
     expect(RELATED_PRODUCT_MAP["glp-2"]!.map((e) => e.slug)).toContain("glp-3");
-
-    for (const product of products.filter((p) => p.category === "Peptide")) {
-      expect(
-        RELATED_PRODUCT_MAP[product.slug]!.map((e) => e.slug),
-        `${product.slug} should recommend BAC Water`,
-      ).toContain("bac");
-    }
   });
 });
 

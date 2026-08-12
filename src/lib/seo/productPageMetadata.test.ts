@@ -33,9 +33,6 @@ describe("productPageTitle", () => {
     expect(
       productPageTitleKind(products.find((p) => p.slug === "glow-blend")!),
     ).toBe("Research Blend");
-    expect(productPageTitleKind(products.find((p) => p.slug === "bac")!)).toBe(
-      "Lab Supply",
-    );
   });
 });
 

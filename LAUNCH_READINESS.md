@@ -30,7 +30,7 @@ Scope: evidence-backed status for [PRODUCTION_LAUNCH_CHECKLIST.md](../.cursor/md
 | Decline/cancel release inventory once | **CODE** | IPN + expire paths; tests |
 | Production fails closed without Supabase | **CODE** | `assertProductionCheckoutReady` + checkout 503 |
 | Paid orders durable before fulfillment side effects | **CODE** | Outbox enqueue after approve; no inline email |
-| Placeholder product data removed | **BLOCKED** | BAC Water variants still marked `PLACEHOLDER` in `src/data/products.ts` — confirm size/price with owner |
+| Placeholder product data removed | **CODE** | BAC Water removed from catalog (FDA compliance) |
 | Production email configured | **OPS** | Resend domain + `EMAIL_PROVIDER=resend` + keys on Vercel |
 | Sales tax configured | **OPS** | TaxJar account, nexus, advisor; code requires `taxjar` in production |
 | Full checkout E2E tests pass | **CODE** | Playwright `tests/e2e/checkout.spec.ts` (mock-hpp) |
@@ -73,7 +73,7 @@ Scope: evidence-backed status for [PRODUCTION_LAUNCH_CHECKLIST.md](../.cursor/md
 
 | Item | Status | Notes |
 |------|--------|-------|
-| `PLACEHOLDER` values removed | **BLOCKED** | BAC-10ML / BAC-30ML |
+| `PLACEHOLDER` values removed | **CODE** | BAC Water removed from catalog |
 | All SKUs unique | **CODE** | `products.test.ts` |
 | Prices / vial sizes / shipping confirmed | **OPS** | Flat $12, free ≥ $150 in `pricing.ts` |
 | Free-shipping threshold confirmed | **OPS** | |

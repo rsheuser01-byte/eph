@@ -23,13 +23,15 @@ describe("GET /api/availability", () => {
 
   it("returns live (uncached) availability for requested SKUs", async () => {
     getLiveAvailabilityMap.mockResolvedValue({
-      "BAC-10ML": 0,
-      "BAC-30ML": 4,
+      "GLP-3-10MG": 0,
+      "NAD-100MG": 4,
     });
 
     const { GET } = await import("./route");
     const response = await GET(
-      new Request("http://localhost/api/availability?skus=BAC-10ML,BAC-30ML"),
+      new Request(
+        "http://localhost/api/availability?skus=GLP-3-10MG,NAD-100MG",
+      ),
     );
 
     expect(response.status).toBe(200);
@@ -40,11 +42,11 @@ describe("GET /api/availability", () => {
       error: string | null;
     };
     expect(json.success).toBe(true);
-    expect(json.data).toEqual({ "BAC-10ML": 0, "BAC-30ML": 4 });
+    expect(json.data).toEqual({ "GLP-3-10MG": 0, "NAD-100MG": 4 });
     expect(json.error).toBeNull();
     expect(getLiveAvailabilityMap).toHaveBeenCalledWith([
-      "BAC-10ML",
-      "BAC-30ML",
+      "GLP-3-10MG",
+      "NAD-100MG",
     ]);
     expect(getAvailabilityMap).not.toHaveBeenCalled();
   });

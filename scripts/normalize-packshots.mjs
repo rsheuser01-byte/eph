@@ -26,8 +26,6 @@ const DERIVED_PACKSHOTS = new Set([
   "nad-100mg.png",
   "nad-500mg.png",
   "nad-1000mg.png",
-  "bac-10ml.png",
-  "bac-30ml.png",
 ]);
 
 const allPngs = (await readdir(productsDir)).filter((f) =>

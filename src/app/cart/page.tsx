@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { CartBacSuggest } from "@/components/CartBacSuggest";
 import { CartLineQtyControls } from "@/components/CartLineQtyControls";
+import { CartSuggest } from "@/components/CartSuggest";
 import { useCart } from "@/lib/cart/CartContext";
 import { useCartAvailability } from "@/lib/cart/useCartAvailability";
 import {
@@ -91,7 +91,7 @@ export default function CartPage() {
                 </span>
               </div>
             ))}
-            <CartBacSuggest resolved={resolved} />
+            <CartSuggest resolved={resolved} />
           </div>
 
           <aside className="h-fit border border-line bg-bg-elevated p-8">

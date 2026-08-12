@@ -8,6 +8,7 @@ import {
   purchasableMaxQty,
   removeLine,
   resolveLines,
+  sanitizeLines,
   updateQty,
 } from "./cart";
 import type { CartLine } from "./types";
@@ -138,6 +139,19 @@ describe("cartSubtotal", () => {
   });
 });
 
+describe("sanitizeLines", () => {
+  it("drops removed catalog products and unknown sizes", () => {
+    const lines: CartLine[] = [
+      { slug: "bac", size: "10ml", qty: 1 },
+      { slug: "glp-3", size: "10mg", qty: 2 },
+      { slug: "glp-3", size: "999mg", qty: 1 },
+    ];
+    expect(sanitizeLines(lines)).toEqual([
+      { slug: "glp-3", size: "10mg", qty: 2 },
+    ]);
+  });
+});
+
 describe("cartCount", () => {
   it("sums quantities across lines", () => {
     const lines: CartLine[] = [
@@ -145,5 +159,13 @@ describe("cartCount", () => {
       { slug: "mt-2", size: "10mg", qty: 3 },
     ];
     expect(cartCount(lines)).toBe(5);
+  });
+
+  it("ignores unknown products", () => {
+    const lines: CartLine[] = [
+      { slug: "bac", size: "10ml", qty: 4 },
+      { slug: "glp-3", size: "10mg", qty: 1 },
+    ];
+    expect(cartCount(lines)).toBe(1);
   });
 });
