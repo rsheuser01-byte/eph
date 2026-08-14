@@ -72,6 +72,10 @@ TAX_FROM_STREET=
 # Optional default product tax code (omit = fully taxable per TaxJar)
 # TAX_PRODUCT_TAX_CODE=
 
+# Google address autocomplete + verification (server-only).
+# Enable Places API (New) and Address Validation API on the key.
+GOOGLE_MAPS_API_KEY=
+
 # Durable rate limits (required in production)
 UPSTASH_REDIS_REST_URL=
 UPSTASH_REDIS_REST_TOKEN=
@@ -181,9 +185,16 @@ Probes:
 - Tax failures return a safe 503 — never silently charge $0 tax in production.
 - Configure nexus/product tax codes with a tax advisor; optional `TAX_PRODUCT_TAX_CODE` applies a default TaxJar product code.
 
+### Shipping address verification
+
+- Checkout uses Google Places autocomplete as the customer types, then Google Address Validation to show a **Use this address** confirmation.
+- `GOOGLE_MAPS_API_KEY` stays server-side. Restrict the key to **Places API (New)** and **Address Validation API**.
+- When the key is set, checkout replaces the typed address with Google’s standardized US premise-level address, or returns 400 if it cannot be verified.
+- Missing key: checkout still works (warning in production readiness). E2E (`E2E_MODE=1`) skips Google.
+
 ### Security, rate limits, and audit
 
-- Durable rate limits via Upstash Redis (memory fallback locally). Applied to checkout, order status, admin login, Stripe webhooks (generous), refunds, inventory, and fulfillment.
+- Durable rate limits via Upstash Redis (memory fallback locally). Applied to checkout, order status, admin login, Stripe webhooks (generous), refunds, inventory, fulfillment, and address lookup.
 - Admin actions write to `admin_audit_log` (or `.data/admin_audit_log.json`) with hashed IPs — never raw addresses.
 - Security headers: CSP, `X-Frame-Options`, `nosniff`, Referrer-Policy; HSTS in production.
 - Critical payment/ops events email the store (cooldown) and optionally emit to Sentry when `SENTRY_DSN` is set.

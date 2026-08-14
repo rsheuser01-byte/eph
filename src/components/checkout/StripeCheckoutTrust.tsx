@@ -17,19 +17,21 @@ function LockIcon() {
 
 function StripeWordmark() {
   return (
-    <svg viewBox="0 0 60 16" className="h-4 w-[3.75rem]" aria-hidden="true">
-      <text
-        x="0"
-        y="13"
-        fill="#635BFF"
-        fontFamily="Arial, sans-serif"
-        fontSize="14"
-        fontWeight="700"
-        letterSpacing="-0.4"
-      >
-        stripe
-      </text>
-    </svg>
+    <a
+      href="https://stripe.com"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="inline-flex"
+    >
+      <Image
+        src="/payment-icons/stripe.svg"
+        alt="Stripe"
+        width={60}
+        height={25}
+        unoptimized
+        className="h-5 w-auto"
+      />
+    </a>
   );
 }
 

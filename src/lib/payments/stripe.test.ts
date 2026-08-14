@@ -43,14 +43,17 @@ describe("createStripeProvider", () => {
 
   it("creates a hosted Checkout Session and returns a redirect", async () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://shop.example.com");
+    vi.stubEnv("TAX_PROVIDER", "stripe");
     const create = vi.fn().mockResolvedValue({
       id: "cs_test_1",
       url: "https://checkout.stripe.com/c/pay/cs_test_1",
     });
+    const customersCreate = vi.fn().mockResolvedValue({ id: "cus_test_1" });
     const provider = createStripeProvider({
       getClient: () =>
         ({
           checkout: { sessions: { create } },
+          customers: { create: customersCreate },
         }) as unknown as Stripe,
       now: () => Date.parse("2026-08-14T12:00:00.000Z"),
     });
@@ -68,16 +71,52 @@ describe("createStripeProvider", () => {
     expect(params.integration_identifier).toBe(STRIPE_CHECKOUT_INTEGRATION_ID);
     expect(params.client_reference_id).toBe("EPH-1");
     expect(params.payment_method_types).toBeUndefined();
-    expect(params.automatic_tax).toBeUndefined();
+    expect(params.automatic_tax).toEqual({ enabled: true });
+    expect(params.customer).toBe("cus_test_1");
+    expect(params.customer_email).toBeUndefined();
+    const paymentIntent = params.payment_intent_data as {
+      shipping?: unknown;
+    };
+    expect(paymentIntent.shipping).toBeUndefined();
     expect(params.success_url).toContain("/checkout/success?order=EPH-1");
     expect(params.cancel_url).toBe(
       "https://shop.example.com/checkout?error=payment_cancelled",
     );
     const lineItems = params.line_items as Array<{
-      price_data: { unit_amount: number; currency: string };
+      price_data: {
+        unit_amount: number;
+        currency: string;
+        tax_behavior?: string;
+      };
     }>;
     expect(lineItems[0]?.price_data.unit_amount).toBe(1999);
     expect(lineItems[0]?.price_data.currency).toBe("usd");
+    expect(lineItems[0]?.price_data.tax_behavior).toBe("exclusive");
+  });
+
+  it("does not enable Stripe Tax when TAX_PROVIDER is not stripe", async () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://shop.example.com");
+    vi.stubEnv("TAX_PROVIDER", "taxjar");
+    const create = vi.fn().mockResolvedValue({
+      id: "cs_test_1",
+      url: "https://checkout.stripe.com/c/pay/cs_test_1",
+    });
+    const customersCreate = vi.fn().mockResolvedValue({ id: "cus_test_1" });
+    const provider = createStripeProvider({
+      getClient: () =>
+        ({
+          checkout: { sessions: { create } },
+          customers: { create: customersCreate },
+        }) as unknown as Stripe,
+    });
+
+    await provider.beginCheckout(chargeInput());
+    const params = create.mock.calls[0]?.[0] as Record<string, unknown>;
+    expect(params.automatic_tax).toBeUndefined();
+    const paymentIntent = params.payment_intent_data as {
+      shipping?: { address?: { line1?: string } };
+    };
+    expect(paymentIntent.shipping?.address?.line1).toBe("1 Lab St");
   });
 
   it("refunds via PaymentIntent id", async () => {

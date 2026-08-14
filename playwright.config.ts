@@ -13,6 +13,7 @@ const e2eEnv: Record<string, string> = {
   EMAIL_PROVIDER: "console",
   ADMIN_TOKEN: "e2e-admin-token",
   ADMIN_SESSION_SECRET: "e2e-admin-session-secret",
+  GOOGLE_MAPS_API_KEY: "",
   // Force inventory soft-skip so catalog is purchasable without seeded stock.
   NEXT_PUBLIC_SUPABASE_URL: "",
   SUPABASE_SERVICE_ROLE_KEY: "",

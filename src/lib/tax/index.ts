@@ -1,5 +1,5 @@
-import { isProductionRuntime } from "@/lib/config/productionReadiness";
 import { createMockTaxProvider } from "./mock";
+import { createStripeTaxProvider } from "./stripe";
 import { createTaxJarProvider } from "./taxjar";
 import {
   TaxCalculationError,
@@ -19,10 +19,9 @@ export function getTaxProvider(): TaxProvider {
   const name = (process.env.TAX_PROVIDER ?? "mock").toLowerCase().trim();
   switch (name) {
     case "mock":
-      if (isProductionRuntime()) {
-        throw new TaxCalculationError();
-      }
       return createMockTaxProvider();
+    case "stripe":
+      return createStripeTaxProvider();
     case "taxjar":
       return createTaxJarProvider();
     default:

@@ -90,6 +90,11 @@ function deps(order: OrderRecord) {
             ...(patch.transactionId !== undefined
               ? { transactionId: patch.transactionId }
               : {}),
+            ...(patch.tax !== undefined ? { tax: patch.tax } : {}),
+            ...(patch.total !== undefined ? { total: patch.total } : {}),
+            ...(patch.taxProvider !== undefined
+              ? { taxProvider: patch.taxProvider }
+              : {}),
           };
           orders.set(id, next);
           return next;

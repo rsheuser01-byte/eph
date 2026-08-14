@@ -10,6 +10,7 @@ import {
   StripeCheckoutCtaTrust,
   StripeCheckoutTrust,
 } from "@/components/checkout/StripeCheckoutTrust";
+import { AddressFields } from "@/components/checkout/AddressFields";
 
 const inputClass =
   "w-full border border-line bg-panel px-4 py-3 text-sm text-ink placeholder:text-ink-soft/60 focus:border-accent focus:outline-none";
@@ -70,6 +71,7 @@ function CheckoutForm() {
   const requiresCard = !isHosted;
 
   const [form, setForm] = useState(initialForm);
+  const [addressReady, setAddressReady] = useState(true);
   const [researchAck, setResearchAck] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -185,6 +187,10 @@ function CheckoutForm() {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
+  function patchForm(patch: Partial<typeof initialForm>) {
+    setForm((current) => ({ ...current, ...patch }));
+  }
+
   async function applyPromo() {
     const code = promoInput.trim();
     if (!code) {
@@ -235,6 +241,12 @@ function CheckoutForm() {
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!addressReady) {
+      setError(
+        "Confirm your shipping address so we can deliver your package.",
+      );
+      return;
+    }
     if (!researchAck) {
       setError(
         "Please confirm research-use-only acknowledgment before continuing.",
@@ -389,52 +401,19 @@ function CheckoutForm() {
                 value={form.organization}
                 onChange={(e) => update("organization", e.target.value)}
               />
-              <input
-                className={`${inputClass} sm:col-span-2`}
-                placeholder="Address"
-                autoComplete="address-line1"
-                required
-                value={form.address1}
-                onChange={(e) => update("address1", e.target.value)}
-              />
-              <input
-                className={`${inputClass} sm:col-span-2`}
-                placeholder="Apartment, suite, etc. (optional)"
-                autoComplete="address-line2"
-                value={form.address2}
-                onChange={(e) => update("address2", e.target.value)}
-              />
-              <input
-                className={inputClass}
-                placeholder="City"
-                autoComplete="address-level2"
-                required
-                value={form.city}
-                onChange={(e) => update("city", e.target.value)}
-              />
-              <input
-                className={inputClass}
-                placeholder="State"
-                autoComplete="address-level1"
-                required
-                value={form.state}
-                onChange={(e) => update("state", e.target.value)}
-              />
-              <input
-                className={inputClass}
-                placeholder="ZIP code"
-                autoComplete="postal-code"
-                required
-                value={form.zip}
-                onChange={(e) => update("zip", e.target.value)}
-              />
-              <input
-                className={inputClass}
-                placeholder="Country"
-                autoComplete="country"
-                required
-                value={form.country}
-                onChange={(e) => update("country", e.target.value)}
+              <AddressFields
+                value={{
+                  address1: form.address1,
+                  address2: form.address2,
+                  city: form.city,
+                  state: form.state,
+                  zip: form.zip,
+                  country: form.country,
+                }}
+                inputClass={inputClass}
+                onChange={(field, value) => update(field, value)}
+                onPatch={patchForm}
+                onReadyChange={setAddressReady}
               />
             </div>
           </section>
@@ -626,7 +605,9 @@ function CheckoutForm() {
           </div>
           <button
             type="submit"
-            disabled={submitting || !researchAck || Boolean(taxError)}
+            disabled={
+              submitting || !researchAck || !addressReady || Boolean(taxError)
+            }
             className="btn btn-primary btn-arrow mt-7 w-full disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting

@@ -283,6 +283,18 @@ export function createSupabaseOrderStore(
       if (patch.fulfillmentNotes !== undefined) {
         updates.fulfillment_notes = patch.fulfillmentNotes;
       }
+      if (patch.tax !== undefined) {
+        updates.tax = patch.tax;
+      }
+      if (patch.total !== undefined) {
+        updates.total = patch.total;
+      }
+      if (patch.taxProvider !== undefined) {
+        updates.tax_provider = patch.taxProvider;
+      }
+      if (patch.taxJurisdiction !== undefined) {
+        updates.tax_jurisdiction = patch.taxJurisdiction;
+      }
 
       if (Object.keys(updates).length === 0) {
         return this.get(orderId);

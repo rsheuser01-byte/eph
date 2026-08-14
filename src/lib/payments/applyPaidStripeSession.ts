@@ -59,14 +59,20 @@ export async function applyPaidStripeSession(
     return { outcome: "already" };
   }
 
-  const expectedCents = toCents(order.total);
+  const expectedPreTaxCents =
+    toCents(order.subtotal) - toCents(order.discount) + toCents(order.shipping);
+  const taxCents = session.total_details?.amount_tax ?? 0;
   const actualCents = session.amount_total;
   const actualCurrency = (session.currency ?? "").toUpperCase();
 
-  if (actualCents !== expectedCents) {
+  if (
+    actualCents == null ||
+    actualCents !== expectedPreTaxCents + taxCents
+  ) {
     deps.logSecurityEvent("stripe_webhook_amount_mismatch", {
       orderId,
-      expectedCents,
+      expectedPreTaxCents,
+      taxCents,
       actualCents,
     });
     if (deps.orderStore.updateStatus) {
@@ -111,6 +117,9 @@ export async function applyPaidStripeSession(
     await deps.orderStore.updateStatus(orderId, {
       paymentStatus: "approved",
       transactionId,
+      tax: taxCents / 100,
+      total: actualCents / 100,
+      taxProvider: "stripe",
     });
   }
 

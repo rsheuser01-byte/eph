@@ -1,5 +1,6 @@
 import Stripe from "stripe";
 import { toCents } from "./money";
+import { stripeProductTaxCode } from "@/lib/tax/stripeTaxCode";
 import type {
   ChargeInput,
   CheckoutOutcome,
@@ -97,11 +98,36 @@ export function createStripeProvider(
         .join(", ")
         .slice(0, 500);
 
+      const address = {
+        line1: input.billing.address1,
+        line2: input.billing.address2 || undefined,
+        city: input.billing.city,
+        state: input.billing.state,
+        postal_code: input.billing.zip,
+        country: input.billing.country || "US",
+      };
+      const customerName =
+        `${input.billing.firstName} ${input.billing.lastName}`.trim();
+      const customer = await client.customers.create({
+        email: input.billing.email,
+        name: customerName || undefined,
+        address,
+        shipping: {
+          name: customerName || input.billing.email,
+          phone: input.billing.phone || undefined,
+          address,
+        },
+      });
+
+      const taxCode = stripeProductTaxCode();
+      const useStripeTax =
+        (process.env.TAX_PROVIDER ?? "mock").toLowerCase().trim() === "stripe";
       const session = await client.checkout.sessions.create({
         mode: "payment",
         integration_identifier: STRIPE_CHECKOUT_INTEGRATION_ID,
         client_reference_id: input.orderId,
-        customer_email: input.billing.email,
+        customer: customer.id,
+        ...(useStripeTax ? { automatic_tax: { enabled: true } } : {}),
         expires_at: sessionExpiresAtUnix(deps.now?.() ?? Date.now()),
         success_url: `${base}/checkout/success?${successParams.toString()}`,
         cancel_url: `${base}/checkout?error=payment_cancelled`,
@@ -113,18 +139,17 @@ export function createStripeProvider(
           metadata: {
             orderId: input.orderId,
           },
-          shipping: {
-            name: `${input.billing.firstName} ${input.billing.lastName}`.trim(),
-            phone: input.billing.phone || undefined,
-            address: {
-              line1: input.billing.address1,
-              line2: input.billing.address2 || undefined,
-              city: input.billing.city,
-              state: input.billing.state,
-              postal_code: input.billing.zip,
-              country: input.billing.country || "US",
-            },
-          },
+          // Stripe Tax rejects payment_intent_data.shipping; Customer.shipping
+          // is the address source for tax and receipts.
+          ...(useStripeTax
+            ? {}
+            : {
+                shipping: {
+                  name: customerName,
+                  phone: input.billing.phone || undefined,
+                  address,
+                },
+              }),
         },
         line_items: [
           {
@@ -132,9 +157,11 @@ export function createStripeProvider(
             price_data: {
               currency: input.currency.toLowerCase(),
               unit_amount: toCents(input.amount),
+              tax_behavior: "exclusive",
               product_data: {
                 name: `Order ${input.orderId}`,
                 description: itemSummary || undefined,
+                ...(taxCode ? { tax_code: taxCode } : {}),
               },
             },
           },

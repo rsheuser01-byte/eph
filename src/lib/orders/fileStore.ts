@@ -124,6 +124,10 @@ export function createFileOrderStore(filePath = defaultPath()): OrderStore {
           patch.fulfillmentNotes === null
             ? undefined
             : (patch.fulfillmentNotes ?? current.fulfillmentNotes),
+        tax: patch.tax ?? current.tax,
+        total: patch.total ?? current.total,
+        taxProvider: patch.taxProvider ?? current.taxProvider,
+        taxJurisdiction: patch.taxJurisdiction ?? current.taxJurisdiction,
         status: paymentStatus,
       });
       orders[index] = updated;

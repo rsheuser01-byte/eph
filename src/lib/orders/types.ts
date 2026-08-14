@@ -61,6 +61,10 @@ export type OrderStatusUpdate = {
   transactionId?: string;
   refundedAmount?: number;
   reservationExpiresAt?: string;
+  tax?: number;
+  total?: number;
+  taxProvider?: string;
+  taxJurisdiction?: string;
   carrier?: string | null;
   trackingNumber?: string | null;
   trackingUrl?: string | null;

@@ -34,6 +34,10 @@ import { hasApprovedOrderForEmail } from "@/lib/promo/orderEligibility";
 import { TaxCalculationError, quoteTax } from "@/lib/tax";
 import { researchUseAckError } from "@/lib/checkout/researchAck";
 import {
+  AddressVerificationError,
+  verifyShippingAddress,
+} from "@/lib/address/google";
+import {
   RATE_LIMITS,
   checkRateLimit,
   clientIpFromRequest,
@@ -156,12 +160,45 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: order.error }, { status: 400 });
   }
 
-  const billing = parseBilling(body.customer);
+  let billing = parseBilling(body.customer);
   if (!billing) {
     return NextResponse.json(
       { error: "Missing or invalid shipping details." },
       { status: 400 },
     );
+  }
+
+  try {
+    const verified = await verifyShippingAddress({
+      address1: billing.address1,
+      address2: billing.address2,
+      city: billing.city,
+      state: billing.state,
+      zip: billing.zip,
+      country: billing.country,
+    });
+    if (!verified.ok) {
+      return NextResponse.json({ error: verified.error }, { status: 400 });
+    }
+    if (verified.enabled) {
+      billing = {
+        ...billing,
+        address1: verified.billing.address1,
+        address2: verified.billing.address2 ?? billing.address2,
+        city: verified.billing.city,
+        state: verified.billing.state,
+        zip: verified.billing.zip,
+        country: verified.billing.country,
+      };
+    }
+  } catch (error) {
+    if (error instanceof AddressVerificationError) {
+      return NextResponse.json(
+        { error: "Unable to verify shipping address. Please try again." },
+        { status: 503 },
+      );
+    }
+    throw error;
   }
 
   let discount = 0;
@@ -271,7 +308,10 @@ export async function POST(request: Request) {
 
     const outcome = await provider.beginCheckout({
       orderId,
-      amount: totals.total,
+      amount:
+        taxQuote.provider === "stripe"
+          ? orderTotals(order.subtotal, 0, discount).total
+          : totals.total,
       currency: "USD",
       billing,
       card,

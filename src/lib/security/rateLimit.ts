@@ -126,6 +126,10 @@ export const RATE_LIMITS = {
   availability: { limit: 120, windowMs: 60_000 },
   /** Promo code validation on checkout. */
   promoValidate: { limit: 30, windowMs: 10 * 60_000 },
+  /** Address autocomplete as the customer types. */
+  addressSuggest: { limit: 60, windowMs: 60_000 },
+  /** Google address confirmation on checkout. */
+  addressValidate: { limit: 40, windowMs: 10 * 60_000 },
 } as const;
 
 export function resetMemoryRateLimits(): void {

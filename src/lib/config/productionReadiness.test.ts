@@ -59,10 +59,24 @@ describe("productionReadiness", () => {
   });
 
   it("passes when all required production settings are present", () => {
-    stubProductionEnv();
+    stubProductionEnv({ GOOGLE_MAPS_API_KEY: "test-maps-key" });
     const result = assessProductionConfig();
     expect(result.ok).toBe(true);
     expect(result.issues.filter((i) => i.severity === "error")).toHaveLength(0);
+    expect(result.issues.filter((i) => i.severity === "warning")).toHaveLength(
+      0,
+    );
+  });
+
+  it("warns when Google address verification is missing", () => {
+    stubProductionEnv({ GOOGLE_MAPS_API_KEY: "" });
+    const result = assessProductionConfig();
+    expect(result.ok).toBe(true);
+    expect(
+      result.issues.some(
+        (i) => i.key === "GOOGLE_MAPS_API_KEY" && i.severity === "warning",
+      ),
+    ).toBe(true);
   });
 
   it("fails closed when payment provider is mock in production", () => {
@@ -123,11 +137,23 @@ describe("productionReadiness", () => {
     }
   });
 
-  it("fails closed when tax provider is mock in production", () => {
-    stubProductionEnv({ TAX_PROVIDER: "mock" });
+  it("allows mock tax in production", () => {
+    stubProductionEnv({ TAX_PROVIDER: "mock", TAXJAR_API_TOKEN: "" });
+    const result = assessProductionConfig();
+    expect(result.ok).toBe(true);
+  });
+
+  it("allows Stripe Tax in production", () => {
+    stubProductionEnv({ TAX_PROVIDER: "stripe", TAXJAR_API_TOKEN: "" });
+    const result = assessProductionConfig();
+    expect(result.ok).toBe(true);
+  });
+
+  it("fails closed when TaxJar is selected without a token", () => {
+    stubProductionEnv({ TAX_PROVIDER: "taxjar", TAXJAR_API_TOKEN: "" });
     const result = assessProductionConfig();
     expect(result.ok).toBe(false);
-    expect(result.issues.some((i) => i.key === "TAX_PROVIDER")).toBe(true);
+    expect(result.issues.some((i) => i.key === "TAXJAR_API_TOKEN")).toBe(true);
   });
 
   it("fails closed when Upstash is missing in production", () => {

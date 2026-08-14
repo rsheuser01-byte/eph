@@ -143,25 +143,25 @@ export function assessProductionConfig(
   );
 
   const taxProvider = env("TAX_PROVIDER").toLowerCase() || "mock";
-  if (taxProvider !== "taxjar") {
+  if (taxProvider === "taxjar") {
+    requireNonEmpty("TAXJAR_API_TOKEN", "TaxJar API token is required.", issues);
+    requireNonEmpty(
+      "TAX_FROM_STATE",
+      "Warehouse/nexus state (TAX_FROM_STATE) is required for TaxJar.",
+      issues,
+    );
+    requireNonEmpty(
+      "TAX_FROM_ZIP",
+      "Warehouse/nexus ZIP (TAX_FROM_ZIP) is required for TaxJar.",
+      issues,
+    );
+  } else if (taxProvider !== "mock" && taxProvider !== "stripe") {
     issues.push({
       key: "TAX_PROVIDER",
-      message:
-        "Production checkout requires TAX_PROVIDER=taxjar (mock tax is disabled).",
+      message: "TAX_PROVIDER must be mock, stripe, or taxjar.",
       severity: "error",
     });
   }
-  requireNonEmpty("TAXJAR_API_TOKEN", "TaxJar API token is required.", issues);
-  requireNonEmpty(
-    "TAX_FROM_STATE",
-    "Warehouse/nexus state (TAX_FROM_STATE) is required for TaxJar.",
-    issues,
-  );
-  requireNonEmpty(
-    "TAX_FROM_ZIP",
-    "Warehouse/nexus ZIP (TAX_FROM_ZIP) is required for TaxJar.",
-    issues,
-  );
 
   requireNonEmpty(
     "UPSTASH_REDIS_REST_URL",
@@ -173,6 +173,15 @@ export function assessProductionConfig(
     "Upstash Redis token is required for durable rate limits.",
     issues,
   );
+
+  if (!env("GOOGLE_MAPS_API_KEY")) {
+    issues.push({
+      key: "GOOGLE_MAPS_API_KEY",
+      message:
+        "Google address verification is not configured. Checkout will accept unverified shipping addresses.",
+      severity: "warning",
+    });
+  }
 
   const errors = issues.filter((issue) => issue.severity === "error");
   return { ok: errors.length === 0, issues };

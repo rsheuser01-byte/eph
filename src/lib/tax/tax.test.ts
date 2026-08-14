@@ -26,6 +26,14 @@ describe("mock tax provider", () => {
     expect(quote.amount).toBe(0);
     expect(quote.provider).toBe("mock");
   });
+
+  it("returns zero tax with provider mock in production", async () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("TAX_PROVIDER", "mock");
+    const quote = await quoteTax(sampleInput);
+    expect(quote.amount).toBe(0);
+    expect(quote.provider).toBe("mock");
+  });
 });
 
 describe("taxjar provider", () => {

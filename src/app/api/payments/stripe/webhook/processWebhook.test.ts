@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type Stripe from "stripe";
-import type { OrderRecord } from "@/lib/orders/types";
+import type { OrderRecord, OrderStatusUpdate } from "@/lib/orders/types";
 import type {
   PaymentEventRecord,
   PaymentEventStore,
@@ -145,15 +145,21 @@ function deps(order: OrderRecord) {
         async list() {
           return [...orders.values()];
         },
-        async updateStatus(id: string, patch: { paymentStatus?: string; transactionId?: string }) {
+        async updateStatus(id: string, patch: OrderStatusUpdate) {
           const current = orders.get(id);
           if (!current) return null;
-          const next = {
+          const next: OrderRecord = {
             ...current,
             paymentStatus: patch.paymentStatus ?? current.paymentStatus,
-            status: (patch.paymentStatus ?? current.paymentStatus) as OrderRecord["status"],
+            status: (patch.paymentStatus ??
+              current.paymentStatus) as OrderRecord["status"],
             ...(patch.transactionId !== undefined
               ? { transactionId: patch.transactionId }
+              : {}),
+            ...(patch.tax !== undefined ? { tax: patch.tax } : {}),
+            ...(patch.total !== undefined ? { total: patch.total } : {}),
+            ...(patch.taxProvider !== undefined
+              ? { taxProvider: patch.taxProvider }
               : {}),
           };
           orders.set(id, next);
@@ -202,6 +208,23 @@ describe("processStripeWebhookEvent", () => {
     const replay = await processStripeWebhookEvent(event, handlers);
     expect(replay.body.duplicate).toBe(true);
     expect(commitStock).toHaveBeenCalledTimes(1);
+  });
+
+  it("records Stripe Tax on the order when Checkout adds tax", async () => {
+    const { handlers, orders } = deps(makeOrder());
+    handlers.retrieveSession = async () =>
+      makeSession({
+        amount_total: 2119,
+        total_details: { amount_tax: 120 } as Stripe.Checkout.Session.TotalDetails,
+      });
+    const result = await processStripeWebhookEvent(
+      makeEvent("checkout.session.completed", makeSession()),
+      handlers,
+    );
+    expect(result.status).toBe(200);
+    expect(orders.get("EPH-1")?.tax).toBe(1.2);
+    expect(orders.get("EPH-1")?.total).toBe(21.19);
+    expect(orders.get("EPH-1")?.paymentStatus).toBe("approved");
   });
 
   it("flags review_required on amount mismatch", async () => {
