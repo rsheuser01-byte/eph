@@ -1,4 +1,5 @@
-import { verifyBankfulTransaction } from "@/lib/payments/bankful";
+import { verifyPaymentTransaction } from "@/lib/payments";
+import type { PaymentVerification } from "@/lib/payments/types";
 import type { OrderStore } from "@/lib/orders/types";
 import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
 import {
@@ -22,7 +23,11 @@ export type ExpireReservationsDeps = {
   expire?: (orderId: string) => Promise<void>;
   release?: (orderId: string) => Promise<void>;
   enqueuePaid?: (orderId: string) => Promise<void>;
-  verifyPayment?: typeof verifyBankfulTransaction;
+  verifyPayment?: (input: {
+    orderId: string;
+    transactionId: string;
+    provider?: string;
+  }) => Promise<PaymentVerification>;
   log?: (message: string, detail?: Record<string, unknown>) => void;
   batchSize?: number;
 };
@@ -39,7 +44,7 @@ export async function processExpiredReservations(
   const commit = deps.commit ?? commitReservations;
   const expire = deps.expire ?? expireReservations;
   const enqueuePaid = deps.enqueuePaid ?? enqueueOrderPaid;
-  const verify = deps.verifyPayment ?? verifyBankfulTransaction;
+  const verify = deps.verifyPayment ?? verifyPaymentTransaction;
   const log = deps.log ?? ((message, detail) => console.error(message, detail));
   const batchSize = deps.batchSize ?? 50;
 
@@ -98,9 +103,8 @@ export async function processExpiredReservations(
 
       if (order.paymentStatus === "pending") {
         if (order.transactionId) {
-          const statusType =
-            process.env.BANKFUL_STATUS_TRANSACTION_TYPE?.trim() ?? "";
-          if (!statusType) {
+          const isBankful = order.provider.startsWith("bankful");
+          if (isBankful && !process.env.BANKFUL_STATUS_TRANSACTION_TYPE?.trim()) {
             log("expire_reservations_skipped_no_status_api", { orderId });
             result.skipped += 1;
             continue;
@@ -109,6 +113,7 @@ export async function processExpiredReservations(
           const verified = await verify({
             orderId,
             transactionId: order.transactionId,
+            provider: order.provider,
           });
 
           if (verified.verified && verified.status === "approved") {
@@ -126,6 +131,15 @@ export async function processExpiredReservations(
               });
             });
             result.committed += 1;
+            continue;
+          }
+
+          if (verified.skipExpire) {
+            log("expire_reservations_skipped_unverified", {
+              orderId,
+              message: verified.message ?? "skip_expire",
+            });
+            result.skipped += 1;
             continue;
           }
         }

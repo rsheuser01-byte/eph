@@ -53,9 +53,26 @@ export type RefundOutcome = {
   message?: string;
 };
 
+export type PaymentVerificationStatus =
+  | "approved"
+  | "declined"
+  | "cancelled"
+  | "pending"
+  | "unknown";
+
+export type PaymentVerification = {
+  verified: boolean;
+  status: PaymentVerificationStatus;
+  amountCents?: number;
+  currency?: string;
+  message?: string;
+  /** Fail closed: do not expire this reservation (payment may still succeed). */
+  skipExpire?: boolean;
+};
+
 // Direct/mock providers settle synchronously and return a `result`. A hosted
-// provider (Bankful HPP) returns a `redirect` URL instead. Both satisfy the
-// same checkout contract so the API route never has to change.
+// provider (Stripe Checkout / Bankful HPP) returns a `redirect` URL instead.
+// Both satisfy the same checkout contract so the API route never has to change.
 export type CheckoutOutcome =
   | {
       kind: "result";
@@ -64,7 +81,7 @@ export type CheckoutOutcome =
       transactionId?: string;
       message?: string;
     }
-  | { kind: "redirect"; url: string };
+  | { kind: "redirect"; url: string; transactionId?: string };
 
 export interface PaymentProvider {
   readonly name: string;

@@ -280,6 +280,14 @@ export async function POST(request: Request) {
     });
 
     if (outcome.kind === "redirect") {
+      if (outcome.transactionId) {
+        const store = getOrderStore();
+        if (store.updateStatus) {
+          await store.updateStatus(orderId, {
+            transactionId: outcome.transactionId,
+          });
+        }
+      }
       return NextResponse.json({
         redirectUrl: outcome.url,
         orderId,

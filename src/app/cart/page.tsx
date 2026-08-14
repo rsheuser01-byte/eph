@@ -124,6 +124,9 @@ export default function CartPage() {
             <Link href="/checkout" className="btn btn-primary btn-arrow mt-7 w-full">
               Proceed to checkout
             </Link>
+            <p className="mt-3 text-center text-[0.7rem] leading-relaxed text-ink-soft/80">
+              Secure checkout. We never store your card number.
+            </p>
           </aside>
         </div>
       )}

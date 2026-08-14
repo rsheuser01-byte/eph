@@ -1,3 +1,4 @@
+import { processOutbox } from "./processOutbox";
 import { getOutboxStore } from "./store";
 import {
   ORDER_CANCELLED_EVENT,
@@ -7,7 +8,19 @@ import {
 } from "./types";
 
 /**
- * Enqueue durable side effects for a paid order.
+ * Send queued emails now. Cron remains a retry backup if this fails.
+ * Never throw — payment/fulfillment already succeeded.
+ */
+async function flushOutbox(): Promise<void> {
+  try {
+    await processOutbox();
+  } catch (error) {
+    console.error("[outbox] immediate process failed", error);
+  }
+}
+
+/**
+ * Enqueue durable side effects for a paid order, then send confirmation immediately.
  * Safe to call multiple times for the same order (unique on event_type+aggregate_id).
  */
 export async function enqueueOrderPaid(orderId: string): Promise<void> {
@@ -20,6 +33,7 @@ export async function enqueueOrderPaid(orderId: string): Promise<void> {
       enqueuedAt: new Date().toISOString(),
     },
   });
+  await flushOutbox();
 }
 
 export async function enqueueOrderShipped(orderId: string): Promise<void> {
@@ -32,6 +46,7 @@ export async function enqueueOrderShipped(orderId: string): Promise<void> {
       enqueuedAt: new Date().toISOString(),
     },
   });
+  await flushOutbox();
 }
 
 /** One outbox row per refund tranche (aggregate includes cents). */
@@ -54,6 +69,7 @@ export async function enqueueOrderRefunded(
       enqueuedAt: new Date().toISOString(),
     },
   });
+  await flushOutbox();
 }
 
 export async function enqueueOrderCancelled(orderId: string): Promise<void> {
@@ -66,4 +82,5 @@ export async function enqueueOrderCancelled(orderId: string): Promise<void> {
       enqueuedAt: new Date().toISOString(),
     },
   });
+  await flushOutbox();
 }

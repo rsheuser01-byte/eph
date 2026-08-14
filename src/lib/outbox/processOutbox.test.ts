@@ -320,4 +320,46 @@ describe("processOutbox", () => {
     expect(second.completed).toBe(1);
     expect(send).toHaveBeenCalledTimes(2);
   });
+
+  it("drops events whose order no longer exists instead of retrying", async () => {
+    dir = await mkdtemp(join(tmpdir(), "eph-outbox-"));
+    const outboxPath = join(dir, "outbox.json");
+    const outbox = createFileOutboxStore(outboxPath);
+    const deliveries = createFileEmailDeliveryStore(join(dir, "email.json"));
+    const send = vi.fn().mockResolvedValue(undefined);
+    const log = vi.fn();
+
+    await outbox.enqueue({
+      eventType: ORDER_PAID_EVENT,
+      aggregateId: "ord_missing",
+      payload: { orderId: "ord_missing" },
+    });
+
+    const result = await processOutbox({
+      outbox,
+      emailDeliveries: deliveries,
+      orderStore: {
+        name: "memory",
+        async get() {
+          return null;
+        },
+        async save() {},
+        async list() {
+          return [];
+        },
+      },
+      send,
+      log,
+    });
+
+    expect(result.failed).toBe(1);
+    expect(result.retried).toBe(0);
+    expect(send).not.toHaveBeenCalled();
+    expect(log).not.toHaveBeenCalled();
+
+    const rows = JSON.parse(
+      await (await import("node:fs/promises")).readFile(outboxPath, "utf8"),
+    ) as Array<{ status: string }>;
+    expect(rows[0]?.status).toBe("failed");
+  });
 });

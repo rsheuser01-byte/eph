@@ -127,6 +127,35 @@ describe("processExpiredReservations", () => {
     expect(expire).not.toHaveBeenCalled();
   });
 
+  it("skips expiration when Stripe session is still open", async () => {
+    const expire = vi.fn();
+    const result = await processExpiredReservations({
+      orderStore: {
+        name: "memory",
+        async get() {
+          return makeOrder({
+            provider: "stripe",
+            transactionId: "cs_test_1",
+          });
+        },
+        async save() {},
+        async list() {
+          return [];
+        },
+      },
+      listExpiredOrderIds: async () => ["ord_1"],
+      expire,
+      log: vi.fn(),
+      verifyPayment: async () => ({
+        verified: true,
+        status: "pending",
+        skipExpire: true,
+      }),
+    });
+    expect(result.skipped).toBe(1);
+    expect(expire).not.toHaveBeenCalled();
+  });
+
   it("commits when STATUS lookup confirms paid", async () => {
     vi.stubEnv("BANKFUL_STATUS_TRANSACTION_TYPE", "STATUS");
     const commit = vi.fn().mockResolvedValue(undefined);

@@ -19,13 +19,13 @@ Scope: evidence-backed status for [PRODUCTION_LAUNCH_CHECKLIST.md](../.cursor/md
 
 | Item | Status | Evidence / next action |
 |------|--------|------------------------|
-| Bankful approved exact catalog / business model | **OPS** | Merchant underwriting with Bankful |
-| Production uses `bankful-hpp` | **CODE** | `productionReadiness.ts` + payment factory reject mock/direct in production |
-| Direct card entry disabled in production | **CODE** | Same; UI hides card fields when `NEXT_PUBLIC_PAYMENT_PROVIDER=*-hpp` |
-| Callback signatures verified | **CODE** | `bankfulCallback.ts`, IPN route tests |
-| Amount/currency verified (cents) | **CODE** | `money.ts` + IPN mismatch → `review_required` |
-| Callback replay tests pass | **CODE** | `payment_events` uniqueness + IPN idempotency test |
-| S2S transaction reconciliation | **OPS** / partial | Callback-authenticated reconcile works; set `BANKFUL_STATUS_TRANSACTION_TYPE` after Bankful confirms STATUS type |
+| Stripe account can accept card payments | **OPS** | Activate Stripe; enable card methods in Dashboard |
+| Production uses `stripe` | **CODE** | `productionReadiness.ts` + payment factory reject mock/on-site capture |
+| Direct card entry disabled in production | **CODE** | UI hides card fields for hosted Stripe Checkout |
+| Webhook signatures verified | **CODE** | Stripe-Signature on `/api/payments/stripe/webhook` |
+| Amount/currency verified (cents) | **CODE** | `money.ts` + webhook mismatch → `review_required` |
+| Callback replay tests pass | **CODE** | `payment_events` uniqueness + webhook idempotency test |
+| S2S transaction reconciliation | **CODE** | Webhook retrieves Checkout Session from Stripe API |
 | Pending reservations expire | **CODE** | Cron `/api/cron/expire-reservations` + reservation RPCs |
 | Decline/cancel release inventory once | **CODE** | IPN + expire paths; tests |
 | Production fails closed without Supabase | **CODE** | `assertProductionCheckoutReady` + checkout 503 |
@@ -41,16 +41,16 @@ Scope: evidence-backed status for [PRODUCTION_LAUNCH_CHECKLIST.md](../.cursor/md
 
 | Item | Status | Notes |
 |------|--------|-------|
-| Bankful merchant account / catalog approval | **OPS** | |
-| Sandbox credentials tested | **OPS** | |
-| Live credentials configured | **OPS** | |
-| `PAYMENT_PROVIDER=bankful-hpp` | **CODE** enforced; **OPS** to set in Vercel | |
+| Stripe account / card payments enabled | **OPS** | |
+| Test-mode Checkout completed | **OPS** | Card `4242…4242` |
+| Live keys + webhook endpoint | **OPS** | |
+| `PAYMENT_PROVIDER=stripe` | **CODE** enforced; **OPS** to set in Vercel | |
 | Direct card-capture disabled | **CODE** | |
 | Signature verification | **CODE** | |
-| S2S reconciliation | **OPS** to confirm STATUS type | |
+| S2S reconciliation | **CODE** | Retrieve Checkout Session on webhook |
 | Amount/currency checks | **CODE** | |
 | Duplicate callback tests | **CODE** | |
-| Refund + cancellation tests | **CODE** | Admin refund route tests + outbox/IPN coverage |
+| Refund + cancellation tests | **CODE** | Admin refund route tests + Stripe refunds |
 
 ---
 
@@ -117,7 +117,7 @@ Scope: evidence-backed status for [PRODUCTION_LAUNCH_CHECKLIST.md](../.cursor/md
 | Secrets reviewed | **OPS** | No secrets in `NEXT_PUBLIC_*` except public URL/provider/Supabase URL |
 | Backup and recovery tested | **OPS** | Supabase backups |
 | Policies reviewed | **OPS** | Privacy, terms, shipping, refunds |
-| No prohibited health claims | **OPS** | Content review before Bankful / launch |
+| No prohibited health claims | **OPS** | Content review before launch |
 
 ---
 
@@ -131,7 +131,7 @@ Scope: evidence-backed status for [PRODUCTION_LAUNCH_CHECKLIST.md](../.cursor/md
 | Confirmation email arrives | **OPS** |
 | Refund succeeds + email | **OPS** |
 | Inventory restocks per policy | **OPS** |
-| Bankful dashboard matches internal order | **OPS** |
+| Stripe dashboard matches internal order | **OPS** |
 
 ---
 
@@ -141,9 +141,9 @@ Copy from README; verify via authenticated `GET /api/readiness`:
 
 - [ ] `NODE_ENV` / Vercel production
 - [ ] `NEXT_PUBLIC_SITE_URL`
-- [ ] `PAYMENT_PROVIDER=bankful-hpp`
-- [ ] `NEXT_PUBLIC_PAYMENT_PROVIDER=bankful-hpp`
-- [ ] `BANKFUL_*` (+ optional `BANKFUL_STATUS_TRANSACTION_TYPE`)
+- [ ] `PAYMENT_PROVIDER=stripe`
+- [ ] `NEXT_PUBLIC_PAYMENT_PROVIDER=stripe`
+- [ ] `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET`
 - [ ] `ORDER_STORE=supabase`
 - [ ] `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`
 - [ ] `ADMIN_TOKEN` + `ADMIN_SESSION_SECRET`
@@ -190,13 +190,13 @@ CI: `.github/workflows/ci.yml` (lint → vitest → build → Playwright).
 
 | Criterion | Met in code? |
 |-----------|----------------|
-| Bankful HPP only live card-entry path | Yes (enforced) |
-| Payment approval authenticated + reconciled | Yes (STATUS type ops) |
+| Stripe Checkout only live card-entry path | Yes (enforced) |
+| Payment approval authenticated + reconciled | Yes (webhook + Session retrieve) |
 | Reservations cannot stick forever | Yes (expire cron) |
 | Callback replay cannot duplicate side effects | Yes |
 | Paid orders durable if email fails | Yes (outbox) |
 | Production fails closed | Yes |
 | Taxes calculated server-side | Yes (TaxJar) |
-| Critical paths have automated tests | Yes (gaps: live Bankful) |
+| Critical paths have automated tests | Yes (gaps: live Stripe) |
 | Admin authenticated + audited | Yes (MFA optional) |
 | Live transaction + refund tested | **No — OPS** |

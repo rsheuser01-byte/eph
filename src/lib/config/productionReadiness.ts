@@ -64,39 +64,37 @@ export function assessProductionConfig(
 
   requireNonEmpty(
     "NEXT_PUBLIC_SITE_URL",
-    "Canonical site URL is required for HPP return/callback URLs.",
+    "Canonical site URL is required for Stripe Checkout return URLs.",
     issues,
   );
 
   const paymentProvider = env("PAYMENT_PROVIDER").toLowerCase() || "mock";
-  if (paymentProvider !== "bankful-hpp") {
+  if (paymentProvider !== "stripe") {
     issues.push({
       key: "PAYMENT_PROVIDER",
       message:
-        "Production checkout requires PAYMENT_PROVIDER=bankful-hpp (mock and direct card capture are disabled).",
+        "Production checkout requires PAYMENT_PROVIDER=stripe (mock and on-site card capture are disabled).",
       severity: "error",
     });
   }
 
   const publicPayment = env("NEXT_PUBLIC_PAYMENT_PROVIDER").toLowerCase();
-  if (publicPayment && publicPayment !== "bankful-hpp") {
+  if (publicPayment && publicPayment !== "stripe") {
     issues.push({
       key: "NEXT_PUBLIC_PAYMENT_PROVIDER",
-      message:
-        "NEXT_PUBLIC_PAYMENT_PROVIDER should be bankful-hpp in production.",
+      message: "NEXT_PUBLIC_PAYMENT_PROVIDER should be stripe in production.",
       severity: "error",
     });
   }
 
   requireNonEmpty(
-    "BANKFUL_API_BASE_URL",
-    "Bankful API base URL is required.",
+    "STRIPE_SECRET_KEY",
+    "Stripe secret key is required (prefer a restricted key).",
     issues,
   );
-  requireNonEmpty("BANKFUL_USERNAME", "Bankful username is required.", issues);
   requireNonEmpty(
-    "BANKFUL_PASSWORD",
-    "Bankful password is required for gateway auth and HPP callback signature verification.",
+    "STRIPE_WEBHOOK_SECRET",
+    "Stripe webhook signing secret is required.",
     issues,
   );
 
@@ -175,15 +173,6 @@ export function assessProductionConfig(
     "Upstash Redis token is required for durable rate limits.",
     issues,
   );
-
-  if (!env("BANKFUL_STATUS_TRANSACTION_TYPE")) {
-    issues.push({
-      key: "BANKFUL_STATUS_TRANSACTION_TYPE",
-      message:
-        "STATUS lookup is not configured; expiration will skip pending orders that already have a transaction id.",
-      severity: "warning",
-    });
-  }
 
   const errors = issues.filter((issue) => issue.severity === "error");
   return { ok: errors.length === 0, issues };

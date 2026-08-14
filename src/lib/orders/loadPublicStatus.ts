@@ -4,6 +4,7 @@ import {
   publicStatusFromPayment,
   type PublicOrderStatus,
 } from "@/lib/orders/publicStatus";
+import { confirmStripePaidOrder } from "@/lib/payments/confirmStripePaidOrder";
 
 export async function loadPublicOrderStatus(
   orderId: string,
@@ -12,10 +13,28 @@ export async function loadPublicOrderStatus(
   if (!orderId || !token) {
     return null;
   }
-  const order = await getOrderStore().get(orderId);
+  const store = getOrderStore();
+  let order = await store.get(orderId);
   if (!order || !lookupTokensEqual(order.lookupToken, token)) {
     return null;
   }
+
+  if (
+    order.paymentStatus === "pending" &&
+    order.provider === "stripe" &&
+    order.transactionId?.startsWith("cs_")
+  ) {
+    try {
+      await confirmStripePaidOrder(order.orderId);
+      order = (await store.get(orderId)) ?? order;
+    } catch (error) {
+      console.error("[stripe] return-path confirm failed", {
+        orderId,
+        message: error instanceof Error ? error.message : "unknown",
+      });
+    }
+  }
+
   return publicStatusFromPayment(
     order.orderId,
     order.paymentStatus,

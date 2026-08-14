@@ -6,13 +6,13 @@ import {
 } from "./trustSignals";
 
 describe("trustSignals", () => {
-  it("includes the supplied legal entity, Louisville address, and BoHai Peptide partner", () => {
+  it("includes the supplied legal entity, city, and BoHai Peptide partner", () => {
     expect(trustSignals.legalEntityName).toBe("Elevate Precision Health LLC");
-    expect(trustSignals.streetAddress).toBe("3801 Billtown Rd");
+    expect(trustSignals.streetAddress).toBeNull();
     expect(trustSignals.postOfficeBoxNumber).toBeNull();
     expect(trustSignals.addressLocality).toBe("Louisville");
     expect(trustSignals.addressRegion).toBe("KY");
-    expect(trustSignals.postalCode).toBe("40299");
+    expect(trustSignals.postalCode).toBeNull();
     expect(trustSignals.testingLabName).toBe("BoHai Peptide");
     expect(trustSignals.testingLabUrl).toBe("https://www.bohaipeptide.com/");
     expect(trustSignals.telephone).toBeNull();
@@ -20,19 +20,19 @@ describe("trustSignals", () => {
     expect(trustSignals.companyStatement).toContain("dependable research products");
   });
 
-  it("formats the public address and meets the minimum trust gate", () => {
-    expect(formatAddressLine()).toBe(
-      "3801 Billtown Rd Louisville, KY 40299",
-    );
-    expect(hasMinimumTrustSignals()).toBe(true);
+  it("omits a public street address until one is supplied", () => {
+    expect(formatAddressLine()).toBeNull();
+    expect(hasMinimumTrustSignals()).toBe(false);
   });
 
-  it("prepends PO Box only when a box number is set", () => {
+  it("prepends PO Box only when a box number and street are set", () => {
     expect(
       formatAddressLine({
         ...trustSignals,
+        streetAddress: "1 Main St",
+        postalCode: "40202",
         postOfficeBoxNumber: "12345",
       }),
-    ).toBe("PO Box 12345, 3801 Billtown Rd Louisville, KY 40299");
+    ).toBe("PO Box 12345, 1 Main St Louisville, KY 40202");
   });
 });

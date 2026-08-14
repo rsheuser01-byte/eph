@@ -114,7 +114,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [],
   );
 
-  const clear = useCallback(() => setLines([]), []);
+  const clear = useCallback(() => {
+    setLines([]);
+    try {
+      // Write immediately so a full-page return from Stripe/mock HPP cannot
+      // rehydrate the old cart from localStorage after clear() in the same tick.
+      window.localStorage.removeItem(STORAGE_KEY);
+    } catch {
+      // Ignore storage failures (private mode, quota, etc.).
+    }
+  }, []);
   const openCart = useCallback(() => setIsOpen(true), []);
   const closeCart = useCallback(() => setIsOpen(false), []);
 

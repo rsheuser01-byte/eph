@@ -11,21 +11,13 @@ import {
 const BASE = "https://www.elevateprecisionhealth.com";
 
 describe("organizationSchema", () => {
-  it("includes legal name, Louisville address, logo, and email contactPoint", () => {
+  it("includes legal name, logo, and email contactPoint without a street address", () => {
     expect(organizationSchema(BASE)).toMatchObject({
       "@type": "Organization",
       name: site.name,
       legalName: "Elevate Precision Health LLC",
       email: site.email,
       logo: `${BASE}/images/logo-header-transparent.png`,
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "3801 Billtown Rd",
-        addressLocality: "Louisville",
-        addressRegion: "KY",
-        postalCode: "40299",
-        addressCountry: "US",
-      },
       contactPoint: {
         "@type": "ContactPoint",
         contactType: "customer support",
@@ -35,9 +27,7 @@ describe("organizationSchema", () => {
     });
     expect(organizationSchema(BASE)).not.toHaveProperty("telephone");
     expect(organizationSchema(BASE)).not.toHaveProperty("sameAs");
-    expect(
-      (organizationSchema(BASE).address as Record<string, unknown>),
-    ).not.toHaveProperty("postOfficeBoxNumber");
+    expect(organizationSchema(BASE)).not.toHaveProperty("address");
   });
 });
 

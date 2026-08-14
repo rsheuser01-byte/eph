@@ -79,6 +79,22 @@ async function sendOnce(
   }
 }
 
+class PermanentOutboxError extends Error {
+  readonly permanent = true as const;
+}
+
+function requireOrder(
+  order: OrderRecord | null,
+  orderId: string,
+): OrderRecord {
+  if (!order) {
+    throw new PermanentOutboxError(
+      `Order ${orderId} not found for outbox event`,
+    );
+  }
+  return order;
+}
+
 async function handleOrderPaid(
   event: OutboxEventRecord,
   deps: Required<
@@ -89,10 +105,7 @@ async function handleOrderPaid(
   >,
 ): Promise<void> {
   const orderId = String(event.payload.orderId ?? event.aggregateId);
-  const order = await deps.orderStore.get(orderId);
-  if (!order) {
-    throw new Error(`Order ${orderId} not found for outbox event`);
-  }
+  const order = requireOrder(await deps.orderStore.get(orderId), orderId);
 
   const emailData = orderEmailData(order);
   await sendOnce(
@@ -118,10 +131,7 @@ async function handleOrderShipped(
   >,
 ): Promise<void> {
   const orderId = String(event.payload.orderId ?? event.aggregateId);
-  const order = await deps.orderStore.get(orderId);
-  if (!order) {
-    throw new Error(`Order ${orderId} not found for outbox event`);
-  }
+  const order = requireOrder(await deps.orderStore.get(orderId), orderId);
 
   await sendOnce(
     deps.emailDeliveries,
@@ -146,10 +156,7 @@ async function handleOrderRefunded(
   if (!orderId) {
     throw new Error("order.refunded payload missing orderId");
   }
-  const order = await deps.orderStore.get(orderId);
-  if (!order) {
-    throw new Error(`Order ${orderId} not found for outbox event`);
-  }
+  const order = requireOrder(await deps.orderStore.get(orderId), orderId);
 
   const refundedAmount = Number(event.payload.refundedAmount ?? 0);
   const totalRefunded = Number(
@@ -178,10 +185,7 @@ async function handleOrderCancelled(
   >,
 ): Promise<void> {
   const orderId = String(event.payload.orderId ?? event.aggregateId);
-  const order = await deps.orderStore.get(orderId);
-  if (!order) {
-    throw new Error(`Order ${orderId} not found for outbox event`);
-  }
+  const order = requireOrder(await deps.orderStore.get(orderId), orderId);
 
   await sendOnce(
     deps.emailDeliveries,
@@ -281,19 +285,29 @@ export async function processOutbox(
       result.completed += 1;
     } catch (error) {
       const message = error instanceof Error ? error.message : "unknown";
-      log("outbox_event_failed", {
-        id: event.id,
-        eventType: event.eventType,
-        aggregateId: event.aggregateId,
-        attempts: event.attempts,
-        message,
-      });
+      const permanent = error instanceof PermanentOutboxError;
 
-      if (event.attempts >= OUTBOX_MAX_ATTEMPTS) {
+      if (permanent || event.attempts >= OUTBOX_MAX_ATTEMPTS) {
         await outbox.markFailed(event.id, message);
-        await alertFailedOutbox(event, message, send, emailDeliveries);
+        if (!permanent) {
+          log("outbox_event_failed", {
+            id: event.id,
+            eventType: event.eventType,
+            aggregateId: event.aggregateId,
+            attempts: event.attempts,
+            message,
+          });
+          await alertFailedOutbox(event, message, send, emailDeliveries);
+        }
         result.failed += 1;
       } else {
+        log("outbox_event_failed", {
+          id: event.id,
+          eventType: event.eventType,
+          aggregateId: event.aggregateId,
+          attempts: event.attempts,
+          message,
+        });
         await outbox.markRetry(event.id, message, event.attempts);
         result.retried += 1;
       }

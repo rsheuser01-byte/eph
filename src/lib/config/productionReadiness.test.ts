@@ -10,11 +10,10 @@ import {
 function stubProductionEnv(overrides: Record<string, string> = {}) {
   vi.stubEnv("NODE_ENV", "production");
   vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://example.com");
-  vi.stubEnv("PAYMENT_PROVIDER", "bankful-hpp");
-  vi.stubEnv("NEXT_PUBLIC_PAYMENT_PROVIDER", "bankful-hpp");
-  vi.stubEnv("BANKFUL_API_BASE_URL", "https://api.paybybankful.com");
-  vi.stubEnv("BANKFUL_USERNAME", "user");
-  vi.stubEnv("BANKFUL_PASSWORD", "pass");
+  vi.stubEnv("PAYMENT_PROVIDER", "stripe");
+  vi.stubEnv("NEXT_PUBLIC_PAYMENT_PROVIDER", "stripe");
+  vi.stubEnv("STRIPE_SECRET_KEY", "rk_test_123");
+  vi.stubEnv("STRIPE_WEBHOOK_SECRET", "whsec_test");
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://proj.supabase.co");
   vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-key");
   vi.stubEnv("ORDER_STORE", "supabase");
@@ -77,8 +76,8 @@ describe("productionReadiness", () => {
     ).toBe(true);
   });
 
-  it("fails closed when direct bankful card capture is configured", () => {
-    stubProductionEnv({ PAYMENT_PROVIDER: "bankful" });
+  it("fails closed when Bankful HPP is configured in production", async () => {
+    stubProductionEnv({ PAYMENT_PROVIDER: "bankful-hpp" });
     const result = assessProductionConfig();
     expect(result.ok).toBe(false);
     expect(
@@ -110,7 +109,7 @@ describe("productionReadiness", () => {
   });
 
   it("assertProductionCheckoutReady throws a customer-safe error", () => {
-    stubProductionEnv({ BANKFUL_PASSWORD: "" });
+    stubProductionEnv({ STRIPE_SECRET_KEY: "" });
     expect(() => assertProductionCheckoutReady()).toThrow(
       ProductionConfigurationError,
     );
@@ -120,7 +119,7 @@ describe("productionReadiness", () => {
       expect(error).toBeInstanceOf(ProductionConfigurationError);
       const typed = error as ProductionConfigurationError;
       expect(typed.message).toBe(publicCheckoutUnavailableMessage);
-      expect(typed.issues.some((i) => i.key === "BANKFUL_PASSWORD")).toBe(true);
+      expect(typed.issues.some((i) => i.key === "STRIPE_SECRET_KEY")).toBe(true);
     }
   });
 
@@ -140,15 +139,13 @@ describe("productionReadiness", () => {
     ).toBe(true);
   });
 
-  it("warns when STATUS lookup is unset but does not block checkout", () => {
-    stubProductionEnv({ BANKFUL_STATUS_TRANSACTION_TYPE: "" });
+  it("fails closed when Stripe webhook secret is missing", () => {
+    stubProductionEnv({ STRIPE_WEBHOOK_SECRET: "" });
     const result = assessProductionConfig();
-    expect(result.ok).toBe(true);
+    expect(result.ok).toBe(false);
     expect(
       result.issues.some(
-        (i) =>
-          i.key === "BANKFUL_STATUS_TRANSACTION_TYPE" &&
-          i.severity === "warning",
+        (i) => i.key === "STRIPE_WEBHOOK_SECRET" && i.severity === "error",
       ),
     ).toBe(true);
   });

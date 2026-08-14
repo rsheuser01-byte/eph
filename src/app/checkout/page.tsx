@@ -6,6 +6,10 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import { useCart } from "@/lib/cart/CartContext";
 import { formatUSD, orderTotals } from "@/lib/checkout/pricing";
 import { researchUseAttestationText } from "@/data/site";
+import {
+  StripeCheckoutCtaTrust,
+  StripeCheckoutTrust,
+} from "@/components/checkout/StripeCheckoutTrust";
 
 const inputClass =
   "w-full border border-line bg-panel px-4 py-3 text-sm text-ink placeholder:text-ink-soft/60 focus:border-accent focus:outline-none";
@@ -59,8 +63,11 @@ function CheckoutForm() {
   );
   const baseTotals = orderTotals(subtotal);
   const provider = (process.env.NEXT_PUBLIC_PAYMENT_PROVIDER ?? "mock").toLowerCase();
-  const requiresCard = provider !== "bankful-hpp" && provider !== "mock-hpp";
-  const isHosted = !requiresCard;
+  const isStripe = provider === "stripe";
+  const isTestHosted = provider === "mock-hpp";
+  const isHosted =
+    isStripe || isTestHosted || provider === "bankful-hpp";
+  const requiresCard = !isHosted;
 
   const [form, setForm] = useState(initialForm);
   const [researchAck, setResearchAck] = useState(false);
@@ -325,6 +332,13 @@ function CheckoutForm() {
       <h1 className="font-display mt-4 text-4xl font-semibold tracking-tight text-ink sm:text-6xl">
         Complete your order
       </h1>
+      {isTestHosted ? (
+        <p className="mt-6 max-w-2xl border border-accent/40 bg-accent/10 px-4 py-3 text-sm leading-relaxed text-ink">
+          Test checkout is on for this machine. Stripe keys are not configured,
+          so payment is simulated and you will not be sent to Stripe. No card
+          is charged and no confirmation email is sent.
+        </p>
+      ) : null}
 
       <form
         onSubmit={handleSubmit}
@@ -470,15 +484,7 @@ function CheckoutForm() {
               </div>
             </section>
           ) : (
-            <section>
-              <h2 className="font-display text-2xl font-semibold tracking-tight text-ink">
-                Secure payment
-              </h2>
-              <p className="mt-4 text-sm leading-relaxed text-ink-soft">
-                Payment opens in a secure Bankful hosted page. Card details are
-                entered there — not on this site.
-              </p>
-            </section>
+            <StripeCheckoutTrust preview={isTestHosted} />
           )}
 
           <label className="flex items-start gap-3 text-sm leading-relaxed text-ink-soft">
@@ -630,10 +636,14 @@ function CheckoutForm() {
                 : `Pay ${formatUSD(displayTotal)}`}
           </button>
           {isHosted ? (
-            <p className="mt-4 text-[0.7rem] leading-relaxed text-ink-soft/80">
-              You will complete payment on Bankful’s secure page, then return
-              here for order status.
-            </p>
+            <>
+              <StripeCheckoutCtaTrust />
+              <p className="mt-4 text-[0.7rem] leading-relaxed text-ink-soft/80">
+                {isTestHosted
+                  ? "Test mode: this button confirms the order locally and does not open Stripe."
+                  : "You will complete payment on Stripe’s secure page, then return here for order status."}
+              </p>
+            </>
           ) : (
             <p className="mt-4 text-[0.7rem] leading-relaxed text-ink-soft/80">
               Research use only. By ordering you certify these materials are for

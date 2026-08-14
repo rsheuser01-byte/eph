@@ -1,21 +1,20 @@
 # Store — remaining work
 
-Follow-ups to take the Bankful checkout store from working demo to production.
+Follow-ups to take the Stripe checkout store from working demo to production.
 Ordered roughly by priority.
 
 ## Payments / go-live
-- [ ] Obtain Bankful **sandbox** credentials; set `PAYMENT_PROVIDER=bankful` (or
-      `bankful-hpp`) + `BANKFUL_USERNAME` / `BANKFUL_PASSWORD` and re-test.
-- [ ] Complete Bankful **live** merchant onboarding; swap `BANKFUL_API_BASE_URL`
-      to `https://api.paybybankful.com` and use live credentials.
-- [x] **Hosted Payment Page (HPP)** provider (`bankful-hpp` / `mock-hpp`) +
-      IPN at `/api/payments/bankful/ipn`. Prefer HPP for production (SAQ A).
-- [x] IPN signature verification, amount/currency reconciliation (cents),
+- [ ] Set Stripe **test** keys (`STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`) and
+      `PAYMENT_PROVIDER=stripe` / `NEXT_PUBLIC_PAYMENT_PROVIDER=stripe`; complete a
+      test Checkout (card `4242 4242 4242 4242`).
+- [ ] Register production webhook `{SITE}/api/payments/stripe/webhook` for
+      Checkout Session events; switch to **live** keys before taking real orders.
+- [x] **Stripe Checkout** hosted provider (`stripe`) + webhook at
+      `/api/payments/stripe/webhook`. Hosted page keeps PCI scope at SAQ A.
+- [x] Webhook signature verification, amount/currency reconciliation (cents),
       callback idempotency via `payment_events`, and `review_required` on mismatch.
-- [ ] Confirm Bankful **STATUS/query** `transaction_type` with merchant docs and
-      set `BANKFUL_STATUS_TRANSACTION_TYPE` for full server-to-server lookup.
-- [x] Refunds / cancellations — admin refund action + Bankful `REFUND`/`CANCEL`
-      (and mock). Restock when fulfillment is still `unfulfilled`.
+- [x] Refunds / cancellations — admin refund action + Stripe refunds (and mock).
+      Restock when fulfillment is still `unfulfilled`.
 
 ## Catalog / pricing
 - [ ] Replace PLACEHOLDER variant prices/sizes in `src/data/products.ts`

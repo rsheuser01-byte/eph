@@ -152,7 +152,7 @@ export const termsSections: TermsSection[] = [
         "Prices are listed in U.S. dollars unless otherwise stated and may change at any time before we accept an order. Applicable sales tax and shipping charges are calculated at checkout where required.",
       ],
       [
-        "Payment is processed through our checkout flow and, when applicable, a Bankful-hosted payment page. We do not store full payment-card numbers on our servers. Card data is handled by the payment provider under its own terms and security controls.",
+        "Payment is processed through our checkout flow and, when applicable, a Stripe-hosted checkout page. We do not store full payment-card numbers on our servers. Card data is handled by the payment provider under its own terms and security controls.",
       ],
       [
         "You authorize us and our payment processor to charge the payment method you provide for the order total, including taxes and shipping. Failed, reversed, or disputed payments may result in order hold, cancellation, or collection of amounts owed to the extent permitted by law.",

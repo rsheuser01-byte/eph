@@ -31,24 +31,21 @@ Cart-based checkout with a swappable payment provider (`src/lib/payments`).
 Create `web/.env.local` with:
 
 ```bash
-# Canonical site URL (no trailing slash) — required for HPP return URLs + SEO
+# Canonical site URL (no trailing slash) — required for Stripe return URLs + SEO
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 
-# Payment: "mock" | "mock-hpp" | "bankful" | "bankful-hpp"
-PAYMENT_PROVIDER=mock
-# Mirror the provider for the checkout UI (hides on-site card fields for *-hpp)
-NEXT_PUBLIC_PAYMENT_PROVIDER=mock
+# Payment: "mock" | "mock-hpp" | "stripe"
+PAYMENT_PROVIDER=stripe
+# Mirror the provider for the checkout UI (hides on-site card fields for hosted checkout)
+NEXT_PUBLIC_PAYMENT_PROVIDER=stripe
 
-# Bankful gateway (bankful / bankful-hpp)
-# Sandbox: https://api-dev1.bankfulportal.com | Live: https://api.paybybankful.com
-BANKFUL_API_BASE_URL=https://api-dev1.bankfulportal.com
-BANKFUL_USERNAME=
-BANKFUL_PASSWORD=
-# Optional: confirmed STATUS/query transaction_type for server-to-server lookup.
-# Leave empty to reconcile from signature-authenticated HPP callbacks (fail closed
-# if neither STATUS type nor authenticated callback is available).
-# TODO: confirm exact value with Bankful merchant docs before enabling in production.
-# BANKFUL_STATUS_TRANSACTION_TYPE=
+# Stripe (required in production). Prefer a restricted key (rk_) over sk_.
+# Dashboard: https://dashboard.stripe.com/apikeys
+STRIPE_SECRET_KEY=
+# Webhook signing secret for POST /api/payments/stripe/webhook
+# Events: checkout.session.completed, checkout.session.async_payment_succeeded,
+# checkout.session.async_payment_failed, checkout.session.expired
+STRIPE_WEBHOOK_SECRET=
 
 # Order confirmation emails: "console" (default) or "resend"
 EMAIL_PROVIDER=console
@@ -115,6 +112,17 @@ ACTIVEPIECES_WEBHOOK_SECRET=
 ACTIVEPIECES_NEWSLETTER_WEBHOOK=
 ```
 
+Local/dev without Stripe keys: `PAYMENT_PROVIDER=mock-hpp` (Playwright default). Card fields stay off-site; checkout completes via the mock hosted helper.
+
+### Stripe webhook (production)
+
+1. In [Stripe Developers → Webhooks](https://dashboard.stripe.com/webhooks), add endpoint `{NEXT_PUBLIC_SITE_URL}/api/payments/stripe/webhook`.
+2. Subscribe to `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, and `checkout.session.expired`.
+3. Set `STRIPE_WEBHOOK_SECRET` to the endpoint signing secret (`whsec_...`).
+4. Use test-mode keys (`rk_test_` / `sk_test_`) until the first live order; then switch to live keys and a live webhook endpoint.
+
+Local forwarding (optional): `stripe listen --forward-to localhost:3000/api/payments/stripe/webhook`.
+
 ### Marketing / newsletter email
 
 - Homepage newsletter popup (after age gate + 5s): sitewide, viewport-centered at the bottom; posts to `/api/newsletter`, which forwards `{ email, firstName, source: "website_newsletter" }` to `ACTIVEPIECES_NEWSLETTER_WEBHOOK` (server-only — never exposed to the browser).
@@ -129,7 +137,7 @@ ACTIVEPIECES_NEWSLETTER_WEBHOOK=
 - SQL migrations: [`supabase/migrations/`](./supabase/migrations/).
 - Import local JSON history: `npx tsx scripts/import-orders-json.ts` (with Supabase env set).
 - Admin: `/admin/login` → `/admin/orders` (ship / fulfill / refund / resend emails) and `/admin/inventory` (receive / adjust).
-- Inventory: checkout creates **active reservations** (does not decrement on-hand until payment is verified). Available qty = on hand − active reservations. Call `/api/cron/expire-reservations` with `CRON_SECRET` to expire abandoned HPP checkouts.
+- Inventory: checkout creates **active reservations** (does not decrement on-hand until payment is verified). Available qty = on hand − active reservations. Call `/api/cron/expire-reservations` with `CRON_SECRET` to expire abandoned Stripe Checkout sessions.
 - Vercel Cron: Hobby allows **once per day** only. `vercel.json` schedules expire-reservations at 06:00 UTC and process-outbox at 07:00 UTC. Upgrade to Pro (or trigger the routes manually) for the original every-15m / every-5m cadence.
 - Legacy RPCs `reserve_stock` / `release_stock` remain for compatibility; new flow uses `create_inventory_reservations` / `commit_inventory_reservations` / `release_inventory_reservations`.
 
@@ -137,8 +145,8 @@ ACTIVEPIECES_NEWSLETTER_WEBHOOK=
 
 In `NODE_ENV=production` (or `VERCEL_ENV=production`), checkout returns **503** unless:
 
-- `PAYMENT_PROVIDER=bankful-hpp` (mock / direct card capture blocked)
-- Bankful credentials + `NEXT_PUBLIC_SITE_URL`
+- `PAYMENT_PROVIDER=stripe` (mock / on-site card capture blocked)
+- `STRIPE_SECRET_KEY` + `STRIPE_WEBHOOK_SECRET` + `NEXT_PUBLIC_SITE_URL`
 - Supabase URL + service role + `ORDER_STORE=supabase`
 - Resend email config
 - TaxJar (`TAX_PROVIDER=taxjar`, token, origin state/ZIP)
@@ -154,9 +162,8 @@ Probes:
 
 ### Durable paid-order side effects
 
-- Approving payment enqueues an `order.paid` outbox event (does not send email inline).
-- Marking an order **shipped** (with tracking) enqueues `order.shipped`; refunds enqueue `order.refunded`; cancel enqueues `order.cancelled`.
-- `GET/POST /api/cron/process-outbox` (Bearer `CRON_SECRET`) sends emails with idempotent `email_deliveries` keys and retries with backoff.
+- Approving payment enqueues an `order.paid` outbox event and **sends the confirmation immediately** (same request). Shipped / refunded / cancelled emails do the same.
+- `GET/POST /api/cron/process-outbox` (Bearer `CRON_SECRET`) is a retry backup: idempotent `email_deliveries` keys and backoff if the immediate send fails.
 - After max attempts, the event is marked `failed` and the store receives an alert email.
 - Admins can intentionally resend confirmation or shipping emails via `/api/admin/orders/[orderId]/resend-email`.
 
@@ -164,19 +171,19 @@ Probes:
 
 - Success URL alone never proves payment. `/checkout/success` loads status from the database using `order` + opaque `token`.
 - Pending payments poll `GET /api/orders/[orderId]/status?token=…`.
-- Hosted checkout CTA: **Continue to secure payment**. Failed/cancelled Bankful returns keep the cart and explain no charge was confirmed.
+- Hosted checkout CTA: **Continue to secure payment**. Failed/cancelled Stripe returns keep the cart and explain no charge was confirmed.
 
 ### Sales tax
 
 - Server quotes tax via TaxJar (`TAX_PROVIDER=taxjar`) using the shipping address; client-supplied tax is ignored.
 - Checkout UI calls `POST /api/checkout/tax` for a live estimate; final charge uses a fresh quote at `POST /api/checkout`.
-- Orders persist `tax`, `tax_provider`, and jurisdiction summary. Bankful amount = subtotal + shipping + tax.
+- Orders persist `tax`, `tax_provider`, and jurisdiction summary. Stripe amount = subtotal + shipping + tax − discount.
 - Tax failures return a safe 503 — never silently charge $0 tax in production.
 - Configure nexus/product tax codes with a tax advisor; optional `TAX_PRODUCT_TAX_CODE` applies a default TaxJar product code.
 
 ### Security, rate limits, and audit
 
-- Durable rate limits via Upstash Redis (memory fallback locally). Applied to checkout, order status, admin login, Bankful IPN (generous), refunds, inventory, and fulfillment.
+- Durable rate limits via Upstash Redis (memory fallback locally). Applied to checkout, order status, admin login, Stripe webhooks (generous), refunds, inventory, and fulfillment.
 - Admin actions write to `admin_audit_log` (or `.data/admin_audit_log.json`) with hashed IPs — never raw addresses.
 - Security headers: CSP, `X-Frame-Options`, `nosniff`, Referrer-Policy; HSTS in production.
 - Critical payment/ops events email the store (cooldown) and optionally emit to Sentry when `SENTRY_DSN` is set.
@@ -190,10 +197,11 @@ Probes:
 
 ### Payments
 
-- `mock` / `bankful`: on-site card capture (PCI SAQ D for live Bankful direct).
-- `bankful-hpp` / `mock-hpp`: redirect to hosted payment; IPN at `/api/payments/bankful/ipn`. Prefer HPP for production.
-- IPN callbacks require a valid Bankful HMAC signature (`BANKFUL_PASSWORD`), reconcile amount/currency in integer cents against the stored order, and persist idempotent rows in `payment_events` (or `.data/payment_events.json` when `ORDER_STORE=file`).
+- `stripe` (production): redirect to Stripe-hosted Checkout; webhook at `/api/payments/stripe/webhook`.
+- `mock-hpp` (local/E2E): redirect to a local hosted-payment helper.
+- `mock`: on-site card capture for local experiments only (blocked in production).
+- Webhooks require a valid `Stripe-Signature`, retrieve the Checkout Session from Stripe, reconcile amount/currency in integer cents against the stored order, and persist idempotent rows in `payment_events`.
 - Forged, unsigned, or amount/currency-mismatched callbacks cannot approve an order.
-- Refunds: admin **Refund** on an approved order calls Bankful `REFUND` (or mock). Restocks when fulfillment is still `unfulfilled`.
+- Refunds: admin **Refund** on an approved order calls Stripe Refunds (or mock). Restocks when fulfillment is still `unfulfilled`.
 
 See [TODO.md](./TODO.md) for remaining production tasks. See [IMPLEMENTATION_STATUS.md](./IMPLEMENTATION_STATUS.md) for the hardening phase map. See [LAUNCH_READINESS.md](./LAUNCH_READINESS.md) for Phase 10 go-live checklist status (CODE / OPS / BLOCKED) and sign-off.

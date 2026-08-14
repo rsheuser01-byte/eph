@@ -111,6 +111,8 @@ export const RATE_LIMITS = {
   checkout: { limit: 20, windowMs: 10 * 60_000 },
   orderStatus: { limit: 60, windowMs: 60_000 },
   adminLogin: { limit: 10, windowMs: 15 * 60_000 },
+  /** Generous: Stripe may retry webhook deliveries. */
+  stripeWebhook: { limit: 120, windowMs: 60_000 },
   /** Generous: Bankful may retry bursts. */
   bankfulIpn: { limit: 120, windowMs: 60_000 },
   adminRefund: { limit: 30, windowMs: 10 * 60_000 },
