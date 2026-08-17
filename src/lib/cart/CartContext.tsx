@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import {
@@ -19,6 +20,7 @@ import {
   updateQty,
 } from "./cart";
 import type { CartLine, ResolvedCartLine } from "./types";
+import { scheduleAbandonedCartSync } from "@/lib/abandonedCart/clientSync";
 
 const STORAGE_KEY = "eph-cart";
 
@@ -31,6 +33,7 @@ type CartContextValue = {
   add: (slug: string, size: string, qty?: number, maxQty?: number) => void;
   setQty: (slug: string, size: string, qty: number, maxQty?: number) => void;
   remove: (slug: string, size: string) => void;
+  replace: (next: CartLine[]) => void;
   clear: () => void;
   clampToAvailability: (
     availability: Record<string, number | null>,
@@ -68,6 +71,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const hasSyncedRef = useRef(false);
 
   useEffect(() => {
     setLines(readStored());
@@ -82,6 +86,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lines));
     } catch {
       // Ignore storage failures (private mode, quota, etc.).
+    }
+    if (lines.length > 0) {
+      hasSyncedRef.current = true;
+      scheduleAbandonedCartSync(lines);
+      return;
+    }
+    if (hasSyncedRef.current) {
+      scheduleAbandonedCartSync(lines);
     }
   }, [lines, hydrated]);
 
@@ -102,6 +114,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const remove = useCallback((slug: string, size: string) => {
     setLines((current) => removeLine(current, slug, size));
+  }, []);
+
+  const replace = useCallback((next: CartLine[]) => {
+    setLines(sanitizeLines(next));
   }, []);
 
   const clampToAvailability = useCallback(
@@ -137,6 +153,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       add,
       setQty,
       remove,
+      replace,
       clear,
       clampToAvailability,
       openCart,
@@ -148,6 +165,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       add,
       setQty,
       remove,
+      replace,
       clear,
       clampToAvailability,
       openCart,

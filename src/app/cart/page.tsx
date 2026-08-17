@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { CartLineQtyControls } from "@/components/CartLineQtyControls";
 import { CartSuggest } from "@/components/CartSuggest";
 import { useCart } from "@/lib/cart/CartContext";
@@ -11,6 +12,27 @@ import {
   formatUSD,
   orderTotals,
 } from "@/lib/checkout/pricing";
+
+function CartRestoreNotice() {
+  const searchParams = useSearchParams();
+  const notice = searchParams.get("notice");
+  if (notice === "unavailable") {
+    return (
+      <p className="mt-8 border border-line bg-panel px-4 py-3 text-sm text-ink">
+        Some saved items are no longer available. We restored everything we
+        could, with current catalog prices.
+      </p>
+    );
+  }
+  if (notice === "restored") {
+    return (
+      <p className="mt-8 border border-line bg-panel px-4 py-3 text-sm text-ink">
+        Your saved cart has been restored. Prices reflect the current catalog.
+      </p>
+    );
+  }
+  return null;
+}
 
 export default function CartPage() {
   const { resolved, subtotal, setQty, remove, clampToAvailability } = useCart();
@@ -40,6 +62,10 @@ export default function CartPage() {
           ← Keep shopping
         </Link>
       </div>
+
+      <Suspense fallback={null}>
+        <CartRestoreNotice />
+      </Suspense>
 
       {resolved.length === 0 ? (
         <div className="mt-14 border-t border-line pt-14">

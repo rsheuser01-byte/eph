@@ -39,8 +39,9 @@ export default function PrivacyPage() {
       <h2>How we use information</h2>
       <p>
         Information is used to respond to inquiries, fulfill research orders,
-        send transactional notices (such as order, shipping, or restock
-        emails), improve the website, and meet legal obligations. If you
+        send transactional notices (such as order, shipping, restock, or
+        saved-cart reminder emails), improve the website, and meet legal
+        obligations. If you
         provide a mobile number and expressly consent to SMS/text messages, we
         may use that number for the message types described in our{" "}
         <a href="/terms#electronic-communications">Terms</a> (for example order
@@ -53,10 +54,21 @@ export default function PrivacyPage() {
         messages or by contacting{" "}
         <a href={`mailto:${site.email}`}>{site.email}</a>. For marketing SMS,
         you may reply STOP or email us with your number and a stop request.
-        Transactional messages about orders or requests you initiated may still
-        be sent by email when needed to complete the transaction or support
-        request. See the Terms section on electronic communications for more
-        detail.
+        Transactional messages about orders, incomplete checkout, or requests
+        you initiated may still be sent by email when needed to complete the
+        transaction or support request. Saved-cart reminder emails include an
+        unsubscribe link. See the Terms section on electronic communications
+        for more detail.
+      </p>
+      <h2>Cookies</h2>
+      <p>
+        We use a small number of first-party cookies that are required for the
+        site to work. The shopping-cart session cookie (
+        <code>eph_cart_sid</code>) stores an opaque identifier so we can save
+        your cart if you leave checkout. It does not contain your email, name,
+        or other contact details. An admin session cookie is used only after
+        staff sign in. We do not use advertising or third-party tracking
+        cookies, so we do not show a marketing-cookie consent banner.
       </p>
       <h2>Contact</h2>
       <p>

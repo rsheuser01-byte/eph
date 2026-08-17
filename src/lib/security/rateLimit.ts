@@ -130,6 +130,14 @@ export const RATE_LIMITS = {
   addressSuggest: { limit: 60, windowMs: 60_000 },
   /** Google address confirmation on checkout. */
   addressValidate: { limit: 40, windowMs: 10 * 60_000 },
+  /** Silent saved-cart upserts as the shopper edits the cart. */
+  abandonedCartSync: { limit: 60, windowMs: 60_000 },
+  /** Checkout email identification (debounced client-side). */
+  abandonedCartIdentify: { limit: 30, windowMs: 10 * 60_000 },
+  /** Restore-token redemption. */
+  abandonedCartRestore: { limit: 20, windowMs: 10 * 60_000 },
+  /** Activepieces status/data lookups. */
+  abandonedCartApi: { limit: 60, windowMs: 60_000 },
 } as const;
 
 export function resetMemoryRateLimits(): void {

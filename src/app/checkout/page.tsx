@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useCart } from "@/lib/cart/CartContext";
+import {
+  identifyAbandonedCartNow,
+  scheduleAbandonedCartIdentify,
+} from "@/lib/abandonedCart/clientSync";
 import { formatUSD, orderTotals } from "@/lib/checkout/pricing";
 import { researchUseAttestationText } from "@/data/site";
 import {
@@ -96,6 +100,10 @@ function CheckoutForm() {
       setError(fromQuery);
     }
   }, [searchParams]);
+
+  useEffect(() => {
+    scheduleAbandonedCartIdentify(form.email, form.firstName, catalogItems);
+  }, [form.email, form.firstName, catalogItems]);
 
   useEffect(() => {
     const addressReady =
@@ -369,6 +377,13 @@ function CheckoutForm() {
                 required
                 value={form.firstName}
                 onChange={(e) => update("firstName", e.target.value)}
+                onBlur={() =>
+                  identifyAbandonedCartNow(
+                    form.email,
+                    form.firstName,
+                    catalogItems,
+                  )
+                }
               />
               <input
                 className={inputClass}
@@ -386,6 +401,13 @@ function CheckoutForm() {
                 required
                 value={form.email}
                 onChange={(e) => update("email", e.target.value)}
+                onBlur={() =>
+                  identifyAbandonedCartNow(
+                    form.email,
+                    form.firstName,
+                    catalogItems,
+                  )
+                }
               />
               <input
                 className={inputClass}

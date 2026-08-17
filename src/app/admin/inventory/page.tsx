@@ -58,6 +58,13 @@ export default async function AdminInventoryPage() {
             <Link href="/admin/orders" className="link-underline text-ink-soft">
               ← Orders
             </Link>
+            {" · "}
+            <Link
+              href="/admin/abandoned-carts"
+              className="link-underline text-ink-soft"
+            >
+              Abandoned carts →
+            </Link>
           </p>
         </div>
         <AdminLogoutButton />

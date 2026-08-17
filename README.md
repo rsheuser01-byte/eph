@@ -114,6 +114,11 @@ ACTIVEPIECES_WEBHOOK_URL=
 ACTIVEPIECES_WEBHOOK_SECRET=
 # Homepage newsletter popup → Activepieces (server-only webhook URL)
 ACTIVEPIECES_NEWSLETTER_WEBHOOK=
+# Abandoned-cart recovery (server-only). Leave unset to skip webhook delivery
+# while still persisting saved carts locally / in Supabase.
+ACTIVEPIECES_ABANDONED_CART_WEBHOOK_URL=
+# Bearer secret for GET /api/abandoned-cart/{publicId} and .../status
+ACTIVEPIECES_CART_API_SECRET=
 ```
 
 Local/dev without Stripe keys: `PAYMENT_PROVIDER=mock-hpp` (Playwright default). Card fields stay off-site; checkout completes via the mock hosted helper.
@@ -130,6 +135,7 @@ Local forwarding (optional): `stripe listen --forward-to localhost:3000/api/paym
 ### Marketing / newsletter email
 
 - Homepage newsletter popup (after age gate + 5s): sitewide, viewport-centered at the bottom; posts to `/api/newsletter`, which forwards `{ email, firstName, source: "website_newsletter" }` to `ACTIVEPIECES_NEWSLETTER_WEBHOOK` (server-only — never exposed to the browser).
+- Abandoned-cart recovery: adding items persists a server-side saved cart (HttpOnly `eph_cart_sid` cookie). Entering email at checkout identifies the cart and POSTs `checkout_identified` to `ACTIVEPIECES_ABANDONED_CART_WEBHOOK_URL`. Activepieces should wait, then `GET /api/abandoned-cart/{publicId}/status` and `GET /api/abandoned-cart/{publicId}` with `Authorization: Bearer ACTIVEPIECES_CART_API_SECRET` before sending email. Restore links are `/cart/restore/<token>`. Paid orders mark the cart converted.
 - Legacy Resend path still available at `/api/newsletter/subscribe` (contact + `eph-newsletter-welcome` template) if you need it for ops scripts.
 - Preview welcome email HTML: `npm run preview:welcome-email` → `tmp/sample-welcome-email.html`
 - Sync/publish Resend template `eph-newsletter-welcome`: `npm run sync:resend-welcome` (requires `RESEND_API_KEY` + `MARKETING_EMAIL_FROM`)
@@ -140,7 +146,7 @@ Local forwarding (optional): `stripe listen --forward-to localhost:3000/api/paym
 - Set `ORDER_STORE=supabase` plus Supabase env vars for durable orders on Vercel.
 - SQL migrations: [`supabase/migrations/`](./supabase/migrations/).
 - Import local JSON history: `npx tsx scripts/import-orders-json.ts` (with Supabase env set).
-- Admin: `/admin/login` → `/admin/orders` (ship / fulfill / refund / resend emails) and `/admin/inventory` (receive / adjust).
+- Admin: `/admin/login` → `/admin/orders` (ship / fulfill / refund / resend emails), `/admin/abandoned-carts`, and `/admin/inventory` (receive / adjust).
 - Inventory: checkout creates **active reservations** (does not decrement on-hand until payment is verified). Available qty = on hand − active reservations. Call `/api/cron/expire-reservations` with `CRON_SECRET` to expire abandoned Stripe Checkout sessions.
 - Vercel Cron: Hobby allows **once per day** only. `vercel.json` schedules expire-reservations at 06:00 UTC and process-outbox at 07:00 UTC. Upgrade to Pro (or trigger the routes manually) for the original every-15m / every-5m cadence.
 - Legacy RPCs `reserve_stock` / `release_stock` remain for compatibility; new flow uses `create_inventory_reservations` / `commit_inventory_reservations` / `release_inventory_reservations`.

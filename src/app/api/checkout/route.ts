@@ -25,6 +25,9 @@ import {
 } from "@/lib/config/productionReadiness";
 import { enqueueOrderPaid } from "@/lib/outbox/enqueue";
 import { generateLookupToken } from "@/lib/orders/publicStatus";
+import { parseCartLineInputs } from "@/lib/abandonedCart/parseRequest";
+import { readCartSessionToken } from "@/lib/abandonedCart/cookie";
+import { linkSavedCartToCheckout } from "@/lib/abandonedCart/service";
 import {
   getPromoStore,
   proportionallyDiscountedUnitPrices,
@@ -296,6 +299,20 @@ export async function POST(request: Request) {
         taxJurisdiction: taxQuote.jurisdiction,
       }),
     );
+
+    try {
+      await linkSavedCartToCheckout({
+        sessionToken: readCartSessionToken(request),
+        email: billing.email,
+        firstName: billing.firstName,
+        lines: parseCartLineInputs(body.items),
+        orderId,
+      });
+    } catch (error) {
+      console.error("[abandoned-cart] checkout link failed", {
+        error: error instanceof Error ? error.name : "unknown",
+      });
+    }
 
     try {
       await createReservations(stockItems, orderId, expiresAt);

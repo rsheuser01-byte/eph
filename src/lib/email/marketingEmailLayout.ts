@@ -32,6 +32,11 @@ export type MarketingEmailLayout = {
    * Preview scripts may pass a safe example URL.
    */
   unsubscribeUrl?: string;
+  /**
+   * Footer sentence explaining why the recipient received the email.
+   * Defaults to the newsletter subscribe copy.
+   */
+  footerReason?: string;
 };
 
 function unsubscribeHref(url: string): string {
@@ -42,14 +47,19 @@ function unsubscribeHref(url: string): string {
   return escapeEmailHtml(url);
 }
 
+const DEFAULT_FOOTER_REASON =
+  "You received this message because you subscribed to Elevate Precision Health news and product updates.";
+
 /** Plain-text marketing footer (no transactional “Questions about your order?”). */
 export function marketingEmailFooterText(options?: {
   unsubscribeUrl?: string;
+  footerReason?: string;
 }): string {
   const support = getSupportEmail();
   const url = getEmailPublicSiteUrl();
   const unsubscribe =
     options?.unsubscribeUrl ?? RESEND_UNSUBSCRIBE_URL_PLACEHOLDER;
+  const reason = options?.footerReason ?? DEFAULT_FOOTER_REASON;
 
   return [
     site.name,
@@ -58,7 +68,7 @@ export function marketingEmailFooterText(options?: {
     "",
     "Research use only. Not for human or veterinary use.",
     "",
-    "You received this message because you subscribed to Elevate Precision Health news and product updates.",
+    reason,
     `Unsubscribe: ${unsubscribe}`,
   ].join("\n");
 }
@@ -83,6 +93,9 @@ export function wrapMarketingEmailHtml(layout: MarketingEmailLayout): string {
   const unsubscribeUrl =
     layout.unsubscribeUrl ?? RESEND_UNSUBSCRIBE_URL_PLACEHOLDER;
   const unsubscribeLink = unsubscribeHref(unsubscribeUrl);
+  const footerReason = escapeEmailHtml(
+    layout.footerReason ?? DEFAULT_FOOTER_REASON,
+  );
 
   return `<!doctype html>
 <html lang="en">
@@ -133,7 +146,7 @@ ${previewText}
               <a href="${siteUrl}" style="color:${BRAND.accent};text-decoration:none;">${siteUrlLabel}</a>
             </p>
             <p style="margin:0 0 8px;">Research use only. Not for human or veterinary use.</p>
-            <p style="margin:0 0 8px;">You received this message because you subscribed to Elevate Precision Health news and product updates.</p>
+            <p style="margin:0 0 8px;">${footerReason}</p>
             <p style="margin:0;">
               <a href="${unsubscribeLink}">Unsubscribe</a>
             </p>

@@ -1,5 +1,6 @@
 import { processOutbox } from "./processOutbox";
 import { getOutboxStore } from "./store";
+import { markSavedCartConvertedSafe } from "@/lib/abandonedCart/service";
 import {
   ORDER_CANCELLED_EVENT,
   ORDER_PAID_EVENT,
@@ -24,6 +25,7 @@ async function flushOutbox(): Promise<void> {
  * Safe to call multiple times for the same order (unique on event_type+aggregate_id).
  */
 export async function enqueueOrderPaid(orderId: string): Promise<void> {
+  await markSavedCartConvertedSafe(orderId);
   const store = getOutboxStore();
   await store.enqueue({
     eventType: ORDER_PAID_EVENT,

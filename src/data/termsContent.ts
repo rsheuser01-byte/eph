@@ -282,7 +282,7 @@ export const termsSections: TermsSection[] = [
         `By providing an email address, phone number, or other contact details on the site (including checkout, contact forms, or restock notifications), you agree that ${legalName} may communicate with you electronically. These communications may include transactional messages and, where permitted and where you have consented, promotional messages.`,
       ],
       [
-        "Transactional and service emails. We may email you about your orders, payment status, shipping and tracking, returns or claims, restock requests you submit, account or compliance questions, and other messages needed to complete a transaction or respond to you. You cannot opt out of certain transactional emails while a purchase or support matter is open, though you may use a different contact method when we offer one.",
+        "Transactional and service emails. We may email you about your orders, payment status, shipping and tracking, returns or claims, restock requests you submit, incomplete checkout or saved-cart reminders related to a purchase you started, account or compliance questions, and other messages needed to complete a transaction or respond to you. You cannot opt out of certain transactional emails while a purchase or support matter is open, though you may use a different contact method when we offer one.",
       ],
       [
         "Promotional email. If you subscribe to updates or otherwise consent to marketing email, we may send catalog, restock, or promotional messages. You may unsubscribe using the link in those emails or by contacting ",

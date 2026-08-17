@@ -6,8 +6,8 @@ import type { Product } from "@/data/products";
  * never stamp "today" on every deploy.
  */
 export const legalPagesUpdatedOn = {
-  privacy: "2026-08-05",
-  terms: "2026-08-05",
+  privacy: "2026-08-17",
+  terms: "2026-08-17",
   refunds: "2026-07-31",
 } as const;
 
