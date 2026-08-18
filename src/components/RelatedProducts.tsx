@@ -48,7 +48,7 @@ export function RelatedProducts({
                     alt={productImageAlt(item.product)}
                     fill
                     sizes="(max-width: 639px) 128px, 160px"
-                    className="object-contain p-0.5 sm:p-1"
+                    className="object-contain object-center scale-[1.35]"
                   />
                 ) : null}
               </Link>

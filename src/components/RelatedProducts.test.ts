@@ -45,6 +45,13 @@ describe("RelatedProducts wiring", () => {
     expect(component).not.toMatch(/ProductCard/);
   });
 
+  it("zooms related packshots into the vial instead of showing full-canvas padding", () => {
+    expect(component).toMatch(/overflow-hidden/);
+    expect(component).toMatch(/scale-\[1\.35\]/);
+    expect(component).toMatch(/object-contain object-center/);
+    expect(component).not.toMatch(/object-contain p-0\.5/);
+  });
+
   it("surfaces research documentation links instead of administration kits", () => {
     expect(component).toMatch(/RELATED_RESOURCE_LINKS/);
     expect(component).toMatch(/Research documentation/);
