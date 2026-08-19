@@ -1,10 +1,12 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { PaymentStatus } from "@/lib/orders/types";
 import {
   buildTrustpilotInvitation,
   createTrustpilotInvitationOnce,
   type TrustpilotInvitation,
 } from "./invitation";
+
+const SITE = "https://www.elevateprecisionhealth.com";
 
 const baseOrder = {
   orderId: "EPH-1001",
@@ -14,9 +16,9 @@ const baseOrder = {
     email: "ada@example.com",
   },
   items: [
-    { sku: "GLP-3-10" },
-    { sku: "GLP-3-10" },
-    { sku: "NAD-500" },
+    { sku: "GLP-3-10MG", name: "GLP-3", size: "10mg" },
+    { sku: "GLP-3-10MG", name: "GLP-3", size: "10mg" },
+    { sku: "NAD-500MG", name: "NAD+", size: "500mg" },
   ],
 };
 
@@ -32,13 +34,33 @@ function invitationFor(
 }
 
 describe("buildTrustpilotInvitation", () => {
-  it("builds a Trustpilot service invitation after payment is approved", () => {
+  afterEach(() => {
+    vi.unstubAllEnvs();
+  });
+
+  it("builds service and product review invitations after payment is approved", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", SITE);
+
     expect(invitationFor("approved")).toEqual({
       recipientEmail: "ada@example.com",
       recipientName: "Ada Lovelace",
       referenceId: "EPH-1001",
       source: "InvitationScript",
-      productSkus: ["GLP-3-10", "NAD-500"],
+      productSkus: ["GLP-3-10MG", "NAD-500MG"],
+      products: [
+        {
+          sku: "GLP-3-10MG",
+          productUrl: `${SITE}/products/glp-3`,
+          imageUrl: `${SITE}/products/glp-3-10mg.png`,
+          name: "GLP-3",
+        },
+        {
+          sku: "NAD-500MG",
+          productUrl: `${SITE}/products/nad`,
+          imageUrl: `${SITE}/products/nad-500mg.png`,
+          name: "NAD+",
+        },
+      ],
     } satisfies TrustpilotInvitation);
   });
 
@@ -61,13 +83,22 @@ describe("buildTrustpilotInvitation", () => {
     ).toBeNull();
   });
 
-  it("omits productSkus when the order has none", () => {
+  it("omits product fields when the order has no line items", () => {
     expect(invitationFor("approved", { items: [] })).toEqual({
       recipientEmail: "ada@example.com",
       recipientName: "Ada Lovelace",
       referenceId: "EPH-1001",
       source: "InvitationScript",
     });
+  });
+
+  it("keeps SKUs that are not in the catalog without inventing product URLs", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", SITE);
+    const invitation = invitationFor("approved", {
+      items: [{ sku: "UNKNOWN-SKU", name: "Mystery", size: "1mg" }],
+    });
+    expect(invitation?.productSkus).toEqual(["UNKNOWN-SKU"]);
+    expect(invitation?.products).toBeUndefined();
   });
 });
 

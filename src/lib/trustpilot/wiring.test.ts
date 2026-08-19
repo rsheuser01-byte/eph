@@ -40,6 +40,8 @@ describe("Trustpilot review invitation wiring", () => {
     expect(source("src/app/api/orders/[orderId]/status/route.ts")).toMatch(
       /reviewInvitation/,
     );
+    expect(source("src/lib/trustpilot/invitation.ts")).toMatch(/productUrl/);
+    expect(source("src/lib/trustpilot/invitation.ts")).toMatch(/productSkus/);
   });
 
   it("discloses Trustpilot review invitations in the privacy policy", () => {

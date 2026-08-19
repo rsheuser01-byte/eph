@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { OrderRecord } from "@/lib/orders/types";
+import { getSiteUrl } from "@/lib/seo/siteUrl";
 import { loadPublicOrderStatus } from "./loadPublicStatus";
 
 const order: OrderRecord = {
@@ -9,7 +10,7 @@ const order: OrderRecord = {
   status: "pending",
   paymentStatus: "pending",
   fulfillmentStatus: "unfulfilled",
-  items: [{ sku: "GLP-3-10", name: "GLP-3", size: "10mg", qty: 1, unitPrice: 10 }],
+  items: [{ sku: "GLP-3-10MG", name: "GLP-3", size: "10mg", qty: 1, unitPrice: 10 }],
   subtotal: 10,
   shipping: 0,
   tax: 0,
@@ -73,6 +74,7 @@ describe("loadPublicOrderStatus", () => {
     order.paymentStatus = "approved";
     order.status = "approved";
     try {
+      const siteUrl = getSiteUrl();
       const status = await loadPublicOrderStatus(
         "ord_status_1",
         order.lookupToken!,
@@ -82,7 +84,15 @@ describe("loadPublicOrderStatus", () => {
         recipientName: "A B",
         referenceId: "ord_status_1",
         source: "InvitationScript",
-        productSkus: ["GLP-3-10"],
+        productSkus: ["GLP-3-10MG"],
+        products: [
+          {
+            sku: "GLP-3-10MG",
+            productUrl: `${siteUrl}/products/glp-3`,
+            imageUrl: `${siteUrl}/products/glp-3-10mg.png`,
+            name: "GLP-3",
+          },
+        ],
       });
     } finally {
       order.paymentStatus = previous;
