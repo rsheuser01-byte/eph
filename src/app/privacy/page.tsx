@@ -60,6 +60,18 @@ export default function PrivacyPage() {
         unsubscribe link. See the Terms section on electronic communications
         for more detail.
       </p>
+      <h2>Reviews</h2>
+      <p>
+        After a paid order, we may share your name, email address, order
+        reference, and product SKUs with Trustpilot so Trustpilot can email
+        you an optional invitation to review our ordering and support. We do
+        not invent reviews. Trustpilot processes that invitation under its own
+        terms and{" "}
+        <a href="https://legal.trustpilot.com/end-user-privacy-terms">
+          privacy terms
+        </a>
+        .
+      </p>
       <h2>Cookies</h2>
       <p>
         We use a small number of first-party cookies that are required for the
@@ -67,8 +79,9 @@ export default function PrivacyPage() {
         <code>eph_cart_sid</code>) stores an opaque identifier so we can save
         your cart if you leave checkout. It does not contain your email, name,
         or other contact details. An admin session cookie is used only after
-        staff sign in. We do not use advertising or third-party tracking
-        cookies, so we do not show a marketing-cookie consent banner.
+        staff sign in. We do not use advertising cookies. After a paid order,
+        the checkout confirmation page loads Trustpilot’s invitation script,
+        which may set its own cookies to send the review invite.
       </p>
       <h2>Contact</h2>
       <p>

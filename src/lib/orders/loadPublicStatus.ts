@@ -5,6 +5,7 @@ import {
   type PublicOrderStatus,
 } from "@/lib/orders/publicStatus";
 import { confirmStripePaidOrder } from "@/lib/payments/confirmStripePaidOrder";
+import { buildTrustpilotInvitation } from "@/lib/trustpilot/invitation";
 
 export async function loadPublicOrderStatus(
   orderId: string,
@@ -35,9 +36,14 @@ export async function loadPublicOrderStatus(
     }
   }
 
-  return publicStatusFromPayment(
+  const status = publicStatusFromPayment(
     order.orderId,
     order.paymentStatus,
     order.fulfillmentStatus,
   );
+  const reviewInvitation = buildTrustpilotInvitation(order);
+  if (!reviewInvitation) {
+    return status;
+  }
+  return { ...status, reviewInvitation };
 }

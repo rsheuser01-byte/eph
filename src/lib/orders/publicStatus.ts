@@ -1,5 +1,6 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import type { FulfillmentStatus, PaymentStatus } from "@/lib/orders/types";
+import type { TrustpilotInvitation } from "@/lib/trustpilot/invitation";
 
 export type PublicOrderStatus = {
   orderId: string;
@@ -9,6 +10,8 @@ export type PublicOrderStatus = {
   message: string;
   /** True when the client should keep polling. */
   poll: boolean;
+  /** Token-gated Trustpilot invite fields for the order owner after payment. */
+  reviewInvitation?: TrustpilotInvitation;
 };
 
 export function generateLookupToken(): string {

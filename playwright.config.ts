@@ -16,6 +16,7 @@ const e2eEnv: Record<string, string> = {
   GOOGLE_MAPS_API_KEY: "",
   // Force inventory soft-skip so catalog is purchasable without seeded stock.
   NEXT_PUBLIC_SUPABASE_URL: "",
+  NEXT_PUBLIC_TRUSTPILOT_INVITE_KEY: "off",
   SUPABASE_SERVICE_ROLE_KEY: "",
 };
 

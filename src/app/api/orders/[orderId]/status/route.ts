@@ -16,7 +16,8 @@ type RouteContext = {
 
 /**
  * Customer-facing order status. Requires opaque lookup token.
- * Returns only non-sensitive fields.
+ * Omits billing address and payment details. After payment, may include
+ * the order owner's email/name for a Trustpilot review invitation.
  */
 export async function GET(request: Request, context: RouteContext) {
   const limited = await checkRateLimit(
@@ -46,6 +47,9 @@ export async function GET(request: Request, context: RouteContext) {
       headline: status.headline,
       message: status.message,
       poll: status.poll,
+      ...(status.reviewInvitation
+        ? { reviewInvitation: status.reviewInvitation }
+        : {}),
     },
     { headers },
   );

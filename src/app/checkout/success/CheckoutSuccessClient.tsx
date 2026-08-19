@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { TrustpilotInvite } from "@/components/TrustpilotInvite";
 import { useCart } from "@/lib/cart/CartContext";
 import type { PublicOrderStatus } from "@/lib/orders/publicStatus";
 
@@ -93,9 +94,16 @@ export function CheckoutSuccessClient({ orderId, token, initial }: Props) {
       <p className="mt-6 max-w-lg text-sm leading-relaxed text-ink-soft">
         {status.message}
       </p>
+      {status.reviewInvitation ? (
+        <p className="mt-4 max-w-lg text-sm leading-relaxed text-ink-soft">
+          Trustpilot may email you a short, optional invitation to review our
+          ordering and support. That review is hosted by Trustpilot.
+        </p>
+      ) : null}
       {status.poll ? (
         <p className="mt-4 text-sm text-ink-soft">Checking for updates…</p>
       ) : null}
+      <TrustpilotInvite invitation={status.reviewInvitation} />
       <p className="mt-8 text-sm text-ink-soft">
         Order reference:{" "}
         <span className="font-semibold tracking-[0.12em] text-ink">

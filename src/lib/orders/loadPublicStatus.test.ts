@@ -9,7 +9,7 @@ const order: OrderRecord = {
   status: "pending",
   paymentStatus: "pending",
   fulfillmentStatus: "unfulfilled",
-  items: [],
+  items: [{ sku: "GLP-3-10", name: "GLP-3", size: "10mg", qty: 1, unitPrice: 10 }],
   subtotal: 10,
   shipping: 0,
   tax: 0,
@@ -65,5 +65,28 @@ describe("loadPublicOrderStatus", () => {
       headline: "Payment processing",
       poll: true,
     });
+    expect(status?.reviewInvitation).toBeUndefined();
+  });
+
+  it("includes a Trustpilot invitation payload after payment is approved", async () => {
+    const previous = order.paymentStatus;
+    order.paymentStatus = "approved";
+    order.status = "approved";
+    try {
+      const status = await loadPublicOrderStatus(
+        "ord_status_1",
+        order.lookupToken!,
+      );
+      expect(status?.reviewInvitation).toEqual({
+        recipientEmail: "a@b.com",
+        recipientName: "A B",
+        referenceId: "ord_status_1",
+        source: "InvitationScript",
+        productSkus: ["GLP-3-10"],
+      });
+    } finally {
+      order.paymentStatus = previous;
+      order.status = previous;
+    }
   });
 });

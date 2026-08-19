@@ -105,6 +105,10 @@ CRON_SECRET=
 # (falls back to CRON_SECRET when unset)
 READINESS_SECRET=
 
+# Trustpilot JavaScript invitations (post-purchase review emails).
+# Unset = use the issued public integration key. Set to "off" to disable.
+# NEXT_PUBLIC_TRUSTPILOT_INVITE_KEY=jZ3C9TiKXWvbgpiv
+
 # Activepieces marketing automation (optional — not wired to orders yet)
 # Leave MARKETING_AUTOMATION_ENABLED unset/false until ready. When "true",
 # ACTIVEPIECES_WEBHOOK_URL and ACTIVEPIECES_WEBHOOK_SECRET are required.

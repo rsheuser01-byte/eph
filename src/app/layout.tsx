@@ -7,6 +7,7 @@ import { NewsletterSignupPopup } from "@/components/NewsletterSignupPopup";
 import { JsonLd } from "@/components/JsonLd";
 import { SiteFooter } from "@/components/SiteFooter";
 import { SiteHeader } from "@/components/SiteHeader";
+import { TrustpilotScript } from "@/components/TrustpilotScript";
 import { site } from "@/data/site";
 import {
   canEmitReviewSchema,
@@ -70,6 +71,9 @@ export default function RootLayout({
       className={`${sora.variable} ${syne.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <TrustpilotScript />
+      </head>
       <body className="flex min-h-screen flex-col antialiased">
         <Script
           id="js-ready"
