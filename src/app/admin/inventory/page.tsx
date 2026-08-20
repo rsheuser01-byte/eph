@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { products } from "@/data/products";
+import { productDisplayName, products } from "@/data/products";
 import { requireAdminSession } from "@/lib/admin/auth";
 import { listInventory, listMovements } from "@/lib/inventory";
 import { AdminInventoryAdjust } from "@/components/AdminInventoryAdjust";
@@ -18,7 +18,7 @@ function productLabel(sku: string): string {
   for (const product of products) {
     const variant = product.variants.find((item) => item.sku === sku);
     if (variant) {
-      return `${product.name} · ${variant.size}`;
+      return `${productDisplayName(product)} · ${variant.size}`;
     }
   }
   return sku;
@@ -36,7 +36,7 @@ export default async function AdminInventoryPage() {
   const catalogRows = products.flatMap((product) =>
     product.variants.map((variant) => ({
       sku: variant.sku,
-      label: `${product.name} · ${variant.size}`,
+      label: `${productDisplayName(product)} · ${variant.size}`,
       quantityOnHand: bySku.get(variant.sku)?.quantityOnHand ?? 0,
       quantityAvailable: bySku.get(variant.sku)?.quantityAvailable ?? 0,
     })),

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useState } from "react";
-import type { Product } from "@/data/products";
+import { productDisplayName, type Product } from "@/data/products";
 import { ProductAssaySignals } from "@/components/ProductAssaySignals";
 import { ProductResearchUseNotice } from "@/components/ProductResearchUseNotice";
 import { RestockNotifyForm } from "@/components/RestockNotifyForm";
@@ -50,7 +50,7 @@ export function ProductPurchase({
     <div className="mt-14">
       <p className="label">{product.category}</p>
       <h1 className="font-display mt-4 text-5xl font-semibold tracking-tight text-ink sm:text-7xl">
-        {product.name}
+        {productDisplayName(product)}
       </h1>
       <ProductResearchUseNotice className="mt-6 max-w-xl" />
       <p className="mt-5 text-xs uppercase tracking-[0.18em] text-ink-soft">
@@ -124,7 +124,7 @@ export function ProductPurchase({
             <RestockNotifyForm
               key={variant.sku}
               productSlug={product.slug}
-              productName={product.name}
+              productName={productDisplayName(product)}
               sku={variant.sku}
               size={variant.size}
             />
@@ -184,10 +184,11 @@ export function ProductPurchase({
               item.image ? (
                 <Image
                   key={item.sku}
-                  src={item.image}
-                  alt={`${product.name} ${item.size} research vial`}
+                  src={`${item.image}?v=8`}
+                  alt={`${productDisplayName(product)} ${item.size} research vial`}
                   fill
                   sizes="288px"
+                  unoptimized
                   priority={item.size === size}
                   className={`object-contain object-center p-3 transition-opacity duration-200 ${
                     item.size === size

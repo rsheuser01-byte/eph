@@ -245,6 +245,6 @@ describe("email data", () => {
     expect(data?.email).toBe("ada@example.com");
     expect(data?.restoreUrl).toContain("/cart/restore/");
     expect(data?.restoreUrl).not.toContain("ada@example.com");
-    expect(data?.items[0].name).toBe("GLP-3");
+    expect(data?.items[0].name).toBe("GLP-3 (Retatrutide)");
   });
 });

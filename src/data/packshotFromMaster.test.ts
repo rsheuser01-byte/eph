@@ -124,3 +124,37 @@ describe("derivePackshotFromMaster", () => {
     }
   });
 });
+
+describe("catalog dosage type", () => {
+  it("uses one shared dose size, large enough to read on catalog tiles", async () => {
+    const heights: number[] = [];
+    const tenMgWidths: number[] = [];
+
+    for (const product of products) {
+      for (const variant of product.variants) {
+        const ink = await measureDosageInk(
+          path.join(productsDir, path.basename(variant.image)),
+        );
+        expect(
+          ink.height,
+          `${product.slug} ${variant.size} dosage ${ink.height}px`,
+        ).toBeGreaterThanOrEqual(30);
+        heights.push(ink.height);
+        if (variant.size === "10mg") {
+          tenMgWidths.push(ink.width);
+        }
+      }
+    }
+
+    expect(
+      Math.max(...heights) - Math.min(...heights),
+      `dosage heights ${heights.join(", ")}`,
+    ).toBeLessThanOrEqual(2);
+
+    expect(tenMgWidths.length).toBeGreaterThan(1);
+    expect(
+      Math.max(...tenMgWidths) - Math.min(...tenMgWidths),
+      `"10 mg" widths ${tenMgWidths.join(", ")}`,
+    ).toBeLessThanOrEqual(4);
+  });
+});

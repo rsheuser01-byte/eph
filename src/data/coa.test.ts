@@ -33,6 +33,7 @@ describe("coa registry", () => {
     expect(getCoaForProduct("mots-c")?.href).toBe("/coa/mots-c.pdf");
     expect(getCoaForProduct("wolverine-blend")?.href).toBe("/coa/bpc-157.pdf");
     expect(getCoaForProduct("mt-2")).toBeUndefined();
+    expect(getCoaForProduct("ss-31")).toBeUndefined();
   });
 
   it("exposes both BPC-157 and TB-500 files for Wolverine Blend", () => {
@@ -58,6 +59,9 @@ describe("coa registry", () => {
       "wolverine-blend",
     ]);
     expect(productsWithoutPublishedCoa().some((p) => p.slug === "mt-2")).toBe(
+      true,
+    );
+    expect(productsWithoutPublishedCoa().some((p) => p.slug === "ss-31")).toBe(
       true,
     );
   });

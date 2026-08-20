@@ -36,6 +36,8 @@ describe("relatedProducts map", () => {
     expect(RELATED_PRODUCT_MAP["pt-141"]!.map((e) => e.slug)).toContain("mt-2");
     expect(RELATED_PRODUCT_MAP["glp-3"]!.map((e) => e.slug)).toContain("glp-2");
     expect(RELATED_PRODUCT_MAP["glp-2"]!.map((e) => e.slug)).toContain("glp-3");
+    expect(RELATED_PRODUCT_MAP["ss-31"]!.map((e) => e.slug)).toContain("mots-c");
+    expect(RELATED_PRODUCT_MAP["mots-c"]!.map((e) => e.slug)).toContain("ss-31");
   });
 
   it("never cross-sells BAC Water or other supply diluents", () => {

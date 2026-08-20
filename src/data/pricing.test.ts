@@ -61,5 +61,6 @@ describe("pricing-guide.json", () => {
       ]),
     );
     expect(compounds).not.toContain("PT-141");
+    expect(compounds).not.toContain("SS-31");
   });
 });

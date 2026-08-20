@@ -1,4 +1,5 @@
 import type { Product } from "@/data/products";
+import { productDisplayName } from "@/data/products";
 
 export type ProductSpecSection = {
   id: string;
@@ -14,7 +15,9 @@ export function buildProductSpecSections(
   product: Product,
 ): ProductSpecSection[] {
   const alias = primaryAlias(product);
-  const identityName = alias ? `${product.name} (${alias})` : product.name;
+  const identityName = alias
+    ? productDisplayName({ name: product.name, commonName: alias })
+    : product.name;
 
   return [
     {
@@ -36,6 +39,9 @@ export function buildProductSpecSections(
 }
 
 function primaryAlias(product: Product): string | null {
+  if (product.commonName) {
+    return product.commonName;
+  }
   const synonyms = product.specs.synonyms?.trim();
   if (!synonyms) {
     return null;

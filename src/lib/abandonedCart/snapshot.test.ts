@@ -20,7 +20,7 @@ describe("snapshotCartItems", () => {
       slug: "glp-3",
       size: "15mg",
       sku: variant!.sku,
-      name: "GLP-3",
+      name: "GLP-3 (Retatrutide)",
       quantity: 2,
       unitPrice: variant!.price,
     });

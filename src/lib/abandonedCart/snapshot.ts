@@ -1,4 +1,4 @@
-import { getProductBySlug, getVariant } from "@/data/products";
+import { getProductBySlug, getVariant, productDisplayName } from "@/data/products";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 import { SAVED_CART_CURRENCY } from "./constants";
 import type { CartLineInput, SavedCartItem } from "./types";
@@ -34,7 +34,7 @@ export function snapshotCartItems(lines: CartLineInput[]): {
       slug: product.slug,
       size: variant.size,
       sku: variant.sku,
-      name: product.name,
+      name: productDisplayName(product),
       quantity: qty,
       unitPrice: variant.price,
       imageUrl: absoluteImageUrl(variant.image),

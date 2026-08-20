@@ -4,6 +4,7 @@ import { ProductCardImage } from "@/components/ProductCardImage";
 import { RelatedProductPurchase } from "@/components/RelatedProductPurchase";
 import {
   formatPrice,
+  productDisplayName,
   productImageAlt,
   productPrimaryImage,
   type Product,
@@ -78,7 +79,7 @@ export function ProductCard({
                 : "text-xl"
             }`}
           >
-            {product.name}
+            {productDisplayName(product)}
           </h3>
           {!compact ? (
             <p className="line-clamp-2 text-sm leading-relaxed text-ink-soft">

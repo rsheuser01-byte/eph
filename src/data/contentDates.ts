@@ -23,7 +23,11 @@ export const DEFAULT_PRODUCT_CONTENT_UPDATED_ON = "2026-08-05";
 export const productContentUpdatedOnBySlug: Partial<
   Record<string, string>
 > = {
-  // Example: "glp-3": "2026-08-15",
+  "glp-3": "2026-08-20",
+  "glp-2": "2026-08-20",
+  "mt-2": "2026-08-20",
+  "pt-141": "2026-08-20",
+  "ss-31": "2026-08-20",
 };
 
 export function productContentUpdatedOn(

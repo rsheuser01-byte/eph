@@ -90,7 +90,7 @@ describe("loadPublicOrderStatus", () => {
             sku: "GLP-3-10MG",
             productUrl: `${siteUrl}/products/glp-3`,
             imageUrl: `${siteUrl}/products/glp-3-10mg.png`,
-            name: "GLP-3",
+            name: "GLP-3 (Retatrutide)",
           },
         ],
       });

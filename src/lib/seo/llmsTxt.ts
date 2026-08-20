@@ -1,4 +1,4 @@
-import { products } from "@/data/products";
+import { productDisplayName, products } from "@/data/products";
 import { researchDisclaimer, site } from "@/data/site";
 import { resourcePages } from "@/data/resources";
 
@@ -27,7 +27,7 @@ export function buildLlmsTxt(baseUrl: string): string {
 
   for (const product of products) {
     lines.push(
-      `- [${product.name}](${root}/products/${product.slug}): ${product.shortDescription}`,
+      `- [${productDisplayName(product)}](${root}/products/${product.slug}): ${product.shortDescription}`,
     );
   }
 

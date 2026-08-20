@@ -19,7 +19,7 @@ test.describe("checkout mock-hpp happy path", () => {
 
     // Exact H1 — Phase 3 added several other headings that also contain "GLP-3".
     await expect(
-      page.getByRole("heading", { level: 1, name: "GLP-3", exact: true }),
+      page.getByRole("heading", { level: 1, name: "GLP-3 (Retatrutide)", exact: true }),
     ).toBeVisible();
     // Primary CTA uses btn-arrow (accessible name "Add to cart →"); related products also expose "Add to cart".
     await page.getByRole("button", { name: "Add to cart →" }).click();

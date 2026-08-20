@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { CartLineQtyControls } from "@/components/CartLineQtyControls";
 import { CartSuggest } from "@/components/CartSuggest";
+import { productDisplayName } from "@/data/products";
 import { useCart } from "@/lib/cart/CartContext";
 import { useCartAvailability } from "@/lib/cart/useCartAvailability";
 import { formatUSD, orderTotals } from "@/lib/checkout/pricing";
@@ -95,7 +96,7 @@ export function CartDrawer() {
                 >
                   <div className="flex-1">
                     <p className="font-display text-lg font-semibold tracking-tight text-ink">
-                      {product.name}
+                      {productDisplayName(product)}
                     </p>
                     <p className="mt-1 text-xs uppercase tracking-[0.16em] text-ink-soft">
                       {variant.size} · {formatUSD(variant.price)}

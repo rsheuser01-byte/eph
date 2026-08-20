@@ -1,5 +1,5 @@
 import type { Product } from "@/data/products";
-import { productPriceRange, productPrimaryImage } from "@/data/products";
+import { productDisplayName, productPriceRange, productPrimaryImage } from "@/data/products";
 import { productContentUpdatedOn } from "@/data/contentDates";
 import { site } from "@/data/site";
 import {
@@ -173,7 +173,7 @@ export function faqPageSchema(
  */
 export function catalogItemListSchema(
   baseUrl: string,
-  catalog: ReadonlyArray<Pick<Product, "name" | "slug">>,
+  catalog: ReadonlyArray<Pick<Product, "name" | "slug" | "commonName">>,
 ): JsonLdObject {
   return {
     "@context": "https://schema.org",
@@ -184,7 +184,7 @@ export function catalogItemListSchema(
     itemListElement: catalog.map((product, index) => ({
       "@type": "ListItem",
       position: index + 1,
-      name: product.name,
+      name: productDisplayName(product),
       url: `${baseUrl}/products/${product.slug}`,
     })),
   };
@@ -213,7 +213,7 @@ export function productSchema(
   return {
     "@context": "https://schema.org",
     "@type": "Product",
-    name: product.name,
+    name: productDisplayName(product),
     sku: product.sku,
     description: product.shortDescription,
     category: product.category,

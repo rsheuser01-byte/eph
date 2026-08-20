@@ -28,6 +28,12 @@ export type ProductSpecs = {
 export type Product = {
   slug: string;
   name: string;
+  /**
+   * Short public INN / common name shown next to the catalog code
+   * (e.g. Retatrutide for GLP-3). Omit when the catalog name is already
+   * the recognizable name.
+   */
+  commonName?: string;
   sku: string;
   category: string;
   shortDescription: string;
@@ -51,6 +57,7 @@ export const products: Product[] = [
   {
     slug: "glp-3",
     name: "GLP-3",
+    commonName: "Retatrutide",
     sku: "GLP-3",
     category: "Peptide",
     shortDescription:
@@ -96,6 +103,7 @@ export const products: Product[] = [
   {
     slug: "glp-2",
     name: "GLP-2",
+    commonName: "Tirzepatide",
     sku: "GLP-2",
     category: "Peptide",
     shortDescription:
@@ -167,6 +175,35 @@ export const products: Product[] = [
     },
   },
   {
+    slug: "ss-31",
+    name: "SS-31",
+    commonName: "Elamipretide",
+    sku: "SS31",
+    category: "Peptide",
+    shortDescription:
+      "Mitochondria-targeted tetrapeptide studied in laboratory models of inner-membrane association and cardiolipin-linked assays.",
+    featured: true,
+    variants: [
+      {
+        size: "10mg",
+        price: listPrice("ss-31", "10mg"),
+        sku: "SS31-10MG",
+        image: "/products/ss-31-10mg.png",
+      },
+    ],
+    specs: {
+      form: LYOPHILIZED,
+      researchApplication:
+        "Mitochondria-targeted tetrapeptide studies of inner-membrane association and cardiolipin-linked pathways in vitro.",
+      molecularFormula: "C32H49N9O5",
+      molecularWeight: "639.8 g/mol",
+      sequence: "D-Arg-Dmt-Lys-Phe-NH2",
+      appearance: POWDER_APPEARANCE,
+      storage: LYOPHILIZED_STORAGE,
+      synonyms: "Elamipretide, MTP-131, Bendavia",
+    },
+  },
+  {
     slug: "tesamorelin",
     name: "Tesamorelin",
     sku: "TESA",
@@ -202,6 +239,7 @@ export const products: Product[] = [
   {
     slug: "mt-2",
     name: "MT-2",
+    commonName: "Melanotan",
     sku: "MT2",
     category: "Peptide",
     shortDescription:
@@ -224,12 +262,13 @@ export const products: Product[] = [
       sequence: "Ac-Nle-cyclo[Asp-His-D-Phe-Arg-Trp-Lys]-NH2",
       appearance: POWDER_APPEARANCE,
       storage: LYOPHILIZED_STORAGE,
-      synonyms: "Melanotan II, Melanotan 2",
+      synonyms: "Melanotan, Melanotan II",
     },
   },
   {
     slug: "pt-141",
     name: "PT-141",
+    commonName: "Bremelanotide",
     sku: "PT141",
     category: "Peptide",
     shortDescription:
@@ -390,6 +429,16 @@ export function getProductBySlug(slug: string): Product | undefined {
   return products.find((product) => product.slug === slug);
 }
 
+/** Catalog code plus common name when one is set, e.g. "GLP-3 (Retatrutide)". */
+export function productDisplayName(
+  product: Pick<Product, "name" | "commonName">,
+): string {
+  if (!product.commonName) {
+    return product.name;
+  }
+  return `${product.name} (${product.commonName})`;
+}
+
 export function getVariant(
   product: Product,
   size: string,
@@ -414,10 +463,11 @@ export function productCatalogImage(product: Product): string {
 export function productImageAlt(product: Product): string {
   const size = product.variants[0]?.size;
   const kind = product.category.toLowerCase();
+  const label = productDisplayName(product);
   if (size) {
-    return `${product.name} ${size} research ${kind}`;
+    return `${label} ${size} research ${kind}`;
   }
-  return `${product.name} research ${kind}`;
+  return `${label} research ${kind}`;
 }
 
 /** Ordered rows for the product detail specs table (skips unset optionals). */

@@ -52,7 +52,7 @@ describe("buildTrustpilotInvitation", () => {
           sku: "GLP-3-10MG",
           productUrl: `${SITE}/products/glp-3`,
           imageUrl: `${SITE}/products/glp-3-10mg.png`,
-          name: "GLP-3",
+          name: "GLP-3 (Retatrutide)",
         },
         {
           sku: "NAD-500MG",

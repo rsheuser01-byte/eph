@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { RelatedProductPurchase } from "@/components/RelatedProductPurchase";
 import {
   getProductBySlug,
+  productDisplayName,
   productImageAlt,
   productPrimaryImage,
   type Product,
@@ -118,7 +119,7 @@ export function CartSuggest({ resolved, compact = false }: CartSuggestProps) {
         </div>
         <div className="min-w-0 flex-1">
           <p className="font-display text-base font-semibold tracking-tight text-ink">
-            {product.name}
+            {productDisplayName(product)}
           </p>
           <p className="mt-1 text-sm leading-relaxed text-ink-soft">
             {cartSuggestReason(product.slug)}

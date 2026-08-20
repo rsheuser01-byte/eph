@@ -6,6 +6,7 @@ import {
   getProductBySlug,
   getVariant,
   productCatalogImage,
+  productDisplayName,
   productImageAlt,
   productPriceRange,
   productSpecRows,
@@ -66,12 +67,12 @@ describe("catalog integrity", () => {
     }
   });
 
-  it("features six products including NAD+ and GLOW Blend", () => {
+  it("features seven products including NAD+, GLOW Blend, and SS-31", () => {
     const featured = products.filter((product) => product.featured);
     expect(featured.map((product) => product.slug)).toEqual(
-      expect.arrayContaining(["nad", "glow-blend"]),
+      expect.arrayContaining(["nad", "glow-blend", "ss-31"]),
     );
-    expect(featured).toHaveLength(6);
+    expect(featured).toHaveLength(7);
   });
 });
 
@@ -234,6 +235,24 @@ describe("GLP catalog identities", () => {
   });
 });
 
+describe("SS-31", () => {
+  it("is listed as a featured 10mg elamipretide peptide", () => {
+    const product = getProductBySlug("ss-31");
+    expect(product).toBeDefined();
+    expect(product!.name).toBe("SS-31");
+    expect(product!.category).toBe("Peptide");
+    expect(product!.featured).toBe(true);
+    expect(product!.variants.map((variant) => variant.size)).toEqual(["10mg"]);
+    expect(getVariant(product!, "10mg")?.sku).toBe("SS31-10MG");
+    expect(getVariant(product!, "10mg")?.image).toBe("/products/ss-31-10mg.png");
+    expect(getVariant(product!, "10mg")?.price).toBe(54.99);
+    expect(product!.specs.molecularFormula).toBe("C32H49N9O5");
+    expect(product!.specs.molecularWeight).toBe("639.8 g/mol");
+    expect(product!.specs.sequence).toBe("D-Arg-Dmt-Lys-Phe-NH2");
+    expect(product!.specs.synonyms).toMatch(/Elamipretide/);
+  });
+});
+
 describe("PT-141", () => {
   it("is listed as a 10mg bremelanotide peptide with COA-backed identity fields", () => {
     const product = getProductBySlug("pt-141");
@@ -270,7 +289,35 @@ describe("productImageAlt", () => {
 
   it("matches the audit-style example for a featured peptide", () => {
     expect(productImageAlt(getProductBySlug("glp-3")!)).toBe(
-      "GLP-3 10mg research peptide",
+      "GLP-3 (Retatrutide) 10mg research peptide",
+    );
+  });
+});
+
+describe("productDisplayName", () => {
+  it("puts the common name in parentheses for coded catalog SKUs", () => {
+    expect(productDisplayName(getProductBySlug("glp-3")!)).toBe(
+      "GLP-3 (Retatrutide)",
+    );
+    expect(productDisplayName(getProductBySlug("glp-2")!)).toBe(
+      "GLP-2 (Tirzepatide)",
+    );
+    expect(productDisplayName(getProductBySlug("mt-2")!)).toBe(
+      "MT-2 (Melanotan)",
+    );
+    expect(productDisplayName(getProductBySlug("pt-141")!)).toBe(
+      "PT-141 (Bremelanotide)",
+    );
+    expect(productDisplayName(getProductBySlug("ss-31")!)).toBe(
+      "SS-31 (Elamipretide)",
+    );
+  });
+
+  it("leaves products without a short common name unchanged", () => {
+    expect(productDisplayName(getProductBySlug("nad")!)).toBe("NAD+");
+    expect(productDisplayName(getProductBySlug("mots-c")!)).toBe("MOTS-c");
+    expect(productDisplayName(getProductBySlug("tesamorelin")!)).toBe(
+      "Tesamorelin",
     );
   });
 });

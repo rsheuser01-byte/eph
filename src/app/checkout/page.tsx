@@ -9,6 +9,7 @@ import {
   scheduleAbandonedCartIdentify,
 } from "@/lib/abandonedCart/clientSync";
 import { formatUSD, orderTotals } from "@/lib/checkout/pricing";
+import { productDisplayName } from "@/data/products";
 import { researchUseAttestationText } from "@/data/site";
 import {
   StripeCheckoutCtaTrust,
@@ -524,7 +525,7 @@ function CheckoutForm() {
                 className="flex items-baseline justify-between gap-4 text-sm"
               >
                 <span className="text-ink-soft">
-                  {product.name} · {variant.size} × {line.qty}
+                  {productDisplayName(product)} · {variant.size} × {line.qty}
                 </span>
                 <span className="tabular-nums text-ink">
                   {formatUSD(lineTotal)}

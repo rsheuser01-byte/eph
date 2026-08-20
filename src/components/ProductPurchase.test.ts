@@ -20,4 +20,8 @@ describe("ProductPurchase default size selection", () => {
   it("shows a product-level research-use notice near the title", () => {
     expect(source).toMatch(/ProductResearchUseNotice/);
   });
+
+  it("uses the catalog display name in the H1 so common names are visible up front", () => {
+    expect(source).toMatch(/productDisplayName/);
+  });
 });

@@ -18,6 +18,10 @@ describe("ProductCard compact variant", () => {
     expect(source).toMatch(/shortDescription/);
   });
 
+  it("shows the catalog display name so common names are visible on tiles", () => {
+    expect(source).toMatch(/productDisplayName/);
+  });
+
   it("uses full-quality primary packshots via ProductCardImage", () => {
     expect(source).toMatch(/productPrimaryImage/);
     expect(source).toMatch(/ProductCardImage/);

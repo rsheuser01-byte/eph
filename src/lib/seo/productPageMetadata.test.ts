@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getProductAssaySignals } from "@/data/coa";
-import { products } from "@/data/products";
+import { productDisplayName, products } from "@/data/products";
 import { site } from "@/data/site";
 import { pageMetadata } from "@/lib/seo/pageMetadata";
 import {
@@ -16,7 +16,7 @@ describe("productPageTitle", () => {
     expect(new Set(titles).size).toBe(products.length);
     for (const product of products) {
       const title = productPageTitle(product);
-      expect(title).toContain(product.name);
+      expect(title).toContain(productDisplayName(product));
       expect(title).toContain(site.name);
       expect(title).toContain(productPageTitleKind(product));
       expect(title).not.toMatch(/\s{2,}/);

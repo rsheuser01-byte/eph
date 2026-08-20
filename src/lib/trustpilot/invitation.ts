@@ -1,4 +1,4 @@
-import { products } from "@/data/products";
+import { productDisplayName, products } from "@/data/products";
 import type { PaymentStatus } from "@/lib/orders/types";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 
@@ -80,7 +80,7 @@ function mapTrustpilotProducts(skus: readonly string[]): TrustpilotProduct[] {
     }
     mapped.push({
       sku,
-      name: match.product.name,
+      name: productDisplayName(match.product),
       productUrl: `${siteUrl}/products/${match.product.slug}`,
       imageUrl: `${siteUrl}${match.variant.image}`,
     });

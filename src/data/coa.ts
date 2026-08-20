@@ -1,4 +1,4 @@
-import { getProductBySlug, products } from "./products";
+import { getProductBySlug, productDisplayName, products } from "./products";
 import { trustSignals } from "./trustSignals";
 
 export type CoaDocument = {
@@ -179,7 +179,7 @@ export function listPublishedCoas(): ReadonlyArray<
     .map((doc) => {
       const product = getProductBySlug(doc.productSlug);
       return product
-        ? { ...doc, productName: product.name }
+        ? { ...doc, productName: productDisplayName(product) }
         : null;
     })
     .filter((doc): doc is CoaDocument & { productName: string } => doc !== null);
@@ -193,5 +193,5 @@ export function productsWithoutPublishedCoa(): ReadonlyArray<{
   const published = new Set(coaDocuments.map((doc) => doc.productSlug));
   return products
     .filter((product) => !published.has(product.slug))
-    .map((product) => ({ slug: product.slug, name: product.name }));
+      .map((product) => ({ slug: product.slug, name: productDisplayName(product) }));
 }

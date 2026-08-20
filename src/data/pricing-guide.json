@@ -166,5 +166,11 @@
     "size": "10mg",
     "listPrice": 44.99,
     "productSlug": "mt-2"
+  },
+  {
+    "compound": "SS-31",
+    "size": "10mg",
+    "listPrice": 54.99,
+    "productSlug": "ss-31"
   }
 ]

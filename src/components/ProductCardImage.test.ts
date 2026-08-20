@@ -29,4 +29,9 @@ describe("ProductCardImage progressive fade", () => {
   it("respects prefers-reduced-motion", () => {
     expect(source).toMatch(/prefers-reduced-motion/);
   });
+
+  it("serves packshots unoptimized so vial label type is not crushed by the image optimizer", () => {
+    expect(source).toMatch(/unoptimized/);
+    expect(source).not.toMatch(/quality=\{75\}/);
+  });
 });

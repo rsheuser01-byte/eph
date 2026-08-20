@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getProductBySlug, products } from "@/data/products";
+import { getProductBySlug, productDisplayName, products } from "@/data/products";
 import { faqs, site } from "@/data/site";
 import {
   catalogItemListSchema,
@@ -68,7 +68,7 @@ describe("catalogItemListSchema", () => {
     expect(elements[0]).toMatchObject({
       "@type": "ListItem",
       position: 1,
-      name: products[0]!.name,
+      name: productDisplayName(products[0]!),
       url: `${BASE}/products/${products[0]!.slug}`,
     });
     expect(elements.at(-1)).toMatchObject({
@@ -94,7 +94,7 @@ describe("productSchema", () => {
     expect(schema).toMatchObject({
       "@context": "https://schema.org",
       "@type": "Product",
-      name: product!.name,
+      name: productDisplayName(product!),
       sku: product!.sku,
       description: product!.shortDescription,
       category: product!.category,
@@ -129,7 +129,7 @@ describe("productSchema", () => {
 
     expect(schema).toMatchObject({
       "@type": "Product",
-      name: "PT-141",
+      name: "PT-141 (Bremelanotide)",
       sku: "PT141",
       url: `${BASE}/products/pt-141`,
       image: `${BASE}/products/pt-141-10mg.png`,
@@ -188,7 +188,7 @@ describe("productSchema", () => {
     expect(schema).toMatchObject({
       "@context": "https://schema.org",
       "@type": "Product",
-      name: product!.name,
+      name: productDisplayName(product!),
       sku: product!.sku,
       description: product!.shortDescription,
       category: product!.category,

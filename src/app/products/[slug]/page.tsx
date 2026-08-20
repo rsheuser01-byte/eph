@@ -7,7 +7,7 @@ import { ProductPurchase } from "@/components/ProductPurchase";
 import { ProductResearchContext } from "@/components/ProductResearchContext";
 import { ProductSpecs } from "@/components/ProductSpecs";
 import { RelatedProducts } from "@/components/RelatedProducts";
-import { getProductBySlug, products } from "@/data/products";
+import { getProductBySlug, productDisplayName, products } from "@/data/products";
 import { getRelatedProducts } from "@/data/relatedProducts";
 import { researchDisclaimer } from "@/data/site";
 import { getAvailabilityMap } from "@/lib/inventory/availability";
@@ -67,7 +67,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
           breadcrumbSchema(getSiteUrl(), [
             { name: "Home", path: "/" },
             { name: "Products", path: "/products" },
-            { name: product.name, path: `/products/${product.slug}` },
+            { name: productDisplayName(product), path: `/products/${product.slug}` },
           ]),
           productSchema(getSiteUrl(), product, availability),
         ]}
@@ -86,7 +86,7 @@ export default async function ProductDetailPage({ params }: ProductPageProps) {
       />
       <ProductResearchContext
         productSlug={product.slug}
-        productName={product.name}
+        productName={productDisplayName(product)}
       />
       <ProductSpecs product={product} />
       <RelatedProducts items={related} availability={availability} />

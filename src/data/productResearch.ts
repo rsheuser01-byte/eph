@@ -134,6 +134,40 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
     ],
   },
 
+  "ss-31": {
+    interestPoints: [
+      "Researchers are studying this tetrapeptide in inner mitochondrial membrane and cardiolipin-association models.",
+      "Common research areas include isolated-mitochondria assays and short cationic peptide handling.",
+      "Of interest in studies that compare mitochondria-targeted peptides with other metabolic pathway stocks.",
+    ],
+    sections: [
+      {
+        heading: "What is SS-31 (elamipretide) in research?",
+        paragraphs: [
+          "SS-31 refers to elamipretide (also indexed as MTP-131), a synthetic aromatic-cationic tetrapeptide with the sequence D-Arg-Dmt-Lys-Phe-NH2, where Dmt is 2,6-dimethyltyrosine. Laboratories use it as a mitochondria-targeted tool compound: the alternating cationic-aromatic motif is studied for concentration at inner-membrane models, including work that examines association with cardiolipin.",
+          "Public identity anchors include CAS 736992-21-5, PubChem CID 11764719, and the molecular formula C32H49N9O5 (639.8 g/mol). Elevate Precision Health supplies SS-31 strictly for research use. Keep lot numbers linked to any identity or purity notes archived with the study folder.",
+        ],
+      },
+      {
+        heading: "Typical laboratory applications",
+        paragraphs: [
+          "Investigators use SS-31-class tetrapeptides in isolated-mitochondria or cultured-cell assays that read out membrane association, electron-transport markers, or handling of short cationic sequences. It also appears in method-development work (HPLC/LC-MS identity, reconstitution, plastic adsorption) because small aromatic-cationic peptides can behave differently from longer mitochondrial-encoded sequences such as MOTS-c.",
+          "Record solvent, aliquot temperature, and freeze–thaw counts so membrane-association datasets remain comparable across operators. Protect dry stocks from moisture; short peptides with aromatic side chains can adsorb to plasticware when working dilutions sit on the open bench.",
+        ],
+      },
+    ],
+    citations: [
+      {
+        label: "PubChem CID 11764719 (elamipretide)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/compound/11764719",
+      },
+      {
+        label: "CAS 736992-21-5 (PubChem)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/#query=736992-21-5",
+      },
+    ],
+  },
+
   tesamorelin: {
     interestPoints: [
       "Researchers are studying this GHRH analog for growth hormone-releasing hormone receptor signaling.",

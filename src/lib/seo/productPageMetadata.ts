@@ -1,6 +1,7 @@
 import { getProductAssaySignals } from "@/data/coa";
 import {
   formatPrice,
+  productDisplayName,
   productPrimaryImage,
   type Product,
 } from "@/data/products";
@@ -28,7 +29,7 @@ export function productPageTitleKind(product: Product): string {
 
 /** Absolute document title for product detail pages. */
 export function productPageTitle(product: Product): string {
-  return `${product.name} ${productPageTitleKind(product)} | ${site.name}`;
+  return `${productDisplayName(product)} ${productPageTitleKind(product)} | ${site.name}`;
 }
 
 /**
@@ -84,7 +85,7 @@ export function productPageMetadata(product: Product): Metadata {
           url: imagePath,
           width: PACKSHOT_SIZE,
           height: PACKSHOT_SIZE,
-          alt: `${product.name} research product`,
+          alt: `${productDisplayName(product)} research product`,
         }
       : undefined,
   });

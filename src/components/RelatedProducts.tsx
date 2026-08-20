@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { RelatedProductPurchase } from "@/components/RelatedProductPurchase";
 import {
+  productDisplayName,
   productImageAlt,
   productPrimaryImage,
 } from "@/data/products";
@@ -60,7 +61,7 @@ export function RelatedProducts({
                   href={`/products/${item.product.slug}`}
                   className="mt-1 block font-display text-lg font-semibold tracking-tight text-ink transition hover:text-ink-soft"
                 >
-                  {item.product.name}
+                  {productDisplayName(item.product)}
                 </Link>
                 <p className="mt-1 text-sm leading-relaxed text-ink-soft">
                   {item.reason}

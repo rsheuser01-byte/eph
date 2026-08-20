@@ -43,12 +43,12 @@ export function ProductCardImage({
 
   return (
     <Image
-      src={src}
+      src={`${src}?v=8`}
       alt={alt}
       fill
       priority={priority}
       loading={priority ? undefined : eager ? "eager" : "lazy"}
-      quality={75}
+      unoptimized
       sizes={sizes}
       onLoad={() => setLoaded(true)}
       className={`object-contain transition-[opacity,transform] duration-500 ease-out group-hover:scale-[1.03] ${

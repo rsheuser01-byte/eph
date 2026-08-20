@@ -1,4 +1,4 @@
-import { getProductBySlug } from "@/data/products";
+import { getProductBySlug, productDisplayName } from "@/data/products";
 import { site } from "@/data/site";
 import {
   escapeEmailHtml,
@@ -14,7 +14,9 @@ export function buildStockNotifyStoreEmail(
   request: StockNotifyRequest,
 ): EmailMessage {
   const product = getProductBySlug(request.productSlug);
-  const productName = product?.name ?? request.productSlug;
+  const productName = product
+    ? productDisplayName(product)
+    : request.productSlug;
   const productUrl = `${getSiteUrl()}/products/${request.productSlug}`;
   const subject = `Restock notify: ${productName} ${request.size}`;
 

@@ -64,7 +64,7 @@ export async function findDosageRegion(filePath) {
         if (x > maxX) maxX = x;
       }
     }
-    if (ink >= 5) {
+    if (ink >= 3) {
       rows.push({ y, ink, minX, maxX });
     }
   }
@@ -105,9 +105,9 @@ export async function findDosageRegion(filePath) {
     .filter(
       (band) =>
         band.bandHeight >= 12 &&
-        band.bandHeight <= 36 &&
-        band.bandWidth >= 50 &&
-        band.bandWidth <= 160 &&
+        band.bandHeight <= 48 &&
+        band.bandWidth >= 40 &&
+        band.bandWidth <= 220 &&
         band.density > 0.12,
     )
     .sort((a, b) => b.density - a.density || a.y0 - b.y0);
@@ -208,7 +208,7 @@ export async function calibrateDosageFontSize(
   let bestSize = Math.max(18, targetInkHeight);
   let bestDelta = Number.POSITIVE_INFINITY;
 
-  for (let fontSize = 16; fontSize <= 42; fontSize++) {
+  for (let fontSize = 16; fontSize <= 64; fontSize++) {
     const svg = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
 <svg width="240" height="80" xmlns="http://www.w3.org/2000/svg">
   <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle"
@@ -247,12 +247,13 @@ export async function calibrateDosageFontSize(
  * Exact copy of the master packshot, with ONLY the dosage line replaced.
  * Vial, lighting, logo, product name, and disclaimer stay byte-identical.
  * All sizes of a product share one calibrated font size so the dosage text
- * does not appear to grow/shrink when switching vials.
+ * does not appear to grow/shrink when switching vials. Pass a shared
+ * `fontSize` (from MT-2) so every product uses the same mg type size.
  *
  * @param {string} masterPath
  * @param {string} newSize catalog size e.g. "30mg"
  * @param {string} outputPath
- * @param {{ fontSize?: number, region?: Awaited<ReturnType<typeof findDosageRegion>> }} [options]
+ * @param {{ fontSize?: number, targetInkHeight?: number, region?: Awaited<ReturnType<typeof findDosageRegion>> }} [options]
  */
 export async function derivePackshotFromMaster(
   masterPath,
@@ -263,18 +264,19 @@ export async function derivePackshotFromMaster(
   const label = formatDosageLabel(newSize);
   const region = options.region ?? (await findDosageRegion(masterPath));
   const fill = cssRgb(region.ink);
+  const targetInkHeight = options.targetInkHeight ?? region.textHeight;
   const fontSize =
     options.fontSize ??
-    (await calibrateDosageFontSize(region.textHeight, label, fill));
+    (await calibrateDosageFontSize(targetInkHeight, label, fill));
 
   // Wide enough for longest dosages (e.g. "1000 mg") while staying centered.
   const centerX = region.textLeft + region.textWidth / 2;
   const centerY = region.textTop + region.textHeight / 2;
   const padX = 28;
-  const padY = 10;
-  const minPatchW = 170;
+  const padY = 8;
+  const minPatchW = 200;
   const patchW = Math.max(region.textWidth + padX * 2, minPatchW);
-  const patchH = region.textHeight + padY * 2;
+  const patchH = Math.max(region.textHeight, targetInkHeight) + padY * 2;
   const x0 = Math.max(0, Math.round(centerX - patchW / 2));
   const x1 = Math.min(region.canvasWidth - 1, x0 + patchW - 1);
   const y0 = Math.max(0, Math.round(centerY - patchH / 2));

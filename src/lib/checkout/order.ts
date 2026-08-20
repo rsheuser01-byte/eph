@@ -1,4 +1,4 @@
-import { getProductBySlug, getVariant } from "@/data/products";
+import { getProductBySlug, getVariant, productDisplayName } from "@/data/products";
 import type { OrderItem } from "@/lib/payments/types";
 import { orderTotals } from "./pricing";
 
@@ -55,12 +55,12 @@ export function buildOrder(input: unknown): OrderBuildResult {
     if (!variant) {
       return {
         ok: false,
-        error: `Unknown size ${raw.size} for ${product.name}.`,
+        error: `Unknown size ${raw.size} for ${productDisplayName(product)}.`,
       };
     }
     items.push({
       sku: variant.sku,
-      name: product.name,
+      name: productDisplayName(product),
       size: variant.size,
       qty,
       unitPrice: variant.price,

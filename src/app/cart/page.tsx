@@ -5,6 +5,7 @@ import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { CartLineQtyControls } from "@/components/CartLineQtyControls";
 import { CartSuggest } from "@/components/CartSuggest";
+import { productDisplayName } from "@/data/products";
 import { useCart } from "@/lib/cart/CartContext";
 import { useCartAvailability } from "@/lib/cart/useCartAvailability";
 import {
@@ -90,7 +91,7 @@ export default function CartPage() {
                     href={`/products/${product.slug}`}
                     className="font-display text-xl font-semibold tracking-tight text-ink transition hover:text-accent"
                   >
-                    {product.name}
+                    {productDisplayName(product)}
                   </Link>
                   <p className="mt-1 text-xs uppercase tracking-[0.16em] text-ink-soft">
                     {variant.size} · {formatUSD(variant.price)} · SKU{" "}

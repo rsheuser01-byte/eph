@@ -54,8 +54,12 @@ export const RELATED_PRODUCT_MAP: Record<string, RelatedProductEntry[]> = {
     { slug: "nad", reason: "Cellular metabolism companion for pathway panels" },
   ],
   "mots-c": [
+    { slug: "ss-31", reason: "Mitochondria-targeted tetrapeptide for membrane-pathway panels" },
     { slug: "nad", reason: "Metabolic and redox pathway companion" },
-    { slug: "tesamorelin", reason: "Peptide stock for adjacent endocrine models" },
+  ],
+  "ss-31": [
+    { slug: "mots-c", reason: "Mitochondrial-encoded peptide for adjacent pathway panels" },
+    { slug: "nad", reason: "Cellular redox companion for metabolic assay panels" },
   ],
   tesamorelin: [
     { slug: "mots-c", reason: "Metabolic peptide for adjacent pathway work" },
@@ -71,6 +75,7 @@ export const RELATED_PRODUCT_MAP: Record<string, RelatedProductEntry[]> = {
   ],
   nad: [
     { slug: "mots-c", reason: "Mitochondrial peptide for metabolic panels" },
+    { slug: "ss-31", reason: "Mitochondria-targeted tetrapeptide for inner-membrane assays" },
     { slug: "glp-3", reason: "Incretin research stock for broader pathway work" },
   ],
   "wolverine-blend": [
