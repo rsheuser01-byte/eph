@@ -237,6 +237,34 @@ export const products: Product[] = [
     },
   },
   {
+    slug: "semax",
+    name: "Semax",
+    sku: "SEMAX",
+    category: "Peptide",
+    shortDescription:
+      "Synthetic ACTH(4-7) analog with a C-terminal Pro-Gly-Pro motif studied in laboratory peptide-identity and analog-comparison models.",
+    featured: true,
+    variants: [
+      {
+        size: "10mg",
+        price: listPrice("semax", "10mg"),
+        sku: "SEMAX-10MG",
+        image: "/products/semax-10mg.png",
+      },
+    ],
+    specs: {
+      form: LYOPHILIZED,
+      researchApplication:
+        "ACTH(4-7)-PGP heptapeptide analog studies in controlled laboratory models.",
+      molecularFormula: "C37H51N9O10S",
+      molecularWeight: "813.9 g/mol",
+      sequence: "Met-Glu-His-Phe-Pro-Gly-Pro",
+      appearance: POWDER_APPEARANCE,
+      storage: LYOPHILIZED_STORAGE,
+      synonyms: "ACTH(4-7)-PGP, MEHFPGP",
+    },
+  },
+  {
     slug: "mt-2",
     name: "MT-2",
     commonName: "Melanotan",
@@ -330,6 +358,34 @@ export const products: Product[] = [
       appearance: "White to yellowish powder",
       storage: LYOPHILIZED_STORAGE,
       synonyms: "Nicotinamide adenine dinucleotide (oxidized form)",
+    },
+  },
+  {
+    slug: "5-amino-1mq",
+    name: "5-Amino-1MQ",
+    sku: "5A1MQ",
+    category: "Small molecule",
+    shortDescription:
+      "Membrane-permeable quinolinium compound studied in laboratory models of nicotinamide N-methyltransferase (NNMT) inhibition.",
+    featured: true,
+    variants: [
+      {
+        size: "50mg",
+        price: listPrice("5-amino-1mq", "50mg"),
+        sku: "5A1MQ-50MG",
+        image: "/products/5-amino-1mq-50mg.png",
+      },
+    ],
+    specs: {
+      form: LYOPHILIZED,
+      researchApplication:
+        "Nicotinamide N-methyltransferase (NNMT) inhibition studies in controlled laboratory models.",
+      molecularFormula: "C10H11IN2",
+      molecularWeight: "286.11 g/mol",
+      appearance: POWDER_APPEARANCE,
+      storage: LYOPHILIZED_STORAGE,
+      synonyms:
+        "5-amino-1-methylquinolinium iodide, NNMTi, 5-amino-1MQ",
     },
   },
   {

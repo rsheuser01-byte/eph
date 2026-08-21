@@ -21,7 +21,11 @@ describe("homepage catalog (all SKUs, dense, below hero)", () => {
   it("renders every catalog product, not a featured subset", () => {
     expect(home).not.toMatch(/product\.featured/);
     expect(home).toMatch(/products\.map/);
-    expect(products.length).toBeGreaterThanOrEqual(10);
+    expect(products.length).toBeGreaterThanOrEqual(12);
+    expect(products.some((product) => product.slug === "5-amino-1mq")).toBe(
+      true,
+    );
+    expect(products.some((product) => product.slug === "semax")).toBe(true);
   });
 
   it("uses a two-column dense grid on small screens", () => {

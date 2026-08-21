@@ -28,6 +28,8 @@ export const productContentUpdatedOnBySlug: Partial<
   "mt-2": "2026-08-20",
   "pt-141": "2026-08-20",
   "ss-31": "2026-08-20",
+  "5-amino-1mq": "2026-08-21",
+  semax: "2026-08-21",
 };
 
 export function productContentUpdatedOn(

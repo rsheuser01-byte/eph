@@ -147,7 +147,7 @@
     "compound": "Semax",
     "size": "10mg",
     "listPrice": 59.99,
-    "productSlug": null
+    "productSlug": "semax"
   },
   {
     "compound": "Selank",
@@ -172,5 +172,11 @@
     "size": "10mg",
     "listPrice": 54.99,
     "productSlug": "ss-31"
+  },
+  {
+    "compound": "5-Amino-1MQ",
+    "size": "50mg",
+    "listPrice": 59.99,
+    "productSlug": "5-amino-1mq"
   }
 ]

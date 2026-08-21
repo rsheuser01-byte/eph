@@ -202,6 +202,40 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
     ],
   },
 
+  semax: {
+    interestPoints: [
+      "Researchers are studying this ACTH(4-7)-PGP heptapeptide as a short analog on the bench.",
+      "Common research areas include peptide identity checks and Met-containing handling studies.",
+      "Of interest in comparisons of ACTH-fragment analogs versus longer GHRH-family stocks.",
+    ],
+    sections: [
+      {
+        heading: "What is Semax in research?",
+        paragraphs: [
+          "Semax is a synthetic linear heptapeptide with the sequence Met-Glu-His-Phe-Pro-Gly-Pro (MEHFPGP). It is built from the ACTH(4-7) fragment with a C-terminal Pro-Gly-Pro (PGP) extension that laboratories use when they need a compact ACTH-related analog that is more protease-resistant than the unmodified tetrapeptide core. It is a research peptide, not a therapeutic product, and it does not carry the full hormonal activity of intact ACTH in catalog terms — use it as a sequence-defined tool compound.",
+          "Public identity anchors include CAS 80714-61-0, PubChem CID 9811102, molecular formula C37H51N9O10S, and a formula weight of 813.9 g/mol. Elevate Precision Health supplies Semax strictly for research use. Keep lot numbers linked to any identity or purity notes archived with the study folder.",
+        ],
+      },
+      {
+        heading: "Typical laboratory applications",
+        paragraphs: [
+          "Investigators use Semax-class heptapeptides in HPLC/LC-MS identity work, reconstitution and freeze–thaw case studies for short linear peptides, and side-by-side handling comparisons versus longer analogs such as tesamorelin. The N-terminal methionine is a practical oxidation marker: document light, temperature, and freeze–thaw counts so chromatograms remain comparable across operators.",
+          "Prepare working dilutions from recorded fill mass and reconstitution volume before calculating nominal molarity. Protect dry stocks from moisture; methionine-containing peptides can oxidize on the open bench and shift mass-spectrometric identity peaks if handling is sloppy.",
+        ],
+      },
+    ],
+    citations: [
+      {
+        label: "PubChem CID 9811102 (Semax)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/compound/9811102",
+      },
+      {
+        label: "CAS 80714-61-0 (PubChem)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/#query=80714-61-0",
+      },
+    ],
+  },
+
   "mt-2": {
     interestPoints: [
       "Researchers are studying Melanotan II for melanocortin receptor and pigment pathway models.",
@@ -292,6 +326,40 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
       {
         label: "CAS 53-84-9 (PubChem)",
         href: "https://pubchem.ncbi.nlm.nih.gov/#query=53-84-9",
+      },
+    ],
+  },
+
+  "5-amino-1mq": {
+    interestPoints: [
+      "Researchers are studying this quinolinium compound as a cell-permeable NNMT inhibitor.",
+      "Common research areas include NAD-salvage pathway assays and methyltransferase panels.",
+      "Of interest in studies that compare NNMT tool compounds with NAD+ cofactor stocks.",
+    ],
+    sections: [
+      {
+        heading: "What is 5-Amino-1MQ in research?",
+        paragraphs: [
+          "5-Amino-1MQ (5-amino-1-methylquinolinium) is a small-molecule quinolinium cation studied as a membrane-permeable inhibitor of nicotinamide N-methyltransferase (NNMT). It is not a peptide: there is no amino-acid backbone. Laboratories use it as a chemical tool so NNMT activity, nicotinamide methylation, and related NAD-salvage pathway readouts can be examined under controlled bench conditions.",
+          "Commercial research lots are commonly the iodide salt. Public identity anchors include CAS 42464-96-0, PubChem CID 66522933, molecular formula C10H11IN2, and a formula weight of 286.11 g/mol for that salt. Elevate Precision Health supplies 5-Amino-1MQ strictly for research use. Keep lot numbers linked to any identity or purity notes archived with the study folder.",
+        ],
+      },
+      {
+        heading: "Typical laboratory applications",
+        paragraphs: [
+          "Investigators use 5-Amino-1MQ-class quinolinium compounds in recombinant NNMT enzyme assays, cellular 1-methylnicotinamide (1-MNA) readouts, and pathway panels that track NAD+ salvage versus nicotinamide methylation. It also appears in method-development work (HPLC/LC-MS identity, reconstitution, light protection) because small cationic heteroaromatics can adsorb to plasticware and photodegrade differently from lyophilized peptides.",
+          "Record solvent, aliquot temperature, and freeze–thaw counts so NNMT-inhibition datasets remain comparable across operators. Protect dry stocks from moisture and strong light; document salt form whenever molarity is calculated from vial fill mass on the research bench.",
+        ],
+      },
+    ],
+    citations: [
+      {
+        label: "PubChem CID 66522933 (5-amino-1-methylquinolinium iodide)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/compound/66522933",
+      },
+      {
+        label: "CAS 42464-96-0 (PubChem)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/#query=42464-96-0",
       },
     ],
   },

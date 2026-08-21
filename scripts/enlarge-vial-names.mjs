@@ -1,13 +1,18 @@
 /**
- * ONE-OFF: restamp PT-141 and SS-31 names larger than the photographed
- * short codes so they read on catalog tiles. Not a build step.
- * `node scripts/enlarge-vial-names.mjs`
+ * ONE-OFF: restamp PT-141, SS-31, 5-Amino-1MQ, and Semax names larger than
+ * the photographed short codes so they read on catalog tiles. Not a build
+ * step.
+ * `node scripts/enlarge-vial-names.mjs` (optional filter: `semax`)
  */
 import { copyFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
-import { findDosageRegion } from "./lib/packshotFromMaster.mjs";
+import {
+  calibrateDosageFontSize,
+  derivePackshotFromMaster,
+  findDosageRegion,
+} from "./lib/packshotFromMaster.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const productsDir = path.join(__dirname, "..", "public", "products");
@@ -22,7 +27,18 @@ const MAX_INK_WIDTH = 268;
 const jobs = [
   { file: "ss-31-10mg.png", label: "SS-31" },
   { file: "pt-141-10mg.png", label: "PT-141" },
+  { file: "5-amino-1mq-50mg.png", label: "5-Amino-1MQ", size: "50mg" },
+  { file: "semax-10mg.png", label: "Semax" },
 ];
+
+const filter = process.argv[2];
+const selected = filter
+  ? jobs.filter((job) => job.file.includes(filter) || job.label.includes(filter))
+  : jobs;
+
+if (selected.length === 0) {
+  throw new Error(`No enlarge-vial-names job matched "${filter}"`);
+}
 
 async function findNameRegion(filePath, dosage) {
   const { data, info } = await sharp(filePath)
@@ -212,7 +228,14 @@ console.log(
   `MT-2 name ink ${region.textWidth}x${region.textHeight} at y ${region.textTop}`,
 );
 
-for (const job of jobs) {
+const TARGET_DOSAGE_INK_HEIGHT = 32;
+const dosageFontSize = await calibrateDosageFontSize(
+  TARGET_DOSAGE_INK_HEIGHT,
+  "10 mg",
+  fill,
+);
+
+for (const job of selected) {
   const outPath = path.join(productsDir, job.file);
   await copyFile(masterPath, outPath);
 
@@ -281,6 +304,21 @@ for (const job of jobs) {
     .composite([{ input: svg, left: x0, top: y0 }])
     .png()
     .toFile(outPath);
+
+  if (job.size && job.size !== "10mg") {
+    const result = await derivePackshotFromMaster(
+      outPath,
+      job.size,
+      outPath,
+      {
+        fontSize: dosageFontSize,
+        targetInkHeight: TARGET_DOSAGE_INK_HEIGHT,
+      },
+    );
+    console.log(
+      `${job.file}: dosage "${result.label}" font ${dosageFontSize}px (shared ${TARGET_DOSAGE_INK_HEIGHT}px ink)`,
+    );
+  }
 
   console.log(
     `${job.file}: "${job.label}" font ${fontSize}px (match MT-2 ink ${targetInkHeight}px tall)`,

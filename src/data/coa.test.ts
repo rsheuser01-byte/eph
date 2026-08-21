@@ -34,6 +34,8 @@ describe("coa registry", () => {
     expect(getCoaForProduct("wolverine-blend")?.href).toBe("/coa/bpc-157.pdf");
     expect(getCoaForProduct("mt-2")).toBeUndefined();
     expect(getCoaForProduct("ss-31")).toBeUndefined();
+    expect(getCoaForProduct("5-amino-1mq")).toBeUndefined();
+    expect(getCoaForProduct("semax")).toBeUndefined();
   });
 
   it("exposes both BPC-157 and TB-500 files for Wolverine Blend", () => {
@@ -62,6 +64,12 @@ describe("coa registry", () => {
       true,
     );
     expect(productsWithoutPublishedCoa().some((p) => p.slug === "ss-31")).toBe(
+      true,
+    );
+    expect(
+      productsWithoutPublishedCoa().some((p) => p.slug === "5-amino-1mq"),
+    ).toBe(true);
+    expect(productsWithoutPublishedCoa().some((p) => p.slug === "semax")).toBe(
       true,
     );
   });

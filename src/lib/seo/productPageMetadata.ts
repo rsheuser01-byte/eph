@@ -20,6 +20,8 @@ export function productPageTitleKind(product: Product): string {
       return "Research Cofactor";
     case "Blend":
       return "Research Blend";
+    case "Small molecule":
+      return "Research Compound";
     case "Supply":
       return "Lab Supply";
     default:

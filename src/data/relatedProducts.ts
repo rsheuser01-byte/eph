@@ -62,8 +62,13 @@ export const RELATED_PRODUCT_MAP: Record<string, RelatedProductEntry[]> = {
     { slug: "nad", reason: "Cellular redox companion for metabolic assay panels" },
   ],
   tesamorelin: [
+    { slug: "semax", reason: "Short ACTH-fragment analog for peptide-handling comparisons" },
     { slug: "mots-c", reason: "Metabolic peptide for adjacent pathway work" },
     { slug: "nad", reason: "Cellular energy companion for assay panels" },
+  ],
+  semax: [
+    { slug: "tesamorelin", reason: "Longer GHRH analog for peptide-handling comparisons" },
+    { slug: "nad", reason: "Cellular metabolism companion for assay panels" },
   ],
   "mt-2": [
     { slug: "pt-141", reason: "Near-analog for melanocortin comparisons" },
@@ -76,7 +81,12 @@ export const RELATED_PRODUCT_MAP: Record<string, RelatedProductEntry[]> = {
   nad: [
     { slug: "mots-c", reason: "Mitochondrial peptide for metabolic panels" },
     { slug: "ss-31", reason: "Mitochondria-targeted tetrapeptide for inner-membrane assays" },
+    { slug: "5-amino-1mq", reason: "NNMT-inhibitor tool compound for NAD-pathway panels" },
     { slug: "glp-3", reason: "Incretin research stock for broader pathway work" },
+  ],
+  "5-amino-1mq": [
+    { slug: "nad", reason: "NAD+ cofactor for adjacent metabolic and redox panels" },
+    { slug: "mots-c", reason: "Mitochondrial peptide for metabolic stress-pathway work" },
   ],
   "wolverine-blend": [
     { slug: "glow-blend", reason: "Related multi-peptide blend with GHK-Cu" },

@@ -38,6 +38,18 @@ describe("relatedProducts map", () => {
     expect(RELATED_PRODUCT_MAP["glp-2"]!.map((e) => e.slug)).toContain("glp-3");
     expect(RELATED_PRODUCT_MAP["ss-31"]!.map((e) => e.slug)).toContain("mots-c");
     expect(RELATED_PRODUCT_MAP["mots-c"]!.map((e) => e.slug)).toContain("ss-31");
+    expect(RELATED_PRODUCT_MAP["5-amino-1mq"]!.map((e) => e.slug)).toContain(
+      "nad",
+    );
+    expect(RELATED_PRODUCT_MAP["nad"]!.map((e) => e.slug)).toContain(
+      "5-amino-1mq",
+    );
+    expect(RELATED_PRODUCT_MAP["semax"]!.map((e) => e.slug)).toContain(
+      "tesamorelin",
+    );
+    expect(RELATED_PRODUCT_MAP["tesamorelin"]!.map((e) => e.slug)).toContain(
+      "semax",
+    );
   });
 
   it("never cross-sells BAC Water or other supply diluents", () => {

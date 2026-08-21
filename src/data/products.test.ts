@@ -67,12 +67,18 @@ describe("catalog integrity", () => {
     }
   });
 
-  it("features seven products including NAD+, GLOW Blend, and SS-31", () => {
+  it("features nine products including NAD+, GLOW Blend, SS-31, 5-Amino-1MQ, and Semax", () => {
     const featured = products.filter((product) => product.featured);
     expect(featured.map((product) => product.slug)).toEqual(
-      expect.arrayContaining(["nad", "glow-blend", "ss-31"]),
+      expect.arrayContaining([
+        "nad",
+        "glow-blend",
+        "ss-31",
+        "5-amino-1mq",
+        "semax",
+      ]),
     );
-    expect(featured).toHaveLength(7);
+    expect(featured).toHaveLength(9);
   });
 });
 
@@ -250,6 +256,45 @@ describe("SS-31", () => {
     expect(product!.specs.molecularWeight).toBe("639.8 g/mol");
     expect(product!.specs.sequence).toBe("D-Arg-Dmt-Lys-Phe-NH2");
     expect(product!.specs.synonyms).toMatch(/Elamipretide/);
+  });
+});
+
+describe("5-Amino-1MQ", () => {
+  it("is listed as a featured 50mg NNMT-inhibitor small molecule without a peptide sequence", () => {
+    const product = getProductBySlug("5-amino-1mq");
+    expect(product).toBeDefined();
+    expect(product!.name).toBe("5-Amino-1MQ");
+    expect(product!.category).toBe("Small molecule");
+    expect(product!.featured).toBe(true);
+    expect(product!.variants.map((variant) => variant.size)).toEqual(["50mg"]);
+    expect(getVariant(product!, "50mg")?.sku).toBe("5A1MQ-50MG");
+    expect(getVariant(product!, "50mg")?.image).toBe(
+      "/products/5-amino-1mq-50mg.png",
+    );
+    expect(getVariant(product!, "50mg")?.price).toBe(59.99);
+    expect(product!.specs.molecularFormula).toBe("C10H11IN2");
+    expect(product!.specs.molecularWeight).toBe("286.11 g/mol");
+    expect(product!.specs.sequence).toBeUndefined();
+    expect(product!.specs.synonyms).toMatch(/1-methylquinolinium/i);
+    expect(product!.specs.synonyms).toMatch(/NNMT/i);
+  });
+});
+
+describe("Semax", () => {
+  it("is listed as a featured 10mg ACTH-fragment analog peptide", () => {
+    const product = getProductBySlug("semax");
+    expect(product).toBeDefined();
+    expect(product!.name).toBe("Semax");
+    expect(product!.category).toBe("Peptide");
+    expect(product!.featured).toBe(true);
+    expect(product!.variants.map((variant) => variant.size)).toEqual(["10mg"]);
+    expect(getVariant(product!, "10mg")?.sku).toBe("SEMAX-10MG");
+    expect(getVariant(product!, "10mg")?.image).toBe("/products/semax-10mg.png");
+    expect(getVariant(product!, "10mg")?.price).toBe(59.99);
+    expect(product!.specs.molecularFormula).toBe("C37H51N9O10S");
+    expect(product!.specs.molecularWeight).toBe("813.9 g/mol");
+    expect(product!.specs.sequence).toBe("Met-Glu-His-Phe-Pro-Gly-Pro");
+    expect(product!.specs.synonyms).toMatch(/ACTH/i);
   });
 });
 

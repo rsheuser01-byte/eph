@@ -56,11 +56,12 @@ describe("pricing-guide.json", () => {
         "KPV",
         "Ipamorelin",
         "CJC-1295 + Ipamorelin",
-        "Semax",
         "Selank",
       ]),
     );
     expect(compounds).not.toContain("PT-141");
     expect(compounds).not.toContain("SS-31");
+    expect(compounds).not.toContain("5-Amino-1MQ");
+    expect(compounds).not.toContain("Semax");
   });
 });
