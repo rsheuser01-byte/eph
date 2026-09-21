@@ -152,23 +152,28 @@ await copyFile(masterPath, outPath);
 const dosage = await findDosageRegion(masterPath);
 const region = await findNameRegion(masterPath, dosage);
 const fill = `rgb(${region.ink[0]}, ${region.ink[1]}, ${region.ink[2]})`;
-const label = "CJC + IPA";
+// Use compact form without spaces to reduce width
+const label = "CJC+IPA";
 const TARGET_INK_HEIGHT = region.textHeight;
 
-// Maximum width for text on the visible label face (conservative estimate
-// based on where the vial curves away from view). The original SEMAX text
-// width gives a baseline, but we add margin and cap to avoid clipping.
-const MAX_LABEL_WIDTH = Math.min(region.textWidth * 1.35, 180);
+// Maximum width for text on the visible FLAT label face. The vial curves
+// away at the edges, so we need a conservative limit. The SEMAX text width
+// is our baseline for what fits comfortably on the flat portion.
+// Use 75% of SEMAX width to ensure comfortable margins on both sides.
+const MAX_LABEL_WIDTH = Math.round(region.textWidth * 0.75);
+
+// Letter-spacing to tighten text slightly (in CSS em units)
+const LETTER_SPACING = "-0.04em";
 
 /**
  * Measure rendered ink bounds (height & width) for a given font size.
  */
-async function measureTextBounds(text, size, fillColor) {
+async function measureTextBounds(text, size, fillColor, letterSpacing = "0") {
   const probe = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
 <svg width="400" height="100" xmlns="http://www.w3.org/2000/svg">
   <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle"
     font-family="Arial, Helvetica, 'Segoe UI', sans-serif"
-    font-size="${size}" font-weight="700" fill="${fillColor}">${text}</text>
+    font-size="${size}" font-weight="700" letter-spacing="${letterSpacing}" fill="${fillColor}">${text}</text>
 </svg>`);
   const { data, info } = await sharp(probe)
     .ensureAlpha()
@@ -194,7 +199,7 @@ async function measureTextBounds(text, size, fillColor) {
 let fontSize = 63;
 let bestDelta = Number.POSITIVE_INFINITY;
 for (let size = 28; size <= 80; size++) {
-  const bounds = await measureTextBounds(label, size, fill);
+  const bounds = await measureTextBounds(label, size, fill, LETTER_SPACING);
   if (!bounds) continue;
   // Skip sizes that are too wide for the label
   if (bounds.width > MAX_LABEL_WIDTH) continue;
@@ -208,7 +213,7 @@ for (let size = 28; size <= 80; size++) {
 // If no size fits both constraints, find the largest size that fits width
 if (bestDelta === Number.POSITIVE_INFINITY) {
   for (let size = 80; size >= 20; size--) {
-    const bounds = await measureTextBounds(label, size, fill);
+    const bounds = await measureTextBounds(label, size, fill, LETTER_SPACING);
     if (bounds && bounds.width <= MAX_LABEL_WIDTH) {
       fontSize = size;
       break;
@@ -221,7 +226,7 @@ const centerY = region.textTop + region.textHeight / 2;
 const padX = 28;
 const padY = 10;
 // Ensure patch is wide enough for the new text
-const measuredBounds = await measureTextBounds(label, fontSize, fill);
+const measuredBounds = await measureTextBounds(label, fontSize, fill, LETTER_SPACING);
 const textWidth = measuredBounds?.width ?? region.textWidth;
 const patchW = Math.max(textWidth + padX * 2, region.textWidth + padX * 2, 170);
 const patchH = region.textHeight + padY * 2;
@@ -273,6 +278,7 @@ const svg = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
     font-family="Arial, Helvetica, 'Segoe UI', sans-serif"
     font-size="${fontSize}"
     font-weight="700"
+    letter-spacing="${LETTER_SPACING}"
     fill="${fill}"
   >${label}</text>
 </svg>`);
@@ -293,5 +299,5 @@ await sharp(base)
   .toFile(outPath);
 
 console.log(
-  `SEMAX → CJC+IPA packshot ("${label}", font ${fontSize}px, name ${region.textWidth}x${region.textHeight} at ${region.textLeft},${region.textTop})`,
+  `SEMAX → CJC+IPA packshot ("${label}", font ${fontSize}px, maxW ${MAX_LABEL_WIDTH}px, rendered ~${textWidth}px, original name ${region.textWidth}x${region.textHeight})`,
 );
