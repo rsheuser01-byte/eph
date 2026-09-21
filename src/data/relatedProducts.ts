@@ -106,6 +106,11 @@ export const RELATED_PRODUCT_MAP: Record<string, RelatedProductEntry[]> = {
     { slug: "mt-2", reason: "Melanocortin analog for pathway comparisons" },
     { slug: "pt-141", reason: "Melanocortin analog for receptor studies" },
   ],
+  "cjc-ipa": [
+    { slug: "tesamorelin", reason: "Standalone GHRH analog for comparative signaling studies" },
+    { slug: "mots-c", reason: "Metabolic peptide for adjacent pathway panels" },
+    { slug: "nad", reason: "Cellular energy companion for metabolic assay panels" },
+  ],
 };
 
 const BLOCKED_RELATED_SLUGS = new Set(["bac"]);

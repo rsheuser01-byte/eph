@@ -485,6 +485,31 @@ export const products: Product[] = [
       synonyms: "Lys-Pro-Val, α-MSH (11-13)",
     },
   },
+  {
+    slug: "cjc-ipa",
+    name: "CJC-1295 (no DAC) + Ipamorelin",
+    sku: "CP10",
+    category: "Blend",
+    shortDescription:
+      "Two-peptide blend combining a GHRH analog and ghrelin-mimetic studied in laboratory models of growth hormone axis signaling.",
+    featured: false,
+    variants: [
+      {
+        size: "10mg",
+        price: listPrice("cjc-ipa", "10mg"),
+        sku: "CP10",
+        image: "/products/cjc-ipa-10mg.png",
+      },
+    ],
+    specs: {
+      form: LYOPHILIZED,
+      researchApplication:
+        "Combined GHRH analog and ghrelin-mimetic protocols for growth hormone axis pathway studies in controlled laboratory models.",
+      composition: "CJC-1295 (no DAC) 5 mg and Ipamorelin 5 mg",
+      appearance: POWDER_APPEARANCE,
+      storage: LYOPHILIZED_STORAGE,
+    },
+  },
 ];
 
 export function productPriceRange(product: Product): {

@@ -54,7 +54,6 @@ describe("pricing-guide.json", () => {
         "TB-500",
         "GHK-Cu",
         "Ipamorelin",
-        "CJC-1295 + Ipamorelin",
         "Selank",
       ]),
     );
@@ -63,5 +62,6 @@ describe("pricing-guide.json", () => {
     expect(compounds).not.toContain("5-Amino-1MQ");
     expect(compounds).not.toContain("Semax");
     expect(compounds).not.toContain("KPV");
+    expect(compounds).not.toContain("CJC-1295 + Ipamorelin");
   });
 });

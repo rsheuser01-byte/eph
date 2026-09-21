@@ -495,4 +495,46 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
       },
     ],
   },
+
+  "cjc-ipa": {
+    interestPoints: [
+      "Research interest centers on combining a GHRH analog with a ghrelin-mimetic in one reconstituted stock.",
+      "Common research areas include growth hormone axis pathway panels and comparative secretagogue studies.",
+      "Of interest in studies that examine GHRH-receptor and ghrelin-receptor signaling in tandem.",
+    ],
+    sections: [
+      {
+        heading: "What is CJC-1295 (no DAC) + Ipamorelin in research?",
+        paragraphs: [
+          "This blend combines CJC-1295 without DAC (drug affinity complex), a 29-amino-acid GHRH analog, with Ipamorelin, a pentapeptide ghrelin-mimetic. The two peptides act on distinct receptor systems — GHRH receptor and growth hormone secretagogue receptor (GHS-R1a) — making the blend a tool for laboratories studying coordinated growth hormone axis signaling from a single reconstituted stock.",
+          "CJC-1295 (no DAC) is indexed under CAS 863288-34-0 and PubChem CID 91976842. Ipamorelin is indexed under CAS 170851-70-4 and PubChem CID 9831659. Material is supplied for research use only. Keep lot numbers linked to any identity or purity notes archived with the study folder.",
+        ],
+      },
+      {
+        heading: "Typical laboratory applications",
+        paragraphs: [
+          "Laboratories use this blend for receptor-level signaling studies, comparative assays against standalone GHRH analogs (such as tesamorelin) or standalone ghrelin-mimetics, and method development for resolving two mid-length peptides in one chromatogram. The blend simplifies sample preparation when both peptides are required in the same experiment.",
+          "Document reconstitution volume and aliquot strategy so each component's nominal concentration remains traceable. Verify both components by orthogonal HPLC/LC-MS methods before quantitative interpretation, as co-formulated peptides can shift retention under shared gradient conditions.",
+        ],
+      },
+    ],
+    citations: [
+      {
+        label: "PubChem CID 91976842 (CJC-1295 no DAC)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/compound/91976842",
+      },
+      {
+        label: "PubChem CID 9831659 (Ipamorelin)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/compound/9831659",
+      },
+      {
+        label: "CAS 863288-34-0 (CJC-1295)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/#query=863288-34-0",
+      },
+      {
+        label: "CAS 170851-70-4 (Ipamorelin)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/#query=170851-70-4",
+      },
+    ],
+  },
 };
