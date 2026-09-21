@@ -93,18 +93,24 @@
     "compound": "GLP-2 TZ",
     "size": "10mg",
     "listPrice": 64.99,
-    "productSlug": "glp-2"
+    "productSlug": null
   },
   {
     "compound": "GLP-2 TZ",
     "size": "20mg",
     "listPrice": 99.99,
-    "productSlug": "glp-2"
+    "productSlug": null
   },
   {
     "compound": "GLP-2 TZ",
     "size": "30mg",
-    "listPrice": 139.99,
+    "listPrice": 119.99,
+    "productSlug": "glp-2"
+  },
+  {
+    "compound": "GLP-2 TZ",
+    "size": "60mg",
+    "listPrice": 179.99,
     "productSlug": "glp-2"
   },
   {

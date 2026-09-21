@@ -111,22 +111,16 @@ export const products: Product[] = [
     featured: true,
     variants: [
       {
-        size: "10mg",
-        price: listPrice("glp-2", "10mg"),
-        sku: "GLP-2-10MG",
-        image: "/products/glp-2-10mg.png",
-      },
-      {
-        size: "20mg",
-        price: listPrice("glp-2", "20mg"),
-        sku: "GLP-2-20MG",
-        image: "/products/glp-2-20mg.png",
-      },
-      {
         size: "30mg",
         price: listPrice("glp-2", "30mg"),
         sku: "GLP-2-30MG",
         image: "/products/glp-2-30mg.png",
+      },
+      {
+        size: "60mg",
+        price: listPrice("glp-2", "60mg"),
+        sku: "GLP-2-60MG",
+        image: "/products/glp-2-60mg.png",
       },
     ],
     specs: {

@@ -33,9 +33,8 @@ const jobs = [
     dir: mastersDir,
     master: "glp-2-10mg.png",
     variants: [
-      { file: "glp-2-10mg.png", size: "10mg" },
-      { file: "glp-2-20mg.png", size: "20mg" },
       { file: "glp-2-30mg.png", size: "30mg" },
+      { file: "glp-2-60mg.png", size: "60mg" },
     ],
   },
   {
