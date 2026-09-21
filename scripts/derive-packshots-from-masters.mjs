@@ -82,6 +82,11 @@ const jobs = [
     master: "klow-blend-80mg.png",
     variants: [{ file: "klow-blend-80mg.png", size: "80mg" }],
   },
+  {
+    dir: productsDir,
+    master: "kpv-10mg.png",
+    variants: [{ file: "kpv-10mg.png", size: "10mg" }],
+  },
 ];
 
 const fontSize = await calibrateDosageFontSize(

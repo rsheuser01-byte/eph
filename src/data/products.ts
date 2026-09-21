@@ -457,6 +457,34 @@ export const products: Product[] = [
       storage: LYOPHILIZED_STORAGE,
     },
   },
+  {
+    slug: "kpv",
+    name: "KPV",
+    sku: "KPV",
+    category: "Peptide",
+    shortDescription:
+      "α-MSH–derived tripeptide fragment studied in laboratory models involving melanocortin-adjacent and inflammatory-marker pathways.",
+    featured: false,
+    variants: [
+      {
+        size: "10mg",
+        price: listPrice("kpv", "10mg"),
+        sku: "KPV-10MG",
+        image: "/products/kpv-10mg.png",
+      },
+    ],
+    specs: {
+      form: LYOPHILIZED,
+      researchApplication:
+        "Melanocortin-adjacent and inflammatory-marker pathway studies in controlled laboratory models.",
+      molecularFormula: "C16H30N6O4",
+      molecularWeight: "370.45 g/mol",
+      sequence: "Lys-Pro-Val",
+      appearance: POWDER_APPEARANCE,
+      storage: LYOPHILIZED_STORAGE,
+      synonyms: "Lys-Pro-Val, α-MSH (11-13)",
+    },
+  },
 ];
 
 export function productPriceRange(product: Product): {

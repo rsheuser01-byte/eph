@@ -432,6 +432,36 @@ export const productResearchBySlug: Record<string, ProductResearchContext> = {
     ],
   },
 
+  kpv: {
+    interestPoints: [
+      "Researchers are studying this short α-MSH–derived tripeptide for melanocortin-adjacent pathway models.",
+      "Common research areas include inflammatory-marker assays and short-peptide handling studies.",
+      "Of interest in studies that compare short tripeptides with larger melanocortin analogs.",
+    ],
+    sections: [
+      {
+        heading: "What is KPV in research?",
+        paragraphs: [
+          "KPV (Lys-Pro-Val) is a three-amino-acid fragment derived from the C-terminal region of α-melanocyte-stimulating hormone (α-MSH, residues 11-13). Laboratories use it as a compact reference peptide when studying melanocortin-adjacent pathways or inflammatory-marker panels in controlled cellular models.",
+          "Public identity anchors include PubChem CID 92944 and the molecular formula C16H30N6O4 (370.45 g/mol). Elevate Precision Health supplies KPV strictly for research use. Keep lot numbers linked to any identity or purity notes archived with the study folder.",
+        ],
+      },
+      {
+        heading: "Typical laboratory applications",
+        paragraphs: [
+          "Investigators use KPV in cellular marker panels, comparative studies versus larger melanocortin analogs such as Melanotan II, and peptide-handling case studies for very short sequences. The tripeptide is also a component of the KLOW multi-peptide blend, where it adds α-MSH–fragment coverage to the marker panel.",
+          "Short tripeptides can elute near the solvent front in typical HPLC methods; tune gradients accordingly when KPV is part of a chromatographic identity or purity check on the research bench.",
+        ],
+      },
+    ],
+    citations: [
+      {
+        label: "PubChem CID 92944 (KPV)",
+        href: "https://pubchem.ncbi.nlm.nih.gov/compound/92944",
+      },
+    ],
+  },
+
   "klow-blend": {
     interestPoints: [
       "Research interest centers on a four-peptide stock that adds KPV to the GLOW-style format.",
