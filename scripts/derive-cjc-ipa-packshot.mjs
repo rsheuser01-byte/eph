@@ -154,21 +154,27 @@ const region = await findNameRegion(masterPath, dosage);
 const fill = `rgb(${region.ink[0]}, ${region.ink[1]}, ${region.ink[2]})`;
 const label = "CJC + IPA";
 const TARGET_INK_HEIGHT = region.textHeight;
-let fontSize = 63;
-let bestDelta = Number.POSITIVE_INFINITY;
-for (let size = 28; size <= 80; size++) {
+
+// Maximum width for text on the visible label face (conservative estimate
+// based on where the vial curves away from view). The original SEMAX text
+// width gives a baseline, but we add margin and cap to avoid clipping.
+const MAX_LABEL_WIDTH = Math.min(region.textWidth * 1.35, 180);
+
+/**
+ * Measure rendered ink bounds (height & width) for a given font size.
+ */
+async function measureTextBounds(text, size, fillColor) {
   const probe = Buffer.from(`<?xml version="1.0" encoding="UTF-8"?>
-<svg width="360" height="100" xmlns="http://www.w3.org/2000/svg">
+<svg width="400" height="100" xmlns="http://www.w3.org/2000/svg">
   <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle"
     font-family="Arial, Helvetica, 'Segoe UI', sans-serif"
-    font-size="${size}" font-weight="700" fill="${fill}">${label}</text>
+    font-size="${size}" font-weight="700" fill="${fillColor}">${text}</text>
 </svg>`);
   const { data, info } = await sharp(probe)
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });
-  let minY = info.height;
-  let maxY = 0;
+  let minY = info.height, maxY = 0, minX = info.width, maxX = 0;
   for (let y = 0; y < info.height; y++) {
     for (let x = 0; x < info.width; x++) {
       const i = (y * info.width + x) * info.channels;
@@ -176,13 +182,37 @@ for (let size = 28; size <= 80; size++) {
       if ((data[i] + data[i + 1] + data[i + 2]) / 3 > 200) continue;
       if (y < minY) minY = y;
       if (y > maxY) maxY = y;
+      if (x < minX) minX = x;
+      if (x > maxX) maxX = x;
     }
   }
-  if (maxY < minY) continue;
-  const delta = Math.abs(maxY - minY + 1 - TARGET_INK_HEIGHT);
+  if (maxY < minY || maxX < minX) return null;
+  return { height: maxY - minY + 1, width: maxX - minX + 1 };
+}
+
+// Calibrate font size to fit BOTH height and width constraints.
+let fontSize = 63;
+let bestDelta = Number.POSITIVE_INFINITY;
+for (let size = 28; size <= 80; size++) {
+  const bounds = await measureTextBounds(label, size, fill);
+  if (!bounds) continue;
+  // Skip sizes that are too wide for the label
+  if (bounds.width > MAX_LABEL_WIDTH) continue;
+  const delta = Math.abs(bounds.height - TARGET_INK_HEIGHT);
   if (delta < bestDelta) {
     bestDelta = delta;
     fontSize = size;
+  }
+}
+
+// If no size fits both constraints, find the largest size that fits width
+if (bestDelta === Number.POSITIVE_INFINITY) {
+  for (let size = 80; size >= 20; size--) {
+    const bounds = await measureTextBounds(label, size, fill);
+    if (bounds && bounds.width <= MAX_LABEL_WIDTH) {
+      fontSize = size;
+      break;
+    }
   }
 }
 
@@ -190,7 +220,10 @@ const centerX = region.textLeft + region.textWidth / 2;
 const centerY = region.textTop + region.textHeight / 2;
 const padX = 28;
 const padY = 10;
-const patchW = Math.max(region.textWidth + padX * 2, 170);
+// Ensure patch is wide enough for the new text
+const measuredBounds = await measureTextBounds(label, fontSize, fill);
+const textWidth = measuredBounds?.width ?? region.textWidth;
+const patchW = Math.max(textWidth + padX * 2, region.textWidth + padX * 2, 170);
 const patchH = region.textHeight + padY * 2;
 const x0 = Math.max(0, Math.round(centerX - patchW / 2));
 const x1 = Math.min(region.canvasWidth - 1, x0 + patchW - 1);
