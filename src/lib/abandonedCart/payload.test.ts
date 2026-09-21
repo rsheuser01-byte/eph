@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   buildCartConvertedPayload,
   buildCheckoutIdentifiedPayload,
@@ -9,7 +9,13 @@ import {
 } from "./payload";
 import type { SavedCart } from "./types";
 
+beforeEach(() => {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date("2026-08-15T12:00:00.000Z"));
+});
+
 afterEach(() => {
+  vi.useRealTimers();
   vi.unstubAllEnvs();
 });
 

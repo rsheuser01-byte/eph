@@ -53,7 +53,6 @@ describe("pricing-guide.json", () => {
         "BPC-157",
         "TB-500",
         "GHK-Cu",
-        "KPV",
         "Ipamorelin",
         "CJC-1295 + Ipamorelin",
         "Selank",
@@ -63,5 +62,6 @@ describe("pricing-guide.json", () => {
     expect(compounds).not.toContain("SS-31");
     expect(compounds).not.toContain("5-Amino-1MQ");
     expect(compounds).not.toContain("Semax");
+    expect(compounds).not.toContain("KPV");
   });
 });
