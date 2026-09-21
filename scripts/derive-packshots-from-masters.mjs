@@ -33,9 +33,8 @@ const jobs = [
     dir: mastersDir,
     master: "glp-2-10mg.png",
     variants: [
-      { file: "glp-2-10mg.png", size: "10mg" },
-      { file: "glp-2-20mg.png", size: "20mg" },
       { file: "glp-2-30mg.png", size: "30mg" },
+      { file: "glp-2-60mg.png", size: "60mg" },
     ],
   },
   {
@@ -82,6 +81,11 @@ const jobs = [
     dir: productsDir,
     master: "klow-blend-80mg.png",
     variants: [{ file: "klow-blend-80mg.png", size: "80mg" }],
+  },
+  {
+    dir: productsDir,
+    master: "kpv-10mg.png",
+    variants: [{ file: "kpv-10mg.png", size: "10mg" }],
   },
 ];
 

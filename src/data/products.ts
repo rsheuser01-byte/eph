@@ -111,22 +111,16 @@ export const products: Product[] = [
     featured: true,
     variants: [
       {
-        size: "10mg",
-        price: listPrice("glp-2", "10mg"),
-        sku: "GLP-2-10MG",
-        image: "/products/glp-2-10mg.png",
-      },
-      {
-        size: "20mg",
-        price: listPrice("glp-2", "20mg"),
-        sku: "GLP-2-20MG",
-        image: "/products/glp-2-20mg.png",
-      },
-      {
         size: "30mg",
         price: listPrice("glp-2", "30mg"),
         sku: "GLP-2-30MG",
         image: "/products/glp-2-30mg.png",
+      },
+      {
+        size: "60mg",
+        price: listPrice("glp-2", "60mg"),
+        sku: "GLP-2-60MG",
+        image: "/products/glp-2-60mg.png",
       },
     ],
     specs: {
@@ -461,6 +455,34 @@ export const products: Product[] = [
       composition: "BPC-157, GHK-Cu, TB-500, and KPV",
       appearance: POWDER_APPEARANCE,
       storage: LYOPHILIZED_STORAGE,
+    },
+  },
+  {
+    slug: "kpv",
+    name: "KPV",
+    sku: "KPV",
+    category: "Peptide",
+    shortDescription:
+      "α-MSH–derived tripeptide fragment studied in laboratory models involving melanocortin-adjacent and inflammatory-marker pathways.",
+    featured: false,
+    variants: [
+      {
+        size: "10mg",
+        price: listPrice("kpv", "10mg"),
+        sku: "KPV-10MG",
+        image: "/products/kpv-10mg.png",
+      },
+    ],
+    specs: {
+      form: LYOPHILIZED,
+      researchApplication:
+        "Melanocortin-adjacent and inflammatory-marker pathway studies in controlled laboratory models.",
+      molecularFormula: "C16H30N6O4",
+      molecularWeight: "370.45 g/mol",
+      sequence: "Lys-Pro-Val",
+      appearance: POWDER_APPEARANCE,
+      storage: LYOPHILIZED_STORAGE,
+      synonyms: "Lys-Pro-Val, α-MSH (11-13)",
     },
   },
 ];

@@ -99,6 +99,12 @@ export const RELATED_PRODUCT_MAP: Record<string, RelatedProductEntry[]> = {
   "klow-blend": [
     { slug: "glow-blend", reason: "Related multi-peptide blend without KPV" },
     { slug: "wolverine-blend", reason: "BPC-157 / TB-500 focused blend" },
+    { slug: "kpv", reason: "Standalone KPV tripeptide for single-analyte controls" },
+  ],
+  kpv: [
+    { slug: "klow-blend", reason: "Multi-peptide blend containing KPV" },
+    { slug: "mt-2", reason: "Melanocortin analog for pathway comparisons" },
+    { slug: "pt-141", reason: "Melanocortin analog for receptor studies" },
   ],
 };
 
