@@ -262,6 +262,20 @@ export function createFileEmailDeliveryStore(
       await writeJsonArray(filePath, rows);
       return true;
     },
+    async clearDelivery(eventType, orderId, recipient) {
+      const rows = await readJsonArray<Row>(filePath);
+      const next = rows.filter(
+        (row) =>
+          !(
+            row.eventType === eventType &&
+            row.orderId === orderId &&
+            row.recipient === recipient
+          ),
+      );
+      const removed = rows.length !== next.length;
+      await writeJsonArray(filePath, next);
+      return removed;
+    },
     async clearDeliveries(eventType, orderId) {
       const rows = await readJsonArray<Row>(filePath);
       const next = rows.filter(
@@ -292,6 +306,19 @@ export function createSupabaseEmailDeliveryStore(
         throw new Error(`Failed to claim email delivery: ${error.message}`);
       }
       return true;
+    },
+    async clearDelivery(eventType, orderId, recipient) {
+      const { data, error } = await client
+        .from("email_deliveries")
+        .delete()
+        .eq("event_type", eventType)
+        .eq("order_id", orderId)
+        .eq("recipient", recipient)
+        .select("id");
+      if (error) {
+        throw new Error(`Failed to clear email delivery: ${error.message}`);
+      }
+      return (data ?? []).length > 0;
     },
     async clearDeliveries(eventType, orderId) {
       const { data, error } = await client

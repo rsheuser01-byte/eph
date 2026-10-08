@@ -10,7 +10,10 @@ import {
   buildRefundEmail,
   buildShippedEmail,
 } from "@/lib/email/orderNotifications";
-import { storeNotificationEmail } from "@/lib/email/storeRecipient";
+import {
+  storeNotificationEmail,
+  storeNotificationRecipients,
+} from "@/lib/email/storeRecipient";
 import { getOrderStore } from "@/lib/orders";
 import type { OrderRecord, OrderStore } from "@/lib/orders/types";
 import { getEmailDeliveryStore, getOutboxStore } from "./store";
@@ -72,8 +75,10 @@ async function sendOnce(
   try {
     await send(message);
   } catch (error) {
-    if (deliveries.clearDeliveries) {
-      await deliveries.clearDeliveries(eventType, orderId).catch(() => undefined);
+    if (deliveries.clearDelivery) {
+      await deliveries
+        .clearDelivery(eventType, orderId, message.to)
+        .catch(() => undefined);
     }
     throw error;
   }
@@ -115,13 +120,15 @@ async function handleOrderPaid(
     buildCustomerConfirmation(emailData),
     deps.send,
   );
-  await sendOnce(
-    deps.emailDeliveries,
-    "order.paid.store",
-    orderId,
-    buildStoreNotification(emailData, storeNotificationEmail()),
-    deps.send,
-  );
+  for (const recipient of storeNotificationRecipients()) {
+    await sendOnce(
+      deps.emailDeliveries,
+      "order.paid.store",
+      orderId,
+      buildStoreNotification(emailData, recipient),
+      deps.send,
+    );
+  }
 }
 
 async function handleOrderShipped(
