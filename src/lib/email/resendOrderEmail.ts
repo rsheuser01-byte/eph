@@ -10,7 +10,7 @@ import {
   buildRefundEmail,
   buildShippedEmail,
 } from "@/lib/email/orderNotifications";
-import { storeNotificationEmail } from "@/lib/email/storeRecipient";
+import { storeNotificationRecipients } from "@/lib/email/storeRecipient";
 import type { OrderRecord } from "@/lib/orders/types";
 import { getEmailDeliveryStore } from "@/lib/outbox/store";
 
@@ -52,7 +52,6 @@ export async function resendOrderEmail(
       await deliveries.clearDeliveries("order.paid.store", order.orderId);
     }
     const customer = buildCustomerConfirmation(data);
-    const storeMsg = buildStoreNotification(data, storeNotificationEmail());
     if (
       await deliveries.claimDelivery(
         "order.paid.customer",
@@ -63,15 +62,18 @@ export async function resendOrderEmail(
       await send(customer);
       sent += 1;
     }
-    if (
-      await deliveries.claimDelivery(
-        "order.paid.store",
-        order.orderId,
-        storeMsg.to,
-      )
-    ) {
-      await send(storeMsg);
-      sent += 1;
+    for (const recipient of storeNotificationRecipients()) {
+      const storeMsg = buildStoreNotification(data, recipient);
+      if (
+        await deliveries.claimDelivery(
+          "order.paid.store",
+          order.orderId,
+          storeMsg.to,
+        )
+      ) {
+        await send(storeMsg);
+        sent += 1;
+      }
     }
     return { sent };
   }

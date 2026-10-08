@@ -50,6 +50,12 @@ export type EmailDeliveryStore = {
     orderId: string,
     recipient: string,
   ): Promise<boolean>;
+  /** Clears a single delivery claim for a specific recipient. */
+  clearDelivery?(
+    eventType: string,
+    orderId: string,
+    recipient: string,
+  ): Promise<boolean>;
   /** Clears prior delivery claims so an intentional resend can proceed. */
   clearDeliveries?(eventType: string, orderId: string): Promise<number>;
 };
