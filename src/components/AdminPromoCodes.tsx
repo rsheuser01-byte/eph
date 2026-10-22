@@ -10,7 +10,7 @@ const STATUS_LABEL = {
   active: "Active",
   scheduled: "Scheduled",
   expired: "Expired",
-  cancelled: "Cancelled",
+  cancelled: "Inactive",
 } as const;
 
 function discountLabel(promo: PromoCode): string {
@@ -105,7 +105,7 @@ export function AdminPromoCodes({ promos }: { promos: PromoCode[] }) {
         <h2 className="font-display text-2xl font-semibold text-ink">New or updated code</h2>
         <p className="text-sm text-ink-soft">
           Saving an existing code updates its discount and dates and turns it back on.
-          Leave the dates blank if it should work until you cancel it.
+          Leave the dates blank if it should work until you deactivate it.
         </p>
         <label className="block text-sm text-ink-soft">
           Code
@@ -230,13 +230,13 @@ export function AdminPromoCodes({ promos }: { promos: PromoCode[] }) {
                             {
                               action: "set-active",
                               code: promo.code,
-                              active: status === "cancelled",
+                              active: !promo.active,
                             },
                             false,
                           )
                         }
                       >
-                        {status === "cancelled" ? "Turn on" : "Cancel"}
+                        {promo.active ? "Deactivate" : "Activate"}
                       </button>
                     </td>
                   </tr>

@@ -33,8 +33,9 @@ export default async function AdminPromosPage() {
             Promo codes
           </h1>
           <p className="mt-4 max-w-xl text-sm text-ink-soft">
-            Customers enter these at checkout. Cancel turns a code off immediately.
-            A start or end time limits when an active code applies.
+            Customers enter these at checkout. Deactivate turns a code off immediately.
+            Activate turns that same code back on, with the same discount and dates.
+            A start or end time still limits when an active code applies.
           </p>
           <p className="mt-3 text-sm">
             <Link href="/admin/orders" className="link-underline text-ink-soft">
