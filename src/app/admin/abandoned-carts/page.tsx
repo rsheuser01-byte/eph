@@ -35,6 +35,10 @@ export default async function AdminAbandonedCartsPage() {
             <Link href="/admin/orders" className="link-underline text-ink-soft">
               ← Orders
             </Link>
+            {" · "}
+            <Link href="/admin/promos" className="link-underline text-ink-soft">
+              Promo codes →
+            </Link>
           </p>
         </div>
         <AdminLogoutButton />

@@ -9,6 +9,12 @@ function memoryStore(promos: PromoCode[]): PromoStore {
     async getByCode(code) {
       return byCode.get(code.trim().toUpperCase()) ?? null;
     },
+    async list() {
+      return [...byCode.values()];
+    },
+    async upsert(promo) {
+      byCode.set(promo.code, promo);
+    },
   };
 }
 

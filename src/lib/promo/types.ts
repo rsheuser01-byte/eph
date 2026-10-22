@@ -8,11 +8,15 @@ export type PromoCode = {
   active: boolean;
   firstOrderOnly: boolean;
   label: string;
+  /** Inclusive start. Omitted means the code can be used as soon as it is active. */
+  startsAt?: string;
+  /** Exclusive end is not used: a code expires once this instant has passed. */
+  endsAt?: string;
 };
 
 export type PromoStore = {
   readonly name: string;
   getByCode(code: string): Promise<PromoCode | null>;
-  /** Test/local helper — not required for production checkout. */
-  upsert?(promo: PromoCode): Promise<void>;
+  list(): Promise<PromoCode[]>;
+  upsert(promo: PromoCode): Promise<void>;
 };

@@ -26,6 +26,7 @@ vi.mock("@/lib/promo", async () => {
     getPromoStore: () => ({
       name: "mock",
       getByCode,
+      list: async () => [],
       upsert: upsertPromo,
     }),
   };

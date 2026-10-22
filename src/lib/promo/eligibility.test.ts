@@ -57,4 +57,38 @@ describe("promoEligibilityError", () => {
     const error = await promoEligibilityError(openPromo, "", async () => true);
     expect(error).toBeNull();
   });
+
+  it("rejects a code before its start time", async () => {
+    const error = await promoEligibilityError(
+      { ...openPromo, startsAt: "2026-12-01T00:00:00.000Z" },
+      "",
+      async () => false,
+      Date.parse("2026-11-01T00:00:00.000Z"),
+    );
+    expect(error).toMatch(/not active yet/i);
+  });
+
+  it("rejects a code after its end time", async () => {
+    const error = await promoEligibilityError(
+      { ...openPromo, endsAt: "2026-10-01T00:00:00.000Z" },
+      "",
+      async () => false,
+      Date.parse("2026-10-02T00:00:00.000Z"),
+    );
+    expect(error).toMatch(/expired/i);
+  });
+
+  it("allows a code inside its window", async () => {
+    const error = await promoEligibilityError(
+      {
+        ...openPromo,
+        startsAt: "2026-10-01T00:00:00.000Z",
+        endsAt: "2026-10-31T00:00:00.000Z",
+      },
+      "",
+      async () => false,
+      Date.parse("2026-10-15T00:00:00.000Z"),
+    );
+    expect(error).toBeNull();
+  });
 });

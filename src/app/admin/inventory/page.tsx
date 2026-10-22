@@ -65,6 +65,10 @@ export default async function AdminInventoryPage() {
             >
               Abandoned carts →
             </Link>
+            {" · "}
+            <Link href="/admin/promos" className="link-underline text-ink-soft">
+              Promo codes →
+            </Link>
           </p>
         </div>
         <AdminLogoutButton />

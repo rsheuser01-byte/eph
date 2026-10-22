@@ -35,4 +35,21 @@ describe("createFilePromoStore", () => {
     expect(found?.code).toBe("SAVE20");
     expect(found?.percentOff).toBe(20);
   });
+
+  it("lists codes and keeps a start and end window", async () => {
+    const store = createFilePromoStore(filePath);
+    await store.upsert({
+      code: "ELEVATE25",
+      percentOff: 25,
+      active: true,
+      firstOrderOnly: false,
+      label: "25% off",
+      startsAt: "2026-10-01T00:00:00.000Z",
+      endsAt: "2026-11-01T00:00:00.000Z",
+    });
+    const listed = await store.list();
+    expect(listed).toHaveLength(1);
+    expect(listed[0]?.startsAt).toBe("2026-10-01T00:00:00.000Z");
+    expect(listed[0]?.endsAt).toBe("2026-11-01T00:00:00.000Z");
+  });
 });

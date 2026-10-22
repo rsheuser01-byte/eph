@@ -12,11 +12,14 @@ function defaultPath(): string {
 
 function normalize(promo: PromoCode): PromoCode {
   return {
-    ...promo,
     code: normalizePromoCode(promo.code),
+    percentOff: promo.percentOff,
+    amountOff: promo.amountOff,
     active: promo.active !== false,
     firstOrderOnly: Boolean(promo.firstOrderOnly),
     label: promo.label?.trim() || promo.code,
+    startsAt: promo.startsAt || undefined,
+    endsAt: promo.endsAt || undefined,
   };
 }
 
@@ -51,6 +54,10 @@ export function createFilePromoStore(filePath = defaultPath()): PromoStore {
       }
       const promos = await readAll(filePath);
       return promos.find((promo) => promo.code === normalized) ?? null;
+    },
+    async list(): Promise<PromoCode[]> {
+      const promos = await readAll(filePath);
+      return promos.sort((a, b) => a.code.localeCompare(b.code));
     },
     async upsert(promo: PromoCode): Promise<void> {
       const next = normalize(promo);
