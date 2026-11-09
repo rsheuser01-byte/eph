@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  bogoInsufficientStockMessage,
+  isBogoEnabled,
+} from "@/lib/checkout/bogo";
 import { buildOrder } from "@/lib/checkout/order";
 import { orderTotals } from "@/lib/checkout/pricing";
 import {
@@ -320,7 +324,12 @@ export async function POST(request: Request) {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Insufficient stock.";
-      return NextResponse.json({ error: message }, { status: 409 });
+      const skuMatch = message.match(/Insufficient stock for ([A-Za-z0-9._-]+)/i);
+      const bogoMessage =
+        isBogoEnabled() && /insufficient stock/i.test(message)
+          ? bogoInsufficientStockMessage(skuMatch?.[1])
+          : message;
+      return NextResponse.json({ error: bogoMessage }, { status: 409 });
     }
 
     const outcome = await provider.beginCheckout({

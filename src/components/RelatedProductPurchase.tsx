@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Product } from "@/data/products";
 import { useCart } from "@/lib/cart/CartContext";
+import { paidQtyCapacity } from "@/lib/checkout/bogo";
 import { formatUSD } from "@/lib/checkout/pricing";
 import {
   defaultInStockSize,
@@ -22,7 +23,7 @@ export function RelatedProductPurchase({
   availability = {},
   dense = false,
 }: RelatedProductPurchaseProps) {
-  const { add } = useCart();
+  const { add, bogoEnabled } = useCart();
   const [size, setSize] = useState(() =>
     defaultInStockSize(product.variants, availability),
   );
@@ -39,8 +40,13 @@ export function RelatedProductPurchase({
     variant && Object.prototype.hasOwnProperty.call(availability, variant.sku)
       ? availability[variant.sku]
       : null;
-  const inStock = stock === null || stock === undefined || stock > 0;
-  const maxQty = stock === null || stock === undefined ? 99 : Math.max(0, stock);
+  const paidCapacity = paidQtyCapacity(stock, bogoEnabled);
+  const inStock =
+    paidCapacity === null || paidCapacity === undefined || paidCapacity > 0;
+  const maxQty =
+    paidCapacity === null || paidCapacity === undefined
+      ? 99
+      : Math.max(0, paidCapacity);
   const canAdd = Boolean(variant) && inStock && maxQty > 0;
 
   function handleAdd() {
@@ -62,10 +68,11 @@ export function RelatedProductPurchase({
             )
               ? availability[item.sku]
               : null;
+            const itemCapacity = paidQtyCapacity(itemStock, bogoEnabled);
             const itemInStock =
-              itemStock === null ||
-              itemStock === undefined ||
-              itemStock > 0;
+              itemCapacity === null ||
+              itemCapacity === undefined ||
+              itemCapacity > 0;
             return (
               <button
                 key={item.sku}

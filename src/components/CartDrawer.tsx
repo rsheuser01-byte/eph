@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
+import { BogoFreeBadge } from "@/components/BogoFreeBadge";
 import { CartLineQtyControls } from "@/components/CartLineQtyControls";
 import { CartSuggest } from "@/components/CartSuggest";
 import { productDisplayName } from "@/data/products";
@@ -18,6 +19,7 @@ export function CartDrawer() {
     setQty,
     remove,
     clampToAvailability,
+    bogoEnabled,
   } = useCart();
   const availability = useCartAvailability(isOpen ? resolved : []);
   const { shipping, total } = orderTotals(subtotal);
@@ -101,12 +103,18 @@ export function CartDrawer() {
                     <p className="mt-1 text-xs uppercase tracking-[0.16em] text-ink-soft">
                       {variant.size} · {formatUSD(variant.price)}
                     </p>
+                    {bogoEnabled ? (
+                      <p className="mt-2 flex items-center gap-2">
+                        <BogoFreeBadge paidQty={line.qty} />
+                      </p>
+                    ) : null}
                     <div className="mt-3">
                       <CartLineQtyControls
                         line={line}
                         sku={variant.sku}
                         availability={availability}
                         setQty={setQty}
+                        bogoEnabled={bogoEnabled}
                       />
                     </div>
                   </div>

@@ -1,3 +1,4 @@
+import { orderItemShipQty } from "@/lib/checkout/bogo";
 import type { OrderItem } from "@/lib/payments/types";
 import { getSupabaseAdmin } from "@/lib/supabase/admin";
 import { products } from "@/data/products";
@@ -37,7 +38,10 @@ export function isInventoryEnabled(): boolean {
 }
 
 export function stockItemsFromOrder(items: OrderItem[]): StockItem[] {
-  return items.map((item) => ({ sku: item.sku, qty: item.qty }));
+  return items.map((item) => ({
+    sku: item.sku,
+    qty: orderItemShipQty(item),
+  }));
 }
 
 export function catalogSkus(): string[] {

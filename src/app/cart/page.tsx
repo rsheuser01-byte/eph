@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Suspense, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { BogoFreeBadge } from "@/components/BogoFreeBadge";
 import { CartLineQtyControls } from "@/components/CartLineQtyControls";
 import { CartSuggest } from "@/components/CartSuggest";
 import { productDisplayName } from "@/data/products";
@@ -36,7 +37,14 @@ function CartRestoreNotice() {
 }
 
 export default function CartPage() {
-  const { resolved, subtotal, setQty, remove, clampToAvailability } = useCart();
+  const {
+    resolved,
+    subtotal,
+    setQty,
+    remove,
+    clampToAvailability,
+    bogoEnabled,
+  } = useCart();
   const availability = useCartAvailability(resolved);
   const { shipping, total } = orderTotals(subtotal);
   const remaining = FREE_SHIPPING_THRESHOLD - subtotal;
@@ -97,12 +105,21 @@ export default function CartPage() {
                     {variant.size} · {formatUSD(variant.price)} · SKU{" "}
                     {variant.sku}
                   </p>
+                  {bogoEnabled ? (
+                    <p className="mt-2 flex items-center gap-2 text-xs text-ink-soft">
+                      <BogoFreeBadge paidQty={line.qty} />
+                      <span>
+                        Qty {line.qty} + {line.qty} free · ships {line.qty * 2}
+                      </span>
+                    </p>
+                  ) : null}
                   <div className="mt-4 flex items-center gap-5">
                     <CartLineQtyControls
                       line={line}
                       sku={variant.sku}
                       availability={availability}
                       setQty={setQty}
+                      bogoEnabled={bogoEnabled}
                     />
                     <button
                       type="button"

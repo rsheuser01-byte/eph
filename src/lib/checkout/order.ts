@@ -1,11 +1,17 @@
 import { getProductBySlug, getVariant, productDisplayName } from "@/data/products";
 import type { OrderItem } from "@/lib/payments/types";
+import { applyBogoToItems, isBogoEnabled } from "./bogo";
 import { orderTotals } from "./pricing";
 
 export type CartItemInput = {
   slug: string;
   size: string;
   qty: number;
+};
+
+export type OrderBuildOptions = {
+  /** Override the BOGO_ENABLED env flag (tests). */
+  bogoEnabled?: boolean;
 };
 
 export type OrderBuildResult =
@@ -32,8 +38,12 @@ function isCartItem(value: unknown): value is CartItemInput {
 }
 
 // Recomputes the order entirely from server-side catalog data. Client-supplied
-// prices are never trusted.
-export function buildOrder(input: unknown): OrderBuildResult {
+// prices are never trusted. BOGO free units are attached here — they do not
+// change the charged subtotal.
+export function buildOrder(
+  input: unknown,
+  options: OrderBuildOptions = {},
+): OrderBuildResult {
   if (!Array.isArray(input) || input.length === 0) {
     return { ok: false, error: "Cart is empty." };
   }
@@ -67,10 +77,13 @@ export function buildOrder(input: unknown): OrderBuildResult {
     });
   }
 
-  const subtotal = items.reduce(
+  const bogoEnabled = options.bogoEnabled ?? isBogoEnabled();
+  const priced = applyBogoToItems(items, bogoEnabled);
+
+  const subtotal = priced.reduce(
     (sum, item) => sum + item.unitPrice * item.qty,
     0,
   );
   const { shipping, total } = orderTotals(subtotal);
-  return { ok: true, items, subtotal, shipping, total };
+  return { ok: true, items: priced, subtotal, shipping, total };
 }

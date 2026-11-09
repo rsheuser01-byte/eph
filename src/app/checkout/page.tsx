@@ -11,6 +11,7 @@ import {
 import { formatUSD, orderTotals } from "@/lib/checkout/pricing";
 import { productDisplayName } from "@/data/products";
 import { researchUseAttestationText } from "@/data/site";
+import { BogoFreeBadge } from "@/components/BogoFreeBadge";
 import {
   StripeCheckoutCtaTrust,
   StripeCheckoutTrust,
@@ -57,7 +58,7 @@ function checkoutErrorMessage(code: string | null): string | null {
 function CheckoutForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { resolved, subtotal, clear } = useCart();
+  const { resolved, subtotal, clear, bogoEnabled } = useCart();
   const catalogItems = useMemo(
     () =>
       resolved.map(({ line }) => ({
@@ -526,6 +527,11 @@ function CheckoutForm() {
               >
                 <span className="text-ink-soft">
                   {productDisplayName(product)} · {variant.size} × {line.qty}
+                  {bogoEnabled ? (
+                    <span className="ml-2 inline-flex align-middle">
+                      <BogoFreeBadge paidQty={line.qty} />
+                    </span>
+                  ) : null}
                 </span>
                 <span className="tabular-nums text-ink">
                   {formatUSD(lineTotal)}

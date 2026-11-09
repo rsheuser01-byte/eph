@@ -14,6 +14,7 @@ import {
   testimonials,
 } from "@/data/testimonials";
 import { CartProvider } from "@/lib/cart/CartContext";
+import { isBogoEnabled } from "@/lib/checkout/bogo";
 import { ogImage } from "@/lib/seo/pageMetadata";
 import { getSiteUrl } from "@/lib/seo/siteUrl";
 import {
@@ -94,7 +95,7 @@ export default function RootLayout({
               : []),
           ]}
         />
-        <CartProvider>
+        <CartProvider bogoEnabled={isBogoEnabled()}>
           <AgeGate />
           <SiteHeader />
           <main className="flex-1">{children}</main>

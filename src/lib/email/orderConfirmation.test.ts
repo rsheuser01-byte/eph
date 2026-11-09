@@ -51,6 +51,29 @@ describe("buildCustomerConfirmation", () => {
     expect(message.html).not.toContain("localhost");
   });
 
+  it("shows BOGO free units on the line without changing the charged total", () => {
+    const message = buildCustomerConfirmation({
+      ...data,
+      items: [
+        {
+          sku: "GLP-3-15MG",
+          name: "GLP-3",
+          size: "15mg",
+          qty: 1,
+          freeQty: 1,
+          unitPrice: 69.99,
+        },
+      ],
+      subtotal: 69.99,
+      total: 81.99,
+    });
+    expect(message.text).toContain("x1 + 1 free");
+    expect(message.text).toContain("$69.99");
+    expect(message.html).toContain("1 + 1 free");
+    expect(message.html).toContain("$69.99");
+    expect(message.text).toContain("$81.99");
+  });
+
   it("escapes HTML in customer-provided fields", () => {
     const message = buildCustomerConfirmation({
       ...data,
@@ -67,5 +90,26 @@ describe("buildStoreNotification", () => {
     expect(message.to).toBe("[email protected]");
     expect(message.subject).toContain("EPH-TEST-1");
     expect(message.text).toContain("[email protected]");
+  });
+
+  it("includes BOGO free units so the store ships the extra vials", () => {
+    const message = buildStoreNotification(
+      {
+        ...data,
+        items: [
+          {
+            sku: "GLP-3-15MG",
+            name: "GLP-3",
+            size: "15mg",
+            qty: 2,
+            freeQty: 2,
+            unitPrice: 69.99,
+          },
+        ],
+      },
+      "[email protected]",
+    );
+    expect(message.text).toContain("x2 + 2 free");
+    expect(message.html).toContain("2 + 2 free");
   });
 });

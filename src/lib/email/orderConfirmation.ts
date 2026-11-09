@@ -1,3 +1,4 @@
+import { formatPaidFreeQty } from "@/lib/checkout/bogo";
 import { formatUSD } from "@/lib/checkout/pricing";
 import type { BillingInfo, OrderItem } from "@/lib/payments/types";
 import type { EmailMessage } from "./types";
@@ -22,11 +23,15 @@ function shippingLabel(shipping: number): string {
   return shipping === 0 ? "Free" : formatUSD(shipping);
 }
 
+function itemQtyLabel(item: OrderItem): string {
+  return formatPaidFreeQty(item.qty, item.freeQty ?? 0);
+}
+
 function itemsText(items: OrderItem[]): string {
   return items
     .map(
       (item) =>
-        `- ${item.name} (${item.size}) x${item.qty} — ${formatUSD(
+        `- ${item.name} (${item.size}) x${itemQtyLabel(item)} — ${formatUSD(
           item.unitPrice * item.qty,
         )}`,
     )
@@ -42,7 +47,7 @@ function itemsHtml(items: OrderItem[]): string {
             item.name,
           )} <span style="color:#5a6a7e;">(${escapeEmailHtml(
             item.size,
-          )}) &times;${item.qty}</span></td>
+          )}) &times;${itemQtyLabel(item)}</span></td>
           <td style="padding:10px 0;border-bottom:1px solid #e2e8f0;text-align:right;font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#0a1628;white-space:nowrap;">${formatUSD(
             item.unitPrice * item.qty,
           )}</td>

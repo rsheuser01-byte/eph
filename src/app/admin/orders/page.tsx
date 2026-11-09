@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { formatPaidFreeQty, orderItemShipQty } from "@/lib/checkout/bogo";
 import { formatUSD } from "@/lib/checkout/pricing";
 import { requireAdminSession } from "@/lib/admin/auth";
 import { getOrderStore } from "@/lib/orders";
@@ -102,11 +103,18 @@ export default async function AdminOrdersPage() {
                   {order.customer.zip}
                 </div>
                 <div>
-                  {order.items.map((item) => (
-                    <span key={item.sku} className="block">
-                      {item.name} ({item.size}) &times;{item.qty}
-                    </span>
-                  ))}
+                  {order.items.map((item) => {
+                    const freeQty = item.freeQty ?? 0;
+                    const qtyLabel = formatPaidFreeQty(item.qty, freeQty);
+                    return (
+                      <span key={item.sku} className="block">
+                        {item.name} ({item.size}) &times;{qtyLabel}
+                        {freeQty > 0
+                          ? ` · ship ${orderItemShipQty(item)}`
+                          : ""}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
 

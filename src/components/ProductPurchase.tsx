@@ -7,6 +7,11 @@ import { ProductAssaySignals } from "@/components/ProductAssaySignals";
 import { ProductResearchUseNotice } from "@/components/ProductResearchUseNotice";
 import { RestockNotifyForm } from "@/components/RestockNotifyForm";
 import { useCart } from "@/lib/cart/CartContext";
+import {
+  BOGO_LABEL,
+  BOGO_PRODUCT_LINE,
+  paidQtyCapacity,
+} from "@/lib/checkout/bogo";
 import { formatUSD } from "@/lib/checkout/pricing";
 import { defaultInStockSize } from "@/lib/products/defaultInStockSize";
 
@@ -22,7 +27,7 @@ export function ProductPurchase({
   disclaimer,
   availability = {},
 }: ProductPurchaseProps) {
-  const { add } = useCart();
+  const { add, bogoEnabled } = useCart();
   const [size, setSize] = useState(() =>
     defaultInStockSize(product.variants, availability),
   );
@@ -34,9 +39,20 @@ export function ProductPurchase({
     variant && Object.prototype.hasOwnProperty.call(availability, variant.sku)
       ? availability[variant.sku]
       : null;
-  const inStock = stock === null || stock === undefined || stock > 0;
-  const maxQty = stock === null || stock === undefined ? 99 : Math.max(0, stock);
+  const paidCapacity = paidQtyCapacity(stock, bogoEnabled);
+  const inStock =
+    paidCapacity === null || paidCapacity === undefined || paidCapacity > 0;
+  const maxQty =
+    paidCapacity === null || paidCapacity === undefined
+      ? 99
+      : Math.max(0, paidCapacity);
   const showNotify = Boolean(variant) && (!inStock || maxQty < 1);
+  const bogoBlockedByStock =
+    bogoEnabled &&
+    showNotify &&
+    stock !== null &&
+    stock !== undefined &&
+    stock > 0;
   const showAssay = product.category !== "Supply";
 
   function handleAdd() {
@@ -78,10 +94,11 @@ export function ProductPurchase({
                   )
                     ? availability[item.sku]
                     : null;
+                  const itemCapacity = paidQtyCapacity(itemStock, bogoEnabled);
                   const itemInStock =
-                    itemStock === null ||
-                    itemStock === undefined ||
-                    itemStock > 0;
+                    itemCapacity === null ||
+                    itemCapacity === undefined ||
+                    itemCapacity > 0;
                   return (
                     <button
                       key={item.sku}
@@ -120,14 +137,28 @@ export function ProductPurchase({
             </p>
           ) : null}
 
+          {bogoEnabled ? (
+            <p className="mt-2 text-xs uppercase tracking-[0.16em] text-accent">
+              {BOGO_PRODUCT_LINE}
+            </p>
+          ) : null}
+
           {showNotify && variant ? (
-            <RestockNotifyForm
-              key={variant.sku}
-              productSlug={product.slug}
-              productName={productDisplayName(product)}
-              sku={variant.sku}
-              size={variant.size}
-            />
+            <div className={variant && product.variants.length > 0 ? "mt-8" : "mt-6"}>
+              {bogoBlockedByStock ? (
+                <p className="mb-4 text-sm text-ink-soft">
+                  {BOGO_LABEL} needs 2 units in stock for this size. Only {stock}{" "}
+                  left — we can email you when more arrives.
+                </p>
+              ) : null}
+              <RestockNotifyForm
+                key={variant.sku}
+                productSlug={product.slug}
+                productName={productDisplayName(product)}
+                sku={variant.sku}
+                size={variant.size}
+              />
+            </div>
           ) : (
             <div
               className={`flex flex-col gap-3 sm:flex-row sm:items-stretch ${
