@@ -158,6 +158,28 @@ describe("supabase order store", () => {
     expect(saved?.paymentStatus).toBe("approved");
   });
 
+  it("persists BOGO freeQty on order items", async () => {
+    const store = createSupabaseOrderStore(
+      createMockClient(state) as never,
+    );
+    const order = makeOrder("EPH-BOGO", "2026-01-01T00:00:00.000Z");
+    order.items = [
+      {
+        sku: "GLP-3-15MG",
+        name: "GLP-3",
+        size: "15mg",
+        qty: 1,
+        freeQty: 1,
+        unitPrice: 69.99,
+      },
+    ];
+    await store.save(order);
+    expect(state.order_items[0]?.free_qty).toBe(1);
+    const saved = await store.get("EPH-BOGO");
+    expect(saved?.items[0]?.qty).toBe(1);
+    expect(saved?.items[0]?.freeQty).toBe(1);
+  });
+
   it("lists newest first", async () => {
     const store = createSupabaseOrderStore(
       createMockClient(state) as never,

@@ -3,6 +3,7 @@ import {
   getVariant,
   type Product,
 } from "@/data/products";
+import { paidQtyCapacity } from "@/lib/checkout/bogo";
 import type { CartLine, ResolvedCartLine } from "./types";
 
 export const MAX_QTY_PER_LINE = 99;
@@ -27,12 +28,14 @@ function clampQty(qty: number, maxQty = MAX_QTY_PER_LINE): number {
 }
 
 /**
- * Max units a shopper may hold for a SKU given live availability.
+ * Max paid units a shopper may hold for a SKU given live availability.
  * Missing key / null qty → inventory not configured → allow global max.
+ * When BOGO is on, capacity is floor(stock / 2) so the free unit is in stock.
  */
 export function purchasableMaxQty(
   sku: string,
   availability: Record<string, number | null> | null | undefined,
+  bogoEnabled = false,
 ): number {
   if (!availability || !Object.prototype.hasOwnProperty.call(availability, sku)) {
     return MAX_QTY_PER_LINE;
@@ -41,7 +44,11 @@ export function purchasableMaxQty(
   if (stock === null || stock === undefined) {
     return MAX_QTY_PER_LINE;
   }
-  return Math.max(0, Math.min(MAX_QTY_PER_LINE, Math.floor(stock)));
+  const capacity = paidQtyCapacity(stock, bogoEnabled);
+  if (capacity === null) {
+    return MAX_QTY_PER_LINE;
+  }
+  return Math.max(0, Math.min(MAX_QTY_PER_LINE, capacity));
 }
 
 // All helpers return new arrays; the input is never mutated.
@@ -99,10 +106,11 @@ export function clampResolvedLinesToStock(
   lines: CartLine[],
   resolved: ResolvedCartLine[],
   availability: Record<string, number | null>,
+  bogoEnabled = false,
 ): CartLine[] {
   let next = lines;
   for (const item of resolved) {
-    const max = purchasableMaxQty(item.variant.sku, availability);
+    const max = purchasableMaxQty(item.variant.sku, availability, bogoEnabled);
     if (item.line.qty > max) {
       next = updateQty(next, item.line.slug, item.line.size, max, max);
     }

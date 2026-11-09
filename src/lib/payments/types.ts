@@ -24,7 +24,13 @@ export type OrderItem = {
   sku: string;
   name: string;
   size: string;
+  /** Paid units the customer selected (charged at unitPrice). */
   qty: number;
+  /**
+   * Extra free units of the same SKU to ship (BOGO). Not charged.
+   * Omitted or 0 on orders placed without the promotion.
+   */
+  freeQty?: number;
   unitPrice: number;
 };
 

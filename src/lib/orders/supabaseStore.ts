@@ -43,6 +43,7 @@ type OrderItemRow = {
   name: string;
   size: string;
   qty: number;
+  free_qty?: number | string | null;
   unit_price: number | string;
 };
 
@@ -84,13 +85,17 @@ function mapRow(row: OrderRow, items: OrderItem[]): OrderRecord {
 }
 
 function mapItems(rows: OrderItemRow[]): OrderItem[] {
-  return rows.map((row) => ({
-    sku: row.sku,
-    name: row.name,
-    size: row.size,
-    qty: row.qty,
-    unitPrice: asNumber(row.unit_price),
-  }));
+  return rows.map((row) => {
+    const freeQty = asNumber(row.free_qty ?? 0);
+    return {
+      sku: row.sku,
+      name: row.name,
+      size: row.size,
+      qty: row.qty,
+      ...(freeQty > 0 ? { freeQty } : {}),
+      unitPrice: asNumber(row.unit_price),
+    };
+  });
 }
 
 export function createSupabaseOrderStore(
@@ -155,6 +160,7 @@ export function createSupabaseOrderStore(
           name: item.name,
           size: item.size,
           qty: item.qty,
+          free_qty: item.freeQty ?? 0,
           unit_price: item.unitPrice,
         })),
       );

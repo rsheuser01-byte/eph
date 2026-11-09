@@ -94,7 +94,14 @@ export function createStripeProvider(
       }
 
       const itemSummary = input.items
-        .map((item) => `${item.name} (${item.size}) × ${item.qty}`)
+        .map((item) => {
+          const free = item.freeQty ?? 0;
+          const qty =
+            free > 0
+              ? `${item.qty} + ${free} free`
+              : String(item.qty);
+          return `${item.name} (${item.size}) × ${qty}`;
+        })
         .join(", ")
         .slice(0, 500);
 

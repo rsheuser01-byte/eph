@@ -30,6 +30,7 @@ type CartContextValue = {
   count: number;
   subtotal: number;
   isOpen: boolean;
+  bogoEnabled: boolean;
   add: (slug: string, size: string, qty?: number, maxQty?: number) => void;
   setQty: (slug: string, size: string, qty: number, maxQty?: number) => void;
   remove: (slug: string, size: string) => void;
@@ -67,7 +68,13 @@ function readStored(): CartLine[] {
   }
 }
 
-export function CartProvider({ children }: { children: React.ReactNode }) {
+export function CartProvider({
+  children,
+  bogoEnabled = true,
+}: {
+  children: React.ReactNode;
+  bogoEnabled?: boolean;
+}) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -124,10 +131,15 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     (availability: Record<string, number | null>) => {
       setLines((current) => {
         const resolved = resolveLines(current);
-        return clampResolvedLinesToStock(current, resolved, availability);
+        return clampResolvedLinesToStock(
+          current,
+          resolved,
+          availability,
+          bogoEnabled,
+        );
       });
     },
-    [],
+    [bogoEnabled],
   );
 
   const clear = useCallback(() => {
@@ -150,6 +162,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       count: cartCount(lines),
       subtotal: cartSubtotal(lines),
       isOpen,
+      bogoEnabled,
       add,
       setQty,
       remove,
@@ -162,6 +175,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     [
       lines,
       isOpen,
+      bogoEnabled,
       add,
       setQty,
       remove,

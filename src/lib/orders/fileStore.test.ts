@@ -62,6 +62,23 @@ describe("file order store", () => {
     expect(await store.get("missing")).toBeNull();
   });
 
+  it("persists BOGO freeQty on items", async () => {
+    const store = createFileOrderStore(filePath);
+    const order = makeOrder("EPH-BOGO", "2026-01-01T00:00:00.000Z");
+    order.items = [
+      {
+        sku: "GLP-3-15MG",
+        name: "GLP-3",
+        size: "15mg",
+        qty: 1,
+        freeQty: 1,
+        unitPrice: 69.99,
+      },
+    ];
+    await store.save(order);
+    expect((await store.get("EPH-BOGO"))?.items[0]?.freeQty).toBe(1);
+  });
+
   it("lists orders newest first", async () => {
     const store = createFileOrderStore(filePath);
     await store.save(makeOrder("EPH-1", "2026-01-01T00:00:00.000Z"));

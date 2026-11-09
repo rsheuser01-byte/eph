@@ -63,6 +63,12 @@ describe("purchasableMaxQty", () => {
     expect(purchasableMaxQty("SKU-1", { "SKU-1": 3 })).toBe(3);
   });
 
+  it("halves capacity when BOGO is on so the free unit is in stock", () => {
+    expect(purchasableMaxQty("SKU-1", { "SKU-1": 1 }, true)).toBe(0);
+    expect(purchasableMaxQty("SKU-1", { "SKU-1": 3 }, true)).toBe(1);
+    expect(purchasableMaxQty("SKU-1", { "SKU-1": 4 }, true)).toBe(2);
+  });
+
   it("returns 0 when the SKU is out of stock", () => {
     expect(purchasableMaxQty("SKU-1", { "SKU-1": 0 })).toBe(0);
   });
@@ -109,6 +115,14 @@ describe("clampResolvedLinesToStock", () => {
     const sku = resolved[0]!.variant.sku;
     const next = clampResolvedLinesToStock(lines, resolved, { [sku]: 5 });
     expect(next).toEqual(lines);
+  });
+
+  it("caps paid qty to floor(stock/2) when BOGO is on", () => {
+    const lines: CartLine[] = [{ slug: "glp-3", size: "15mg", qty: 3 }];
+    const resolved = resolveLines(lines);
+    const sku = resolved[0]!.variant.sku;
+    const next = clampResolvedLinesToStock(lines, resolved, { [sku]: 5 }, true);
+    expect(next).toEqual([{ slug: "glp-3", size: "15mg", qty: 2 }]);
   });
 });
 

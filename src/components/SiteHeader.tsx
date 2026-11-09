@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { navLinks, site } from "@/data/site";
 import { useCart } from "@/lib/cart/CartContext";
+import { BOGO_BANNER_TEXT } from "@/lib/checkout/bogo";
 
 // The header shows a dedicated "Products" CTA button, so drop it from the
 // inline text nav to avoid listing Products twice.
@@ -13,7 +14,8 @@ const headerLinks = navLinks.filter((link) => link.href !== "/products");
 
 export function SiteHeader() {
   const pathname = usePathname();
-  const { count, openCart } = useCart();
+  const { count, openCart, bogoEnabled } = useCart();
+  const showBogoBanner = bogoEnabled && !pathname.startsWith("/admin");
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -36,6 +38,11 @@ export function SiteHeader() {
           : "border-white/10 bg-[rgba(6,11,22,0.8)]"
       }`}
     >
+      {showBogoBanner ? (
+        <p className="border-b border-accent/35 bg-accent/15 py-1.5 text-center text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-ink">
+          <span className="site-shell block">{BOGO_BANNER_TEXT}</span>
+        </p>
+      ) : null}
       <div
         className={`site-shell flex items-center justify-between gap-4 transition-[height] duration-300 ${
           scrolled ? "h-[4.25rem] sm:h-[4.5rem]" : "h-20 sm:h-[5.25rem]"
